@@ -18,11 +18,12 @@ import {
     checkRangeValue,
     checkPort,
 } from './validator';
-import type { TValidator } from './typings';
+import type { Validate, TValidator } from './typings';
 
 // 导出所有的单条 validator
 export * from './validator';
 
+export type { Validate, TValidator };
 export type TChecker = () => Record<string, ReturnType<TValidator>>;
 
 /**

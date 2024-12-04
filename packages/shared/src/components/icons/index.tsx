@@ -70,6 +70,22 @@ export {
     Share as ShareIcon,
     Https as HttpsIcon,
     AdsClick as AdsClickIcon,
+    Timeline as TimelineIcon,
+    SystemUpdateAlt as SystemUpdateAltIcon,
+    Input as InputIcon,
+    ZoomIn as ZoomInIcon,
+    ZoomOut as ZoomOutIcon,
+    MyLocation as MyLocationIcon,
+    AddCircle as AddCircleIcon,
+    Flag as FlagIcon,
+    CallSplit as CallSplitIcon,
+    SettingsEthernet as SettingsEthernetIcon,
+    RoomService as RoomServiceIcon,
+    Webhook as WebhookIcon,
+    Timer as TimerIcon,
+    Hearing as HearingIcon,
+    FactCheck as FactCheckIcon,
+    Loop as LoopIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';

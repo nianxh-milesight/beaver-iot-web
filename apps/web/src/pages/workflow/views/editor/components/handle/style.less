@@ -1,0 +1,87 @@
+.@{prefix}-workflow {
+    & &-handle {
+        width: 2px;
+        min-width: auto;
+        height: 16px;
+        color: var(--primary-color-base);
+        background-color: var(--primary-color-base);
+        border: none;
+        border-radius: 0;
+
+        .@{mui-prefix}SvgIcon-root {
+            display: none;
+            font-size: @font-size-lg;
+            pointer-events: none;
+        }
+
+        // &.react-flow__handle-left {
+        //     left: -1px;
+        // }
+
+        // &.react-flow__handle-right {
+        //     right: -1px;
+        // }
+
+        &.connectingto {
+            .@{prefix}-workflow-handle-tooltip {
+                display: none;
+            }
+        }
+    }
+
+    & &-handle-tooltip {
+        position: absolute;
+        top: -12px;
+        left: 0;
+        z-index: 1;
+        min-width: 145px;
+        padding: @padding-xs @padding-sm;
+        font-size: @font-size-base;
+        color: var(--white);
+        text-align: left;
+        background-color: var(--gray-background-3);
+        border-radius: @border-radius-base;
+        pointer-events: none;
+        transform: translate(-50%, -100%);
+
+        &::after {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            content: '';
+            .triangle(8px, { top: var(--gray-background-3) });
+        }
+
+        &.hidden {
+            display: none;
+        }
+    }
+
+    .react-flow__node {
+        .@{prefix}-workflow-handle.is-menu-open {
+            width: 16px;
+            background-color: var(--component-background);
+            border-radius: 16px;
+            cursor: pointer;
+
+            .@{mui-prefix}SvgIcon-root {
+                display: block;
+            }
+        }
+    }
+
+    .react-flow__node:hover,
+    .react-flow__node.selected {
+        .@{prefix}-workflow-handle.source,
+        .@{prefix}-workflow-handle.target.target-enable-add {
+            width: 16px;
+            background-color: var(--component-background);
+            border-radius: 16px;
+            cursor: pointer;
+
+            .@{mui-prefix}SvgIcon-root {
+                display: block;
+            }
+        }
+    }
+}

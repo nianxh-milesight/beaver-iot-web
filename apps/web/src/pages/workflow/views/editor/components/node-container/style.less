@@ -1,0 +1,28 @@
+.@{prefix}-workflow-node-contextmenu  {
+    .@{mui-prefix}Menu-list {
+        width: 160px;
+    }
+}
+
+.@{prefix}-workflow-node-contextmenu-sub {
+    .@{mui-prefix}Menu-list {
+        width: 240px;
+    }
+
+    .@{mui-prefix}MenuItem-root {
+        .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: @margin-sm;
+            color: var(--white);
+            border-radius: @border-radius-sm;
+
+            .@{mui-prefix}SvgIcon-root {
+                font-size: @font-size-lg;
+            }
+        }
+    }
+}

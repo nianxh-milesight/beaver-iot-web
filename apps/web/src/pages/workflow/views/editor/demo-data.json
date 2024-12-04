@@ -1,0 +1,126 @@
+{
+    "nodes": [
+        {
+            "id": "1",
+            "data": {
+                "label": "Hello"
+            },
+            "position": {
+                "x": 0,
+                "y": 0
+            },
+            "type": "trigger"
+        },
+        {
+            "id": "2",
+            "data": {
+                "label": "World",
+                "cases": [
+                    {
+                        "id": "case-1",
+                        "conditions:": [
+                            {
+                                "id": "condition-1",
+                                "key": "var1",
+                                "value": "a",
+                                "operator": "CONTAINS"
+                            },
+                            {
+                                "id": "condition-2",
+                                "key": "var2",
+                                "value": "b",
+                                "operator": "START_WITH"
+                            }
+                        ],
+                        "logic": "AND"
+                    },
+                    {
+                        "id": "case-2",
+                        "conditions:": [
+                            {
+                                "id": "condition-3",
+                                "key": "var4",
+                                "value": "aa",
+                                "operator": "CONTAINS"
+                            },
+                            {
+                                "id": "condition-4",
+                                "key": "var5",
+                                "value": "bb",
+                                "operator": "START_WITH"
+                            }
+                        ],
+                        "logic": "OR"
+                    }
+                ]
+            },
+            "position": {
+                "x": 300,
+                "y": 100
+            },
+            "type": "ifelse"
+        },
+        {
+            "id": "3",
+            "data": {
+                "label": "Code"
+            },
+            "position": {
+                "x": 600,
+                "y": 0
+            },
+            "type": "code"
+        },
+        {
+            "id": "4",
+            "data": {
+                "label": "Service"
+            },
+            "position": {
+                "x": 600,
+                "y": 100
+            },
+            "type": "service"
+        },
+        {
+            "id": "5",
+            "data": {
+                "label": "Select"
+            },
+            "position": {
+                "x": 600,
+                "y": 200
+            },
+            "type": "select"
+        }
+    ],
+    "edges": [
+        {
+            "id": "1-2",
+            "source": "1",
+            "target": "2",
+            "type": "addable"
+        },
+        {
+            "id": "2-3",
+            "source": "2",
+            "target": "3",
+            "type": "addable",
+            "sourceHandle": "case-1"
+        },
+        {
+            "id": "2-4",
+            "source": "2",
+            "target": "4",
+            "type": "addable",
+            "sourceHandle": "case-2"
+        },
+        {
+            "id": "2-5",
+            "source": "2",
+            "target": "5",
+            "type": "addable",
+            "sourceHandle": "case-else"
+        }
+    ]
+}

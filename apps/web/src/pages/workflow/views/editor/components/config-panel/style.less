@@ -1,0 +1,46 @@
+.@{prefix}-workflow-panel-config-root.react-flow__panel.right {
+    z-index: 20;
+    width: 445px;
+    height: 100%;
+    padding: @margin-xs;
+    margin: 0;
+
+    &.hidden {
+        display: none;
+    }
+}
+
+.@{prefix}-workflow-panel-config {
+    height: 100%;
+    background-color: var(--component-background);
+    border-radius: @border-radius-sm;
+    box-shadow: @shadow-2;
+
+    &-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: @padding-lg @padding-xl;
+
+        .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            color: var(--white);
+            border-radius: @border-radius-sm;
+        }
+
+        .title {
+            .text-size(@font-size-xxl);
+
+            font-weight: @font-weight-bold;
+        }
+    }
+
+    &-body {
+        padding: 0 @padding-xl @padding-lg;
+    }
+}
