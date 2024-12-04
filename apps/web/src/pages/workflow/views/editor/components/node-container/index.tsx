@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useMemo } from 'react';
-import { Position, type NodeProps } from '@xyflow/react';
+import { useReactFlow, Position, type NodeProps } from '@xyflow/react';
 import cls from 'classnames';
 import { Menu, MenuItem } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
@@ -65,8 +65,12 @@ const statusMap: Record<
     },
 };
 
+const entryNodeTypes = Object.values(basicNodeConfigs)
+    .filter(item => item.category === 'entry')
+    .map(item => item.type);
+
 /**
- * 通用节点容器
+ * Common Node Container
  */
 const NodeContainer: React.FC<NodeContainerProps> = ({
     type,
@@ -83,7 +87,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     const { getIntlText } = useI18n();
     const status = nodeProps?.data?.$status as WorkflowNodeStatus;
 
-    // ---------- 右键菜单 ----------
+    // ---------- ContextMenu ----------
     const [contextMenu, setContextMenu] = useState<{
         mouseX: number;
         mouseY: number;
@@ -92,9 +96,9 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     const isEntryNode = basicNodeConfigs[nodeProps.type as WorkflowNodeType]?.category === 'entry';
 
     /**
-     * 「变更节点」子菜单项集合
+     * Collection of modifiable node menus
      *
-     * TODO: 入口节点只可变更为其他入口接口，不可删除？
+     * Note: The entry node can not be deleted.
      */
     const nodeMenus = useMemo(() => {
         const result = Object.values(basicNodeConfigs).filter(item => {
@@ -105,7 +109,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     }, [nodeProps]);
 
     /**
-     * 右键菜单点击回调
+     * Set Context Menu Position
      */
     const handleContextMenu = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -120,17 +124,39 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     };
 
     /**
-     * 菜单项点击回调
+     * Menu Item click callback
      */
-    const handleMenuItemClick = (
-        type: 'change' | 'delete',
-        record: NodeProps,
-        targetNodeType?: WorkflowNodeType,
+    const { updateNode, deleteElements } = useReactFlow();
+    const handleMenuItemClick = async (
+        e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+        {
+            type,
+            targetNodeType,
+        }: {
+            type: 'change' | 'delete';
+            targetNodeType?: WorkflowNodeType;
+        },
     ) => {
-        console.log({ type, record, targetNodeType });
-
+        e.stopPropagation();
         setAnchorEl(null);
         setContextMenu(null);
+
+        switch (type) {
+            case 'change': {
+                updateNode(nodeProps.id, {
+                    type: targetNodeType,
+                    data: {},
+                });
+                break;
+            }
+            case 'delete': {
+                await deleteElements({ nodes: [nodeProps] });
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     };
 
     return (
@@ -158,15 +184,18 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                     {isEntryNode && (
                         <MenuItem
                             onClick={e => {
+                                e.stopPropagation();
                                 setAnchorEl(e.currentTarget);
                             }}
                         >
                             {getIntlText('workflow.context_menu.title_change_node')}
                         </MenuItem>
                     )}
-                    <MenuItem onClick={() => handleMenuItemClick('delete', nodeProps)}>
-                        {getIntlText('common.label.delete')}
-                    </MenuItem>
+                    {!entryNodeTypes.includes(nodeProps.type) && (
+                        <MenuItem onClick={e => handleMenuItemClick(e, { type: 'delete' })}>
+                            {getIntlText('common.label.delete')}
+                        </MenuItem>
+                    )}
                 </Menu>
                 <Menu
                     className="ms-workflow-node-contextmenu-sub"
@@ -181,7 +210,12 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                     {nodeMenus.map(node => (
                         <MenuItem
                             key={node.type}
-                            onClick={() => handleMenuItemClick('change', nodeProps, node.type)}
+                            onClick={e =>
+                                handleMenuItemClick(e, {
+                                    type: 'change',
+                                    targetNodeType: node.type,
+                                })
+                            }
                         >
                             <span className="icon" style={{ backgroundColor: node.iconBgColor }}>
                                 {node.icon}

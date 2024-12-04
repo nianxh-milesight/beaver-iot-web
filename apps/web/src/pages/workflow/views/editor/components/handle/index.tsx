@@ -1,4 +1,4 @@
-import React, { useState, useCallback, forwardRef } from 'react';
+import React, { useState, useCallback, useMemo, forwardRef } from 'react';
 import cls from 'classnames';
 import { useDebounceFn } from 'ahooks';
 import { Handle as XHandle, useEdges, type HandleProps, type NodeProps } from '@xyflow/react';
@@ -41,6 +41,18 @@ const Handle = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> &
             e.stopPropagation();
         }, []);
 
+        const closestNodeProps = useMemo(() => {
+            return props.type === 'target'
+                ? {
+                      nextNodeId: nodeProps.id,
+                      nextNodeTargetHandle: props.id,
+                  }
+                : {
+                      prevNodeId: nodeProps.id,
+                      prevNodeSourceHandle: props.id,
+                  };
+        }, [props, nodeProps]);
+
         return (
             <>
                 <XHandle
@@ -69,7 +81,12 @@ const Handle = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> &
                         <AddCircleIcon />
                     </Stack>
                 </XHandle>
-                <NodeMenu open={!!anchorEl} onClose={() => setAnchorEl(null)} anchorEl={anchorEl} />
+                <NodeMenu
+                    open={!!anchorEl}
+                    anchorEl={anchorEl}
+                    {...closestNodeProps}
+                    onClose={() => setAnchorEl(null)}
+                />
             </>
         );
     },

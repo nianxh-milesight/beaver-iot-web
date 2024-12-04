@@ -61,8 +61,12 @@ const AddableEdge = ({
                         </Stack>
                         <NodeMenu
                             open={!!anchorEl}
-                            onClose={() => setAnchorEl(null)}
                             anchorEl={anchorEl}
+                            prevNodeId={edge?.source}
+                            prevNodeSourceHandle={edge?.sourceHandle}
+                            nextNodeId={edge?.target}
+                            nextNodeTargetHandle={edge?.targetHandle}
+                            onClose={() => setAnchorEl(null)}
                         />
                     </div>
                 </EdgeLabelRenderer>

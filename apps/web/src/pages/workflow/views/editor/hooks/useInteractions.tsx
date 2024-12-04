@@ -4,6 +4,7 @@ import {
     addEdge,
     applyNodeChanges,
     applyEdgeChanges,
+    getIncomers,
     getOutgoers,
     type OnNodesChange,
     type OnEdgesChange,
@@ -11,29 +12,33 @@ import {
     type ReactFlowProps,
     type IsValidConnection,
 } from '@xyflow/react';
+import { cloneDeep, maxBy } from 'lodash-es';
 import { genRandomString } from '@milesight/shared/src/utils/tools';
+import { NODE_SPACING_X, NODE_SPACING_Y, EDGE_TYPE_ADDABLE } from '../constant';
 
 type RFProps = ReactFlowProps<WorkflowNode, WorkflowEdge>;
 
-interface AddNodeOptions {
-    newNodePayload: {
-        nodeType: WorkflowNodeType;
-        sourceHandle?: ApiKey;
-        targetHandle?: ApiKey;
-    };
-}
+/**
+ * The closest node payload type for AddNode function
+ */
+export type AddNodeClosestPayloadParam = {
+    prevNodeId?: ApiKey;
+    prevNodeSourceHandle?: string | null;
+    nextNodeId?: ApiKey;
+    nextNodeTargetHandle?: string | null;
+};
 
 type AddNodeFunc = (
     newNodePayload: {
         nodeType: WorkflowNodeType;
         sourceHandle?: ApiKey;
         targetHandle?: ApiKey;
+        position?: {
+            x: number;
+            y: number;
+        };
     },
-    atNodePayload?: {
-        atNodeId?: ApiKey;
-        atNodeTargetHandle?: ApiKey;
-        atNodeSourceHandle?: ApiKey;
-    },
+    closestNodePayload?: AddNodeClosestPayloadParam,
 ) => void;
 
 /**
@@ -41,33 +46,154 @@ type AddNodeFunc = (
  * @param type node/edge
  */
 const genUuid = (type: 'node' | 'edge') => {
-    return `${type}:${Date.now()}:${genRandomString()}`;
+    return `${type}:${Date.now()}:${genRandomString(8, { lowerCase: true })}`;
 };
 
 /**
- * 工作流通用交互逻辑
+ * Workflow Interactions Hook
  */
 const useInteractions = () => {
-    const { getNodes, getEdges, setNodes, setEdges } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { getNodes, getEdges, setNodes, setEdges, addNodes, addEdges } = useReactFlow<
+        WorkflowNode,
+        WorkflowEdge
+    >();
 
     const addNode = useCallback<AddNodeFunc>(
         (
-            { nodeType, sourceHandle, targetHandle },
-            { atNodeId, atNodeSourceHandle, atNodeTargetHandle } = {},
+            { nodeType, position },
+            { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle } = {},
         ) => {
-            console.log({ nodeType, sourceHandle, targetHandle });
+            console.log({
+                nodeType,
+                prevNodeId,
+                prevNodeSourceHandle,
+                nextNodeId,
+                nextNodeTargetHandle,
+            });
             const nodes = getNodes();
-            const node: WorkflowNode = {
+            const edges = getEdges();
+            const prevNode = nodes.find(node => node.id === prevNodeId);
+            const nextNode = nodes.find(node => node.id === nextNodeId);
+            const newNode: WorkflowNode = {
                 id: genUuid('node'),
                 type: nodeType,
-                position: {
+                position: position || {
                     x: 0,
                     y: 0,
                 },
                 data: {},
             };
+
+            // Button at the edge
+            if (prevNode && nextNode) {
+                const newEdges = cloneDeep(edges);
+                const newNodes = cloneDeep(nodes);
+
+                // Update current edge
+                const edge = newEdges.find(
+                    edge => edge.source === prevNodeId && edge.target === nextNodeId,
+                )!;
+                edge.target = newNode.id;
+
+                // Add new Edge
+                if (newNode.type !== 'ifelse') {
+                    newEdges.push({
+                        id: genUuid('edge'),
+                        type: EDGE_TYPE_ADDABLE,
+                        source: newNode.id,
+                        target: nextNode.id,
+                        targetHandle: nextNodeTargetHandle,
+                    });
+                }
+
+                newNode.position = {
+                    x: nextNode.position.x,
+                    y: nextNode.position.y,
+                };
+                newNodes.push(newNode);
+
+                const updateNodesPosition = (node: WorkflowNode) => {
+                    const tempNode = newNodes.find(item => item.id === node.id)!;
+
+                    tempNode.position = {
+                        x: node.position.x + NODE_SPACING_X,
+                        y: node.position.y,
+                    };
+
+                    const outgoers = getOutgoers(node, newNodes, newEdges);
+
+                    outgoers.forEach(node => updateNodesPosition(node));
+                };
+                updateNodesPosition(nextNode);
+
+                setNodes(newNodes);
+                setEdges(newEdges);
+                return;
+            }
+
+            // Button at the node target handle
+            if (!prevNode && nextNode) {
+                const newEdge: WorkflowEdge | undefined = {
+                    id: genUuid('edge'),
+                    type: 'addable',
+                    source: newNode.id,
+                    target: nextNode.id,
+                    targetHandle: nextNodeTargetHandle,
+                };
+                const incomers = getIncomers(nextNode, nodes, edges);
+
+                if (!incomers.length) {
+                    newNode.position = {
+                        x: nextNode.position.x - NODE_SPACING_X,
+                        y: nextNode.position.y,
+                    };
+                } else {
+                    const maxYIncomer = maxBy(incomers, item => item.position.y)!;
+
+                    newNode.position = {
+                        x: maxYIncomer.position.x,
+                        y: maxYIncomer.position.y + NODE_SPACING_Y,
+                    };
+                }
+
+                addNodes([newNode]);
+                addEdges([newEdge]);
+                return;
+            }
+
+            // Button at the node source handle
+            if (prevNode && !nextNode) {
+                const newEdge: WorkflowEdge | undefined = {
+                    id: genUuid('edge'),
+                    type: EDGE_TYPE_ADDABLE,
+                    source: prevNode.id,
+                    target: newNode.id,
+                    sourceHandle: prevNodeSourceHandle,
+                };
+                const outgoers = getOutgoers(prevNode, nodes, edges);
+
+                if (!outgoers.length) {
+                    newNode.position = {
+                        x: prevNode.position.x + NODE_SPACING_X,
+                        y: prevNode.position.y,
+                    };
+                } else {
+                    const maxYOutgoers = maxBy(outgoers, item => item.position.y)!;
+
+                    newNode.position = {
+                        x: maxYOutgoers.position.x,
+                        y: maxYOutgoers.position.y + NODE_SPACING_Y,
+                    };
+                }
+
+                addNodes([newNode]);
+                addEdges([newEdge]);
+                return;
+            }
+
+            addNodes([newNode]);
         },
-        [getNodes],
+        [addEdges, addNodes, getEdges, getNodes],
     );
 
     const handleNodesChange = useCallback<OnNodesChange<WorkflowNode>>(

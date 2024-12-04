@@ -168,3 +168,18 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
  * Parallel nesting layer limit
  */
 export const PARALLEL_DEPTH_LIMIT = 3;
+
+/**
+ * The addable Edge type
+ */
+export const EDGE_TYPE_ADDABLE: WorkflowEdgeType = 'addable';
+
+/**
+ * Node X-axis spacing
+ */
+export const NODE_SPACING_X = 300;
+
+/**
+ * Node Y-axis spacing
+ */
+export const NODE_SPACING_Y = 100;

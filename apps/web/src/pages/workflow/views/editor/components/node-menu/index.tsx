@@ -1,29 +1,14 @@
 import { useState, useMemo, useLayoutEffect } from 'react';
-import { useReactFlow, type HandleType } from '@xyflow/react';
+import { useReactFlow } from '@xyflow/react';
 import { Menu, MenuItem, type MenuProps } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { nodeCategoryConfigs, basicNodeConfigs, type NodeConfigItemType } from '../../constant';
-import useInteractions from '../../hooks/useInteractions';
+import useInteractions, { type AddNodeClosestPayloadParam } from '../../hooks/useInteractions';
 import './style.less';
 
-interface Props extends MenuProps {
+interface Props extends MenuProps, AddNodeClosestPayloadParam {
     /**
-     * 节点信息
-     */
-    node?: WorkflowNode;
-
-    /**
-     * 边信息
-     */
-    edge?: WorkflowEdge;
-
-    /**
-     * 操作柄类型
-     */
-    handleType?: HandleType;
-
-    /**
-     * 菜单项点击回调
+     * Menu Item click callback
      */
     onItemClick?: (nodeType: WorkflowNodeType) => void;
 }
@@ -32,9 +17,10 @@ interface Props extends MenuProps {
  * 节点菜单
  */
 const NodeMenu = ({
-    node,
-    edge,
-    handleType = 'source',
+    prevNodeId,
+    prevNodeSourceHandle,
+    nextNodeId,
+    nextNodeTargetHandle,
     open,
     onItemClick,
     onClose,
@@ -81,7 +67,7 @@ const NodeMenu = ({
     useLayoutEffect(() => setInnerOpen(!!open), [open]);
 
     // ---------- Menu Item Click ----------
-    const { getNodes, getEdges } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { screenToFlowPosition } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const { addNode } = useInteractions();
     const handleClick = (
         e: React.MouseEvent<HTMLLIElement, MouseEvent>,
@@ -89,7 +75,15 @@ const NodeMenu = ({
     ) => {
         e.stopPropagation();
 
-        addNode({ nodeType: type });
+        let position: { x: number; y: number } | undefined;
+        if (!prevNodeId && !nextNodeId) {
+            position = screenToFlowPosition({ x: e.clientX - 20, y: e.clientY - 20 });
+        }
+
+        addNode(
+            { nodeType: type, position },
+            { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle },
+        );
         onItemClick?.(type);
         handleInnerClose({}, 'backdropClick');
     };
