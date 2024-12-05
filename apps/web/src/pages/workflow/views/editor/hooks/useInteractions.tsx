@@ -1,17 +1,16 @@
 import { useCallback } from 'react';
 import {
-    useReactFlow,
-    addEdge,
-    applyNodeChanges,
-    applyEdgeChanges,
     getIncomers,
     getOutgoers,
+    applyNodeChanges,
+    applyEdgeChanges,
+    useReactFlow,
     type OnNodesChange,
     type OnEdgesChange,
     type OnConnect,
     type ReactFlowProps,
-    type IsValidConnection,
 } from '@xyflow/react';
+import { useSize } from 'ahooks';
 import { cloneDeep, maxBy } from 'lodash-es';
 import { genRandomString } from '@milesight/shared/src/utils/tools';
 import {
@@ -21,6 +20,7 @@ import {
     DEFAULT_NODE_HEIGHT,
     EDGE_TYPE_ADDABLE,
 } from '../constant';
+import useWorkflow from './useWorkflow';
 
 type RFProps = ReactFlowProps<WorkflowNode, WorkflowEdge>;
 
@@ -59,16 +59,86 @@ const genUuid = (type: 'node' | 'edge') => {
  * Workflow Interactions Hook
  */
 const useInteractions = () => {
-    const { getNodes, getEdges, setNodes, setEdges, addNodes, addEdges, updateEdgeData } =
-        useReactFlow<WorkflowNode, WorkflowEdge>();
+    const {
+        getNodes,
+        getEdges,
+        setNodes,
+        setEdges,
+        addEdges,
+        updateEdgeData,
+        fitView,
+        flowToScreenPosition,
+    } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { checkNestedParallelLimit } = useWorkflow();
+    const { width: bodyWidth, height: bodyHeight } = useSize(document.querySelector('body')) || {};
 
+    const handleNodesChange = useCallback<OnNodesChange<WorkflowNode>>(
+        changes => {
+            setNodes(nds => applyNodeChanges(changes, nds));
+        },
+        [setNodes],
+    );
+
+    const handleEdgesChange = useCallback<OnEdgesChange<WorkflowEdge>>(
+        changes => {
+            setEdges(eds => applyEdgeChanges(changes, eds));
+        },
+        [setEdges],
+    );
+
+    // Handle nodes connect
+    const handleConnect = useCallback<OnConnect>(
+        connection => {
+            const nodes = getNodes();
+            const edges = getEdges();
+            const newEdge = { ...connection, id: genUuid('edge'), type: EDGE_TYPE_ADDABLE };
+
+            if (!checkNestedParallelLimit(nodes, [...edges, newEdge])) return;
+            addEdges([newEdge]);
+        },
+        [addEdges, checkNestedParallelLimit, getEdges, getNodes],
+    );
+
+    // Check before node delete
+    const handleBeforeDelete = useCallback<NonNullable<RFProps['onBeforeDelete']>>(
+        async ({ nodes }) => {
+            const hasEntryNode = nodes.some(
+                node =>
+                    node.type === 'trigger' || node.type === 'timer' || node.type === 'listener',
+            );
+
+            if (hasEntryNode) return false;
+            return true;
+        },
+        [],
+    );
+
+    // Handle edge mouse enter
+    const handleEdgeMouseEnter = useCallback<NonNullable<RFProps['onEdgeMouseEnter']>>(
+        (e, edge) => {
+            e.stopPropagation();
+            updateEdgeData(edge.id, { $hovering: true });
+        },
+        [updateEdgeData],
+    );
+
+    // Handle edge mouse leave
+    const handleEdgeMouseLeave = useCallback<NonNullable<RFProps['onEdgeMouseLeave']>>(
+        (e, edge) => {
+            e.stopPropagation();
+            updateEdgeData(edge.id, { $hovering: false });
+        },
+        [updateEdgeData],
+    );
+
+    // Add New Node
     const addNode = useCallback<AddNodeFunc>(
         (
             { nodeType, position },
             { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle } = {},
         ) => {
-            const nodes = getNodes();
-            const edges = getEdges();
+            const nodes = cloneDeep(getNodes());
+            const edges = cloneDeep(getEdges());
             const prevNode = nodes.find(node => node.id === prevNodeId);
             const nextNode = nodes.find(node => node.id === nextNodeId);
             const newNode: WorkflowNode = {
@@ -81,20 +151,17 @@ const useInteractions = () => {
                 data: {},
             };
 
-            // Button at the edge
             if (prevNode && nextNode) {
-                const newEdges = cloneDeep(edges);
-                const newNodes = cloneDeep(nodes);
-
+                // ----- Button at the edge -----
                 // Update current edge
-                const edge = newEdges.find(
+                const edge = edges.find(
                     edge => edge.source === prevNodeId && edge.target === nextNodeId,
                 )!;
                 edge.target = newNode.id;
 
                 // Add new Edge
                 if (newNode.type !== 'ifelse') {
-                    newEdges.push({
+                    edges.push({
                         id: genUuid('edge'),
                         type: EDGE_TYPE_ADDABLE,
                         source: newNode.id,
@@ -107,10 +174,10 @@ const useInteractions = () => {
                     x: nextNode.position.x,
                     y: nextNode.position.y,
                 };
-                newNodes.push(newNode);
+                nodes.push(newNode);
 
                 const updateNodesPosition = (startNode: WorkflowNode) => {
-                    const innerNextNode = newNodes.find(item => item.id === startNode.id)!;
+                    const innerNextNode = nodes.find(item => item.id === startNode.id)!;
 
                     innerNextNode.position = {
                         x:
@@ -120,19 +187,13 @@ const useInteractions = () => {
                         y: startNode.position.y,
                     };
 
-                    const outgoers = getOutgoers(startNode, newNodes, newEdges);
+                    const outgoers = getOutgoers(startNode, nodes, edges);
 
                     outgoers.forEach(item => updateNodesPosition(item));
                 };
                 updateNodesPosition(nextNode);
-
-                setNodes(newNodes);
-                setEdges(newEdges);
-                return;
-            }
-
-            // Button at the node target handle
-            if (!prevNode && nextNode) {
+            } else if (!prevNode && nextNode) {
+                // ----- Button at the node target handle -----
                 const newEdge: WorkflowEdge | undefined = {
                     id: genUuid('edge'),
                     type: 'addable',
@@ -162,13 +223,10 @@ const useInteractions = () => {
                     };
                 }
 
-                addNodes([newNode]);
-                addEdges([newEdge]);
-                return;
-            }
-
-            // Button at the node source handle
-            if (prevNode && !nextNode) {
+                nodes.push(newNode);
+                edges.push(newEdge);
+            } else if (prevNode && !nextNode) {
+                // ----- Button at the node source handle -----
                 const newEdge: WorkflowEdge | undefined = {
                     id: genUuid('edge'),
                     type: EDGE_TYPE_ADDABLE,
@@ -198,90 +256,42 @@ const useInteractions = () => {
                     };
                 }
 
-                addNodes([newNode]);
-                addEdges([newEdge]);
-                return;
+                nodes.push(newNode);
+                edges.push(newEdge);
+            } else {
+                // ----- Button at the control bar -----
+                nodes.push(newNode);
             }
 
-            addNodes([newNode]);
+            if (!checkNestedParallelLimit(nodes, edges)) return;
+
+            setNodes(nodes);
+            setEdges(edges);
+
+            if (!bodyWidth || !bodyHeight) return;
+            const screenPosition = flowToScreenPosition({
+                x: newNode.position.x,
+                y: newNode.position.y,
+            });
+
+            if (
+                screenPosition.x + DEFAULT_NODE_WIDTH > bodyWidth ||
+                screenPosition.y + DEFAULT_NODE_HEIGHT > bodyHeight
+            ) {
+                setTimeout(() => fitView({ duration: 300 }), 0);
+            }
         },
-        [addEdges, addNodes, getEdges, getNodes, setEdges, setNodes],
-    );
-
-    const handleNodesChange = useCallback<OnNodesChange<WorkflowNode>>(
-        changes => {
-            setNodes(nds => applyNodeChanges(changes, nds));
-        },
-        [setNodes],
-    );
-
-    const handleEdgesChange = useCallback<OnEdgesChange<WorkflowEdge>>(
-        changes => {
-            setEdges(eds => applyEdgeChanges(changes, eds));
-        },
-        [setEdges],
-    );
-
-    const handleConnect = useCallback<OnConnect>(
-        connection => {
-            setEdges(eds => addEdge({ ...connection, type: 'addable' }, eds!));
-        },
-        [setEdges],
-    );
-
-    // Check node connection cycle
-    const isValidConnection = useCallback<IsValidConnection>(
-        connection => {
-            // we are using getNodes and getEdges helpers here
-            // to make sure we create isValidConnection function only once
-            const nodes = getNodes();
-            const edges = getEdges();
-            const target = nodes.find(node => node.id === connection.target);
-            const hasCycle = (node: WorkflowNode, visited = new Set()) => {
-                if (visited.has(node.id)) return false;
-
-                visited.add(node.id);
-
-                for (const outgoer of getOutgoers(node, nodes, edges)) {
-                    if (outgoer.id === connection.source) return true;
-                    if (hasCycle(outgoer, visited)) return true;
-                }
-            };
-
-            if (target?.id === connection.source) return false;
-            return !hasCycle(target!);
-        },
-        [getNodes, getEdges],
-    );
-
-    // Check before node delete
-    const handleBeforeDelete = useCallback<NonNullable<RFProps['onBeforeDelete']>>(
-        async ({ nodes }) => {
-            const hasEntryNode = nodes.some(
-                node =>
-                    node.type === 'trigger' || node.type === 'timer' || node.type === 'listener',
-            );
-
-            if (hasEntryNode) return false;
-            return true;
-        },
-        [],
-    );
-
-    const handleEdgeMouseEnter = useCallback<NonNullable<RFProps['onEdgeMouseEnter']>>(
-        (e, edge) => {
-            e.stopPropagation();
-            updateEdgeData(edge.id, { $hovering: true });
-        },
-        [updateEdgeData],
-    );
-
-    const handleEdgeMouseLeave = useCallback<NonNullable<RFProps['onEdgeMouseLeave']>>(
-        (e, edge) => {
-            e.stopPropagation();
-            updateEdgeData(edge.id, { $hovering: false });
-        },
-        [updateEdgeData],
+        [
+            bodyWidth,
+            bodyHeight,
+            getNodes,
+            getEdges,
+            setNodes,
+            setEdges,
+            fitView,
+            flowToScreenPosition,
+            checkNestedParallelLimit,
+        ],
     );
 
     return {
@@ -290,7 +300,6 @@ const useInteractions = () => {
         handleEdgesChange,
         handleConnect,
         handleBeforeDelete,
-        isValidConnection,
         handleEdgeMouseEnter,
         handleEdgeMouseLeave,
     };

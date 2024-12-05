@@ -47,7 +47,7 @@ const Controls: React.FC<ControlsProps> = ({ minZoom, maxZoom }) => {
                         <Button disabled={!!maxZoom && maxZoom === zoom} onClick={() => zoomIn()}>
                             <ZoomInIcon sx={{ fontSize: 20 }} />
                         </Button>
-                        <Button onClick={() => fitView()}>
+                        <Button onClick={() => fitView({ duration: 300 })}>
                             <MyLocationIcon sx={{ fontSize: 20 }} />
                         </Button>
                     </ButtonGroup>

@@ -16,5 +16,6 @@
     "workflow.label.node_category_entry": "Entry",
     "workflow.label.node_category_control": "Control",
     "workflow.label.node_category_action": "Action",
-    "workflow.label.node_category_external": "External"
+    "workflow.label.node_category_external": "External",
+    "workflow.label.parallel_depth_limit_tip": "并行嵌套层数限制 {1} 层"
 }

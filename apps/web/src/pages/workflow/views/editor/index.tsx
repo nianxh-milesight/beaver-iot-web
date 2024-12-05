@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react';
 import { useTheme } from '@milesight/shared/src/hooks';
 import { MIN_ZOOM, MAX_ZOOM } from './constant';
-import { useNodeTypes, useInteractions } from './hooks';
+import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
 import { Topbar, Controls, ConfigPanel, Edge, HelperLines, getHelperLines } from './components';
 import demoData from './demo-data.json';
 
@@ -28,13 +28,9 @@ const edgeTypes: Record<WorkflowEdgeType, React.FC<any>> = {
 const WorkflowEditor = () => {
     const { grey } = useTheme();
     const nodeTypes = useNodeTypes();
-    const {
-        handleConnect,
-        handleBeforeDelete,
-        isValidConnection,
-        handleEdgeMouseEnter,
-        handleEdgeMouseLeave,
-    } = useInteractions();
+    const { isValidConnection } = useWorkflow();
+    const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
+        useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
 
