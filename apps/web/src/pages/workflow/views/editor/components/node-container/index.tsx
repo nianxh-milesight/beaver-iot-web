@@ -173,7 +173,11 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                 <Menu
                     className="ms-workflow-node-contextmenu"
                     open={contextMenu !== null}
-                    onClose={() => setContextMenu(null)}
+                    onClose={e => {
+                        // @ts-ignore
+                        e.stopPropagation?.();
+                        setContextMenu(null);
+                    }}
                     anchorReference="anchorPosition"
                     anchorPosition={
                         contextMenu !== null
@@ -205,7 +209,12 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                         vertical: 'bottom',
                         horizontal: 'center',
                     }}
-                    onClose={() => setAnchorEl(null)}
+                    onClose={e => {
+                        // @ts-ignore
+                        e.stopPropagation?.();
+                        setAnchorEl(null);
+                        setContextMenu(null);
+                    }}
                 >
                     {nodeMenus.map(node => (
                         <MenuItem

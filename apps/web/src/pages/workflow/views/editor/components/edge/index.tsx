@@ -4,6 +4,7 @@ import {
     EdgeLabelRenderer,
     getBezierPath,
     useEdges,
+    useReactFlow,
     type EdgeProps,
 } from '@xyflow/react';
 import { Stack } from '@mui/material';
@@ -23,7 +24,7 @@ const AddableEdge = ({
     targetY,
     sourcePosition,
     targetPosition,
-    selected,
+    // selected,
     style = {},
     markerEnd,
 }: EdgeProps<WorkflowEdge>) => {
@@ -39,6 +40,7 @@ const AddableEdge = ({
     });
 
     // ---------- Add Button Click Callback ----------
+    const { updateEdgeData } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         setAnchorEl(e.currentTarget);
@@ -48,7 +50,7 @@ const AddableEdge = ({
     return (
         <>
             <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
-            {(selected || data?.$hovering) && (
+            {data?.$hovering && (
                 <EdgeLabelRenderer>
                     <div
                         className="ms-workflow-edge-label"
@@ -66,7 +68,10 @@ const AddableEdge = ({
                             prevNodeSourceHandle={edge?.sourceHandle}
                             nextNodeId={edge?.target}
                             nextNodeTargetHandle={edge?.targetHandle}
-                            onClose={() => setAnchorEl(null)}
+                            onClose={() => {
+                                setAnchorEl(null);
+                                updateEdgeData(id, { $hovering: false });
+                            }}
                         />
                     </div>
                 </EdgeLabelRenderer>

@@ -22,15 +22,19 @@ const edgeTypes: Record<WorkflowEdgeType, React.FC<any>> = {
     addable: Edge,
 };
 
-type RFProps = ReactFlowProps<WorkflowNode, WorkflowEdge>;
-
 /**
  * Workflow Editor
  */
 const WorkflowEditor = () => {
     const { grey } = useTheme();
     const nodeTypes = useNodeTypes();
-    const { handleConnect, handleBeforeDelete, isValidConnection } = useInteractions();
+    const {
+        handleConnect,
+        handleBeforeDelete,
+        isValidConnection,
+        handleEdgeMouseEnter,
+        handleEdgeMouseLeave,
+    } = useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
 
@@ -96,6 +100,8 @@ const WorkflowEditor = () => {
                         onNodesChange={handleNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={handleConnect}
+                        onEdgeMouseEnter={handleEdgeMouseEnter}
+                        onEdgeMouseLeave={handleEdgeMouseLeave}
                     >
                         <Background style={{ backgroundColor: grey['100'] }} />
                         <Controls minZoom={MIN_ZOOM} maxZoom={MAX_ZOOM} />

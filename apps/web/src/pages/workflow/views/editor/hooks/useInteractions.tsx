@@ -14,7 +14,13 @@ import {
 } from '@xyflow/react';
 import { cloneDeep, maxBy } from 'lodash-es';
 import { genRandomString } from '@milesight/shared/src/utils/tools';
-import { NODE_SPACING_X, NODE_SPACING_Y, EDGE_TYPE_ADDABLE } from '../constant';
+import {
+    NODE_SPACING_X,
+    NODE_SPACING_Y,
+    DEFAULT_NODE_WIDTH,
+    DEFAULT_NODE_HEIGHT,
+    EDGE_TYPE_ADDABLE,
+} from '../constant';
 
 type RFProps = ReactFlowProps<WorkflowNode, WorkflowEdge>;
 
@@ -53,23 +59,14 @@ const genUuid = (type: 'node' | 'edge') => {
  * Workflow Interactions Hook
  */
 const useInteractions = () => {
-    const { getNodes, getEdges, setNodes, setEdges, addNodes, addEdges } = useReactFlow<
-        WorkflowNode,
-        WorkflowEdge
-    >();
+    const { getNodes, getEdges, setNodes, setEdges, addNodes, addEdges, updateEdgeData } =
+        useReactFlow<WorkflowNode, WorkflowEdge>();
 
     const addNode = useCallback<AddNodeFunc>(
         (
             { nodeType, position },
             { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle } = {},
         ) => {
-            console.log({
-                nodeType,
-                prevNodeId,
-                prevNodeSourceHandle,
-                nextNodeId,
-                nextNodeTargetHandle,
-            });
             const nodes = getNodes();
             const edges = getEdges();
             const prevNode = nodes.find(node => node.id === prevNodeId);
@@ -112,17 +109,20 @@ const useInteractions = () => {
                 };
                 newNodes.push(newNode);
 
-                const updateNodesPosition = (node: WorkflowNode) => {
-                    const tempNode = newNodes.find(item => item.id === node.id)!;
+                const updateNodesPosition = (startNode: WorkflowNode) => {
+                    const innerNextNode = newNodes.find(item => item.id === startNode.id)!;
 
-                    tempNode.position = {
-                        x: node.position.x + NODE_SPACING_X,
-                        y: node.position.y,
+                    innerNextNode.position = {
+                        x:
+                            startNode.position.x +
+                            NODE_SPACING_X +
+                            (innerNextNode.measured?.width || DEFAULT_NODE_WIDTH),
+                        y: startNode.position.y,
                     };
 
-                    const outgoers = getOutgoers(node, newNodes, newEdges);
+                    const outgoers = getOutgoers(startNode, newNodes, newEdges);
 
-                    outgoers.forEach(node => updateNodesPosition(node));
+                    outgoers.forEach(item => updateNodesPosition(item));
                 };
                 updateNodesPosition(nextNode);
 
@@ -144,7 +144,10 @@ const useInteractions = () => {
 
                 if (!incomers.length) {
                     newNode.position = {
-                        x: nextNode.position.x - NODE_SPACING_X,
+                        x:
+                            nextNode.position.x -
+                            NODE_SPACING_X -
+                            (nextNode.measured?.width || DEFAULT_NODE_WIDTH),
                         y: nextNode.position.y,
                     };
                 } else {
@@ -152,7 +155,10 @@ const useInteractions = () => {
 
                     newNode.position = {
                         x: maxYIncomer.position.x,
-                        y: maxYIncomer.position.y + NODE_SPACING_Y,
+                        y:
+                            maxYIncomer.position.y +
+                            NODE_SPACING_Y +
+                            (maxYIncomer.measured?.height || DEFAULT_NODE_HEIGHT),
                     };
                 }
 
@@ -174,15 +180,21 @@ const useInteractions = () => {
 
                 if (!outgoers.length) {
                     newNode.position = {
-                        x: prevNode.position.x + NODE_SPACING_X,
+                        x:
+                            prevNode.position.x +
+                            NODE_SPACING_X +
+                            (prevNode.measured?.width || DEFAULT_NODE_WIDTH),
                         y: prevNode.position.y,
                     };
                 } else {
-                    const maxYOutgoers = maxBy(outgoers, item => item.position.y)!;
+                    const maxYOutgoer = maxBy(outgoers, item => item.position.y)!;
 
                     newNode.position = {
-                        x: maxYOutgoers.position.x,
-                        y: maxYOutgoers.position.y + NODE_SPACING_Y,
+                        x: maxYOutgoer.position.x,
+                        y:
+                            maxYOutgoer.position.y +
+                            NODE_SPACING_Y +
+                            (maxYOutgoer.measured?.height || DEFAULT_NODE_HEIGHT),
                     };
                 }
 
@@ -193,7 +205,7 @@ const useInteractions = () => {
 
             addNodes([newNode]);
         },
-        [addEdges, addNodes, getEdges, getNodes],
+        [addEdges, addNodes, getEdges, getNodes, setEdges, setNodes],
     );
 
     const handleNodesChange = useCallback<OnNodesChange<WorkflowNode>>(
@@ -256,6 +268,22 @@ const useInteractions = () => {
         [],
     );
 
+    const handleEdgeMouseEnter = useCallback<NonNullable<RFProps['onEdgeMouseEnter']>>(
+        (e, edge) => {
+            e.stopPropagation();
+            updateEdgeData(edge.id, { $hovering: true });
+        },
+        [updateEdgeData],
+    );
+
+    const handleEdgeMouseLeave = useCallback<NonNullable<RFProps['onEdgeMouseLeave']>>(
+        (e, edge) => {
+            e.stopPropagation();
+            updateEdgeData(edge.id, { $hovering: false });
+        },
+        [updateEdgeData],
+    );
+
     return {
         addNode,
         handleNodesChange,
@@ -263,6 +291,8 @@ const useInteractions = () => {
         handleConnect,
         handleBeforeDelete,
         isValidConnection,
+        handleEdgeMouseEnter,
+        handleEdgeMouseLeave,
     };
 };
 

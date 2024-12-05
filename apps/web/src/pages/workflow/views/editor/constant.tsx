@@ -175,11 +175,21 @@ export const PARALLEL_DEPTH_LIMIT = 3;
 export const EDGE_TYPE_ADDABLE: WorkflowEdgeType = 'addable';
 
 /**
+ * The default node width
+ */
+export const DEFAULT_NODE_WIDTH = 240;
+
+/**
+ * The default node height
+ */
+export const DEFAULT_NODE_HEIGHT = 50;
+
+/**
  * Node X-axis spacing
  */
-export const NODE_SPACING_X = 300;
+export const NODE_SPACING_X = 50;
 
 /**
  * Node Y-axis spacing
  */
-export const NODE_SPACING_Y = 100;
+export const NODE_SPACING_Y = 50;
