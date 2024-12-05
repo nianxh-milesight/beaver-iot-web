@@ -1,7 +1,13 @@
 import React, { useState, useCallback, useMemo, forwardRef } from 'react';
 import cls from 'classnames';
 import { useDebounceFn } from 'ahooks';
-import { Handle as XHandle, useEdges, type HandleProps, type NodeProps } from '@xyflow/react';
+import {
+    Handle as XHandle,
+    useEdges,
+    useReactFlow,
+    type HandleProps,
+    type NodeProps,
+} from '@xyflow/react';
 import { Stack } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { AddCircleIcon } from '@milesight/shared/src/components';
@@ -25,11 +31,15 @@ const Handle = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> &
         const targetAddEnabled = edges.every(edge => edge.target !== nodeProps.id);
 
         // ---------- Handle Tooltip Open ----------
+        const [originNodeZIndex] = useState(nodeProps.zIndex);
+        const { updateNode } = useReactFlow();
         const [showTooltip, setShowTooltip] = useState(false);
         const { run: handleMouseEnter, cancel: cancelHandleMouseEnter } = useDebounceFn(
             () => {
                 if (props.type === 'target' && !targetAddEnabled) return;
                 setShowTooltip(true);
+                // Increase the zIndex of the node to make the tooltip appear on top of other nodes
+                updateNode(nodeProps.id, { zIndex: 1 });
             },
             { wait: 500 },
         );
@@ -67,6 +77,7 @@ const Handle = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> &
                     onMouseLeave={() => {
                         setShowTooltip(false);
                         cancelHandleMouseEnter();
+                        updateNode(nodeProps.id, { zIndex: originNodeZIndex });
                     }}
                 >
                     {/* Use Custom Tooltip, resolve the issue of Edge connect failure when Mui Tooltip component is enabled */}
