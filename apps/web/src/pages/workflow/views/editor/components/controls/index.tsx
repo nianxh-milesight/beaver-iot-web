@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { Panel, useReactFlow, useViewport } from '@xyflow/react';
+import { Panel, useNodes, useReactFlow, useViewport } from '@xyflow/react';
 import { Stack, Paper, ButtonGroup, Button } from '@mui/material';
+import cls from 'classnames';
 import {
     ZoomInIcon,
     ZoomOutIcon,
@@ -26,6 +27,7 @@ export interface ControlsProps {
  * 工作流编辑器工具栏
  */
 const Controls: React.FC<ControlsProps> = ({ minZoom, maxZoom }) => {
+    const nodes = useNodes();
     const { zoom } = useViewport();
     const { zoomIn, zoomOut, fitView } = useReactFlow();
 
@@ -37,7 +39,10 @@ const Controls: React.FC<ControlsProps> = ({ minZoom, maxZoom }) => {
     }, []);
 
     return (
-        <Panel position="bottom-left" className="ms-workflow-controls-root">
+        <Panel
+            position="bottom-left"
+            className={cls('ms-workflow-controls-root', { hidden: !nodes.length })}
+        >
             <Stack direction="row" spacing={1}>
                 <Paper elevation={0}>
                     <ButtonGroup variant="text">

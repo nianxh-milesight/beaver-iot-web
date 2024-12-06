@@ -8,3 +8,4 @@ export { default as Handle, type Props as HandleProps } from './handle';
 export { default as Edge } from './edge';
 export { default as HelperLines, getHelperLines } from './helper-lines';
 export { default as NodeMenu } from './node-menu';
+export { default as EntryPanel } from './entry-panel';

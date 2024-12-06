@@ -1,12 +1,14 @@
 {
     "workflow.button.label_import_from_dsl": "Import from DSL",
     "workflow.label.trigger_node_name": "Trigger",
-    "workflow.label.end_node_name": "End",
+    "workflow.label.trigger_node_desc": "It needs to be triggered by the user to run the whole workflow, the starting node is a Trigger node, and input parameters are allowed to be set when triggering.",
     "workflow.label.select_node_name": "Entity Select",
     "workflow.label.ifelse_node_name": "IF/ELSE",
     "workflow.label.assigner_node_name": "Entity Assigner",
     "workflow.label.timer_node_name": "Timer",
+    "workflow.label.timer_node_desc": "Based on the scheduled time or cycle as a trigger to run the entire workflow conditions, without the need for active triggering, the starting node is the Timer node.",
     "workflow.label.listener_node_name": "Entity Listener",
+    "workflow.label.listener_node_desc": "Based on the listening entity object changes as a trigger to run the entire workflow conditions, without the need for active triggering, the starting node for the Entity Listening node.",
     "workflow.label.code_node_name": "Code",
     "workflow.label.service_node_name": "Service Invocation",
     "workflow.label.email_node_name": "Email Notify",
@@ -17,5 +19,6 @@
     "workflow.label.node_category_control": "Control",
     "workflow.label.node_category_action": "Action",
     "workflow.label.node_category_external": "External",
-    "workflow.label.parallel_depth_limit_tip": "并行嵌套层数限制 {1} 层"
+    "workflow.label.parallel_depth_limit_tip": "并行嵌套层数限制 {1} 层",
+    "workflow.modal.entry_node_create_title": "What type of starting Node do you want to create?"
 }

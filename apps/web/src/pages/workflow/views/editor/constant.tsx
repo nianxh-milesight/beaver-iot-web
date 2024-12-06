@@ -58,6 +58,10 @@ export type NodeConfigItemType = {
      */
     labelIntlKey: string;
     /**
+     * Description i18n key
+     */
+    descIntlKey?: string;
+    /**
      * Node Icon
      */
     icon: React.ReactNode;
@@ -82,6 +86,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     trigger: {
         type: 'trigger',
         labelIntlKey: 'workflow.label.trigger_node_name',
+        descIntlKey: 'workflow.label.trigger_node_desc',
         icon: <InputIcon />,
         iconBgColor: '#3491FA',
         category: 'entry',
@@ -89,6 +94,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     timer: {
         type: 'timer',
         labelIntlKey: 'workflow.label.timer_node_name',
+        descIntlKey: 'workflow.label.timer_node_desc',
         icon: <TimerIcon />,
         iconBgColor: '#3491FA',
         category: 'entry',
@@ -96,6 +102,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     listener: {
         type: 'listener',
         labelIntlKey: 'workflow.label.listener_node_name',
+        descIntlKey: 'workflow.label.listener_node_desc',
         icon: <HearingIcon />,
         iconBgColor: '#3491FA',
         category: 'entry',

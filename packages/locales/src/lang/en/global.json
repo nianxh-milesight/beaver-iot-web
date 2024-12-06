@@ -157,5 +157,6 @@
     "common.label.remark": "Remark",
     "common.label.enable_status": "Enable Status",
     "common.label.update_time": "Update Time",
-    "common.label.back": "Back"
+    "common.label.back": "Back",
+    "common.label.create": "Create"
 }

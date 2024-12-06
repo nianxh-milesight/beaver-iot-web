@@ -6,13 +6,20 @@ import {
     useNodesState,
     useEdgesState,
     ReactFlowProvider,
-    type ReactFlowProps,
     type NodeChange,
 } from '@xyflow/react';
 import { useTheme } from '@milesight/shared/src/hooks';
 import { MIN_ZOOM, MAX_ZOOM } from './constant';
 import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
-import { Topbar, Controls, ConfigPanel, Edge, HelperLines, getHelperLines } from './components';
+import {
+    Topbar,
+    Controls,
+    ConfigPanel,
+    Edge,
+    HelperLines,
+    getHelperLines,
+    EntryPanel,
+} from './components';
 import demoData from './demo-data.json';
 
 import '@xyflow/react/dist/style.css';
@@ -34,11 +41,11 @@ const WorkflowEditor = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
 
-    // TODO: Init data may come from api or local draft
-    useEffect(() => {
-        setNodes(demoData.nodes as WorkflowNode[]);
-        setEdges(demoData.edges as WorkflowEdge[]);
-    }, [setNodes, setEdges]);
+    // TODO: Init workflow data
+    // useEffect(() => {
+    //     setNodes(demoData.nodes as WorkflowNode[]);
+    //     setEdges(demoData.edges as WorkflowEdge[]);
+    // }, [setNodes, setEdges]);
 
     // ---------- Show Helper Lines when node change ----------
     const [helperLineHorizontal, setHelperLineHorizontal] = useState<number | undefined>(undefined);
@@ -106,6 +113,7 @@ const WorkflowEditor = () => {
                             vertical={helperLineVertical}
                         />
                         <ConfigPanel />
+                        <EntryPanel />
                     </ReactFlow>
                 </div>
             </div>

@@ -269,15 +269,13 @@ const useInteractions = () => {
             setEdges(edges);
 
             if (!bodyWidth || !bodyHeight) return;
+            // Node bottom right corner position
             const screenPosition = flowToScreenPosition({
-                x: newNode.position.x,
-                y: newNode.position.y,
+                x: newNode.position.x + DEFAULT_NODE_WIDTH,
+                y: newNode.position.y + DEFAULT_NODE_HEIGHT,
             });
 
-            if (
-                screenPosition.x + DEFAULT_NODE_WIDTH > bodyWidth ||
-                screenPosition.y + DEFAULT_NODE_HEIGHT > bodyHeight
-            ) {
+            if (screenPosition.x > bodyWidth || screenPosition.y > bodyHeight) {
                 setTimeout(() => fitView({ duration: 300 }), 0);
             }
         },
