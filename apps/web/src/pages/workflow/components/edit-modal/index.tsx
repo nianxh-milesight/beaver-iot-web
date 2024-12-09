@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useMemoizedFn } from 'ahooks';
 import cls from 'classnames';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { Modal, type ModalProps } from '@milesight/shared/src/components';
-import useEditFormItems, { type FormDataProps } from './hook/useWorkflowFormItems';
+import useWorkflowFormItems, {
+    type FormDataProps,
+    type FormDataKeys,
+} from './hook/useWorkflowFormItems';
 
 interface Props extends Omit<ModalProps, 'onOk'> {
     /** confirm callback */
@@ -31,9 +34,14 @@ const EditModal: React.FC<Props> = ({
     const { getIntlText } = useI18n();
 
     // ---------- forms processing ----------
-    const { control, formState, handleSubmit, reset } = useForm<FormDataProps>();
-    const formItems = useEditFormItems(data);
-
+    const { control, formState, handleSubmit, reset, setValue } = useForm<FormDataProps>();
+    const formItems = useWorkflowFormItems(data);
+    // Update the initial form data
+    useEffect(() => {
+        Object.keys(data || { name: '', remark: '' }).forEach(key => {
+            setValue(key as FormDataKeys, data?.[key as FormDataKeys] ?? '');
+        });
+    }, [formItems]);
     const modalTitle = useMemo(() => {
         return isAdd
             ? getIntlText('workflow.modal.add_workflow_modal')
