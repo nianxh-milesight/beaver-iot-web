@@ -86,6 +86,7 @@ export {
     Hearing as HearingIcon,
     FactCheck as FactCheckIcon,
     Loop as LoopIcon,
+    History as HistoryIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';

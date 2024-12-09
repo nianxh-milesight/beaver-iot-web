@@ -1,1 +1,1 @@
-export { default as EditModal } from './edit-modal';
+export { default as EditModal, type Props as EditModalProps } from './edit-modal';
