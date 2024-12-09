@@ -12,15 +12,14 @@ export type FormDataProps = {
     remark?: string;
 };
 
-const useEditFormItems = (initialData?: FormDataProps) => {
+const useEditFormItems = () => {
     const { getIntlText } = useI18n();
-    const { name = '', remark = '' } = initialData || {};
     const formItems = useMemo(() => {
         const result: ControllerProps<FormDataProps>[] = [];
         result.push(
             {
                 name: 'name',
-                defaultValue: name,
+                defaultValue: '',
                 rules: {
                     validate: {
                         checkRequired: checkRequired(),
@@ -44,7 +43,7 @@ const useEditFormItems = (initialData?: FormDataProps) => {
             },
             {
                 name: 'remark',
-                defaultValue: remark,
+                defaultValue: '',
                 rules: {
                     validate: { checkMaxLength: checkMaxLength({ max: 1000 }) },
                 },
@@ -53,6 +52,7 @@ const useEditFormItems = (initialData?: FormDataProps) => {
                         <TextField
                             fullWidth
                             type="text"
+                            label={getIntlText('common.label.remark')}
                             error={!!error}
                             helperText={error ? error.message : null}
                             value={value}
