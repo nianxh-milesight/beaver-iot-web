@@ -1,4 +1,6 @@
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useRequest } from 'ahooks';
 import {
     ReactFlow,
     Background,
@@ -9,6 +11,7 @@ import {
     type NodeChange,
 } from '@xyflow/react';
 import { useTheme } from '@milesight/shared/src/hooks';
+import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { MIN_ZOOM, MAX_ZOOM } from './constant';
 import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
 import {
@@ -41,11 +44,30 @@ const WorkflowEditor = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
 
-    // TODO: Init workflow data
-    // useEffect(() => {
-    //     setNodes(demoData.nodes as WorkflowNode[]);
-    //     setEdges(demoData.edges as WorkflowEdge[]);
-    // }, [setNodes, setEdges]);
+    // ---------- Fetch Data ----------
+    const [searchParams] = useSearchParams();
+    const wid = searchParams.get('wid');
+    const { loading } = useRequest(
+        async () => {
+            if (!wid) return;
+            // TODO: Call workflow detail API
+            // const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: wid }));
+
+            // if (error || !isRequestSuccess(resp)) return;
+            // const data = getResponseData(resp);
+            // console.log(data);
+
+            await new Promise(resolve => {
+                setTimeout(resolve, 500);
+            });
+            setNodes(demoData.nodes as WorkflowNode[]);
+            setEdges(demoData.edges as WorkflowEdge[]);
+        },
+        {
+            debounceWait: 300,
+            refreshDeps: [wid],
+        },
+    );
 
     // ---------- Show Helper Lines when node change ----------
     const [helperLineHorizontal, setHelperLineHorizontal] = useState<number | undefined>(undefined);
@@ -113,7 +135,7 @@ const WorkflowEditor = () => {
                             vertical={helperLineVertical}
                         />
                         <ConfigPanel />
-                        <EntryPanel />
+                        <EntryPanel loading={!!wid || loading} />
                     </ReactFlow>
                 </div>
             </div>
