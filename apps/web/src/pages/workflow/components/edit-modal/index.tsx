@@ -3,15 +3,12 @@ import { useMemoizedFn } from 'ahooks';
 import cls from 'classnames';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { Modal, toast, type ModalProps } from '@milesight/shared/src/components';
+import { Modal, type ModalProps } from '@milesight/shared/src/components';
 import useEditFormItems, { type FormDataProps } from './hook/useWorkflowFormItems';
 
 interface Props extends Omit<ModalProps, 'onOk'> {
-    /** error callback */
-    onError?: (err: any) => void;
-
-    /** success callback */
-    onConfirm?: (params: FormDataProps) => void;
+    /** confirm callback */
+    onConfirm?: (params: FormDataProps) => Promise<void> | void;
 
     /** table-row item */
     data?: FormDataProps;
@@ -28,7 +25,6 @@ const EditModal: React.FC<Props> = ({
     isAdd = false,
     data,
     onCancel,
-    onError,
     onConfirm,
     ...props
 }) => {
@@ -45,10 +41,11 @@ const EditModal: React.FC<Props> = ({
     }, [isAdd]);
 
     const onSubmit: SubmitHandler<FormDataProps> = async ({ ...params }) => {
+        if (onConfirm) {
+            await onConfirm(params);
+        }
+        // Clear the form data upon confirmation.
         reset();
-        onConfirm?.(params);
-        // TODO: success tips: Save successfully?
-        toast.success(getIntlText('common.message.operation_success'));
     };
 
     const handleCancel = useMemoizedFn(() => {
@@ -61,7 +58,7 @@ const EditModal: React.FC<Props> = ({
             visible={visible}
             title={modalTitle}
             className={cls({ loading: formState.isSubmitting })}
-            onOk={handleSubmit(onSubmit, onError)}
+            onOk={handleSubmit(onSubmit)}
             onCancel={handleCancel}
             sx={{ '& .MuiDialog-paper': { width: 600 } }}
             {...props}
