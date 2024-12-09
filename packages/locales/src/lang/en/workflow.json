@@ -20,5 +20,8 @@
     "workflow.label.node_category_action": "Action",
     "workflow.label.node_category_external": "External",
     "workflow.label.parallel_depth_limit_tip": "并行嵌套层数限制 {1} 层",
-    "workflow.modal.entry_node_create_title": "What type of starting Node do you want to create?"
+    "workflow.modal.entry_node_create_title": "What type of starting Node do you want to create?",
+    "workflow.modal.add_workflow_modal": "Add Workflow",
+    "workflow.modal.edit_workflow_modal": "Edit Workflow",
+    "workflow.modal.workflow_name": "Workflow Name"
 }
