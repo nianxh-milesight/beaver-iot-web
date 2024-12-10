@@ -12,15 +12,16 @@ import {
 } from '@milesight/shared/src/components';
 import { Breadcrumbs, TablePro, useConfirm } from '@/components';
 import { deviceAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
-import { type FormDataProps } from '@/pages/workflow/components/edit-modal/hook/useWorkflowFormItems';
-import { EditModal } from '@/pages/workflow/components';
+import { type FormDataProps as EditFormDataProps } from '@/pages/workflow/components/edit-modal/hook/useWorkflowFormItems';
+import { type FormDataProps as ImportFormDataProps } from '@/pages/workflow/components/import-modal/hook/useImportFormItems';
+import { EditModal, ImportModal } from '@/pages/workflow/components';
 import { useColumns, type UseColumnsProps, type TableRowDataType } from './hooks';
 import './style.less';
 
-type ModalOption = {
+type EditModalOption = {
     isAdd: boolean;
     openModal: boolean;
-    dataSource?: FormDataProps;
+    dataSource?: EditFormDataProps;
 };
 
 const Workflow = () => {
@@ -29,10 +30,11 @@ const Workflow = () => {
 
     // ---------- 列表数据相关逻辑 ----------
     const [keyword, setKeyword] = useState<string>();
-    const [editOption, SetEditOption] = useState<ModalOption>({
+    const [editOption, SetEditOption] = useState<EditModalOption>({
         isAdd: false,
         openModal: false,
     });
+    const [importModal, setImportModal] = useState<boolean>(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [selectedIds, setSelectedIds] = useState<readonly ApiKey[]>([]);
     const {
@@ -109,7 +111,7 @@ const Workflow = () => {
                     variant="outlined"
                     sx={{ height: 36, textTransform: 'none' }}
                     startIcon={<SystemUpdateAltIcon />}
-                    // onClick={() => setModalOpen(true)}
+                    onClick={() => handlerImportModal(true)}
                 >
                     {getIntlText('workflow.button.label_import_from_dsl')}
                 </Button>
@@ -126,8 +128,14 @@ const Workflow = () => {
             </Stack>
         );
     }, [getIntlText, handleDeleteConfirm, selectedIds]);
-    const handlerEditModal = (isAdd: boolean, isOpen: boolean, row?: FormDataProps): void => {
-        const newEditOption: ModalOption = {
+    const handlerImportModal = (isOpen: boolean, param?: ImportFormDataProps) => {
+        if (param) {
+            // TODO: Pass the DSL to the workflow.
+        }
+        setImportModal(isOpen);
+    };
+    const handlerEditModal = (isAdd: boolean, isOpen: boolean, row?: EditFormDataProps): void => {
+        const newEditOption: EditModalOption = {
             isAdd,
             openModal: isOpen,
         };
@@ -139,20 +147,23 @@ const Workflow = () => {
         }
         SetEditOption(newEditOption);
     };
-    const submitEditModal = async (data: FormDataProps) => {
-        const { isAdd } = editOption;
-        // const [error, res] = await awaitWrap(isAdd ? WorkflowAPI.addWorkflow(data) : WorkflowAPI.updateWorkflow(data));
-        // if (isRequestSuccess(res)) {
-        handlerEditModal(false, false);
-        if (isAdd) {
-            navigate('/workflow/editor', { state: data });
-        } else {
-            // toast.success(getIntlText('common.message.operation_success'));
-        }
-        // } else {
-        //     toast.error(error);
-        // }
-    };
+    const submitEditModal = useCallback(
+        async (data: EditFormDataProps) => {
+            const { isAdd } = editOption;
+            // const [error, res] = await awaitWrap(isAdd ? WorkflowAPI.addWorkflow(data) : WorkflowAPI.updateWorkflow(data));
+            // if (isRequestSuccess(res)) {
+            handlerEditModal(false, false);
+            if (isAdd) {
+                navigate('/workflow/editor', { state: data });
+            } else {
+                // toast.success(getIntlText('common.message.operation_success'));
+            }
+            // } else {
+            //     toast.error(error);
+            // }
+        },
+        [navigate],
+    );
     const handleTableBtnClick: UseColumnsProps<TableRowDataType>['onButtonClick'] = useCallback(
         (type, record) => {
             // console.log(type, record);
@@ -209,6 +220,11 @@ const Workflow = () => {
                 data={editOption.dataSource}
                 onCancel={() => handlerEditModal(false, false)}
                 onConfirm={submitEditModal}
+            />
+            <ImportModal
+                visible={importModal}
+                onUpload={param => handlerImportModal(false, param)}
+                onCancel={() => handlerImportModal(false)}
             />
         </div>
     );
