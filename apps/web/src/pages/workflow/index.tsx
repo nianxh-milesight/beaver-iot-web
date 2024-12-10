@@ -20,7 +20,7 @@ import './style.less';
 type ModalOption = {
     isAdd: boolean;
     openModal: boolean;
-    dataSource: FormDataProps;
+    dataSource?: FormDataProps;
 };
 
 const Workflow = () => {
@@ -32,10 +32,6 @@ const Workflow = () => {
     const [editOption, SetEditOption] = useState<ModalOption>({
         isAdd: false,
         openModal: false,
-        dataSource: {
-            name: '',
-            remark: '',
-        },
     });
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [selectedIds, setSelectedIds] = useState<readonly ApiKey[]>([]);
@@ -134,10 +130,6 @@ const Workflow = () => {
         const newEditOption: ModalOption = {
             isAdd,
             openModal: isOpen,
-            dataSource: {
-                name: '',
-                remark: '',
-            },
         };
         if (!isAdd && isOpen) {
             newEditOption.dataSource = {
@@ -214,7 +206,6 @@ const Workflow = () => {
             </div>
             <EditModal
                 visible={editOption.openModal}
-                isAdd={editOption.isAdd}
                 data={editOption.dataSource}
                 onCancel={() => handlerEditModal(false, false)}
                 onConfirm={submitEditModal}
