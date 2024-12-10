@@ -8,7 +8,7 @@ import {
     type UseOnSelectionChangeOptions,
 } from '@xyflow/react';
 import cls from 'classnames';
-import { Paper, Stack, IconButton } from '@mui/material';
+import { Stack, IconButton } from '@mui/material';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 // import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';

@@ -114,7 +114,7 @@ const Topbar: React.FC<Props> = ({
                         {getIntlText('common.label.back')}
                     </Button>
                     <div className="title">
-                        <Tooltip title="Workflow Name" />
+                        <Tooltip autoEllipsis title="Workflow Name" />
                         <IconButton onClick={() => setOpenEditModal(true)}>
                             <EditIcon />
                         </IconButton>
