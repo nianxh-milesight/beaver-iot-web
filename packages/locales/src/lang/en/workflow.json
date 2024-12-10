@@ -24,5 +24,6 @@
     "workflow.modal.add_workflow_modal": "Add Workflow",
     "workflow.modal.edit_workflow_modal": "Edit Workflow",
     "workflow.modal.workflow_name": "Workflow Name",
-    "workflow.button.delete_filter": "More Filters"
+    "workflow.button.delete_filter": "More Filters",
+    "workflow.modal.upload_tips": "Click here or drag file to this area to upload"
 }

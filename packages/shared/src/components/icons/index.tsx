@@ -86,6 +86,8 @@ export {
     Hearing as HearingIcon,
     FactCheck as FactCheckIcon,
     Loop as LoopIcon,
+    UploadFile as UploadFileIcon,
+    AttachFile as AttachFileIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';
