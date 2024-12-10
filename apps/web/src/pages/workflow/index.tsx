@@ -147,23 +147,20 @@ const Workflow = () => {
         }
         SetEditOption(newEditOption);
     };
-    const submitEditModal = useCallback(
-        async (data: EditFormDataProps) => {
-            const { isAdd } = editOption;
-            // const [error, res] = await awaitWrap(isAdd ? WorkflowAPI.addWorkflow(data) : WorkflowAPI.updateWorkflow(data));
-            // if (isRequestSuccess(res)) {
-            handlerEditModal(false, false);
-            if (isAdd) {
-                navigate('/workflow/editor', { state: data });
-            } else {
-                // toast.success(getIntlText('common.message.operation_success'));
-            }
-            // } else {
-            //     toast.error(error);
-            // }
-        },
-        [navigate],
-    );
+    const submitEditModal = async (data: EditFormDataProps) => {
+        const { isAdd } = editOption;
+        // const [error, res] = await awaitWrap(isAdd ? WorkflowAPI.addWorkflow(data) : WorkflowAPI.updateWorkflow(data));
+        // if (isRequestSuccess(res)) {
+        handlerEditModal(false, false);
+        if (isAdd) {
+            navigate('/workflow/editor', { state: data });
+        } else {
+            // toast.success(getIntlText('common.message.operation_success'));
+        }
+        // } else {
+        //     toast.error(error);
+        // }
+    };
     const handleTableBtnClick: UseColumnsProps<TableRowDataType>['onButtonClick'] = useCallback(
         (type, record) => {
             // console.log(type, record);
