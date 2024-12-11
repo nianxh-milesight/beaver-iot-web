@@ -15,7 +15,7 @@ import { Button } from '@mui/material';
 import { useI18n, useTheme } from '@milesight/shared/src/hooks';
 import { CheckIcon } from '@milesight/shared/src/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
-import { MIN_ZOOM, MAX_ZOOM } from './constant';
+import { MIN_ZOOM, MAX_ZOOM } from './constants';
 import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
 import {
     Topbar,
@@ -45,7 +45,7 @@ const WorkflowEditor = () => {
     const { grey } = useTheme();
     const { getIntlText } = useI18n();
     const nodeTypes = useNodeTypes();
-    const { toObject } = useReactFlow();
+    const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const { isValidConnection } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
         useInteractions();

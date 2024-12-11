@@ -4,43 +4,43 @@ import cls from 'classnames';
 import { Menu, MenuItem } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { CheckCircleIcon, ErrorIcon, LoopIcon } from '@milesight/shared/src/components';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 import Handle from '../handle';
-import { basicNodeConfigs } from '../../constant';
 import './style.less';
 
 export type NodeContainerProps = {
     /**
-     * 节点类型
+     * Node Type
      */
     type: WorkflowNodeType;
 
     /**
-     * 节点 Title 的国际化文案 Key
+     * Node title i18n key
      */
     title: string;
 
     /**
-     * 节点 Icon
+     * Node Icon
      */
     icon: React.ReactNode;
 
     /**
-     * 节点 Icon 背景色
+     * Node Icon Background Color
      */
     iconBgColor: string;
 
     /**
-     * 节点操作柄集合，默认会有左右操作柄
+     * Node Handles
      */
     handles?: React.ReactNode[];
 
     /**
-     * 节点所有属性
+     * Node Props
      */
     nodeProps: NodeProps<WorkflowNode>;
 
     /**
-     * 节点详情内容
+     * Custom Node Children
      */
     children?: React.ReactNode;
 };

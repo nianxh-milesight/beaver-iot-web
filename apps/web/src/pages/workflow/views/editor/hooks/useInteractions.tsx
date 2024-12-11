@@ -15,7 +15,7 @@ import {
     DEFAULT_NODE_WIDTH,
     DEFAULT_NODE_HEIGHT,
     EDGE_TYPE_ADDABLE,
-} from '../constant';
+} from '../constants';
 import useWorkflow from './useWorkflow';
 
 type RFProps = ReactFlowProps<WorkflowNode, WorkflowEdge>;

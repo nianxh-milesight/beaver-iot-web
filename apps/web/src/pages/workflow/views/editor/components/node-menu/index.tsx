@@ -2,7 +2,11 @@ import { useState, useMemo, useLayoutEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Menu, MenuItem, type MenuProps } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { nodeCategoryConfigs, basicNodeConfigs, type NodeConfigItemType } from '../../constant';
+import {
+    nodeCategoryConfigs,
+    basicNodeConfigs,
+    type NodeConfigItemType,
+} from '@/pages/workflow/config';
 import useInteractions, { type AddNodeClosestPayloadParam } from '../../hooks/useInteractions';
 import './style.less';
 
@@ -14,7 +18,7 @@ interface Props extends MenuProps, AddNodeClosestPayloadParam {
 }
 
 /**
- * 节点菜单
+ * Node Menu
  */
 const NodeMenu = ({
     prevNodeId,

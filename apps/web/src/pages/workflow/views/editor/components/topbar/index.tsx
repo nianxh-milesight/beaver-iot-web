@@ -40,7 +40,7 @@ interface Props {
 }
 
 /**
- * Workflow 头部工具栏组件
+ * Workflow Editor Topbar
  */
 const Topbar: React.FC<Props> = ({
     data,

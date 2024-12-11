@@ -1,4 +1,4 @@
-import { Node, NodePositionChange, XYPosition } from '@xyflow/react';
+import type { NodePositionChange, XYPosition } from '@xyflow/react';
 
 type GetHelperLinesResult = {
     horizontal?: number;
@@ -7,7 +7,8 @@ type GetHelperLinesResult = {
 };
 
 /**
- * 根据当前节点及周围节点位置计算辅助线位置
+ * Calculate the position of the helper line based on the
+ * current node and surrounding node positions
  */
 export function getHelperLines(
     change: NodePositionChange,

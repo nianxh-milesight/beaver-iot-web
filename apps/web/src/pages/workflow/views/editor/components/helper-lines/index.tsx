@@ -24,7 +24,7 @@ export type HelperLinesProps = {
 };
 
 /**
- * 辅助线渲染器
+ * HelperLines Renderer
  */
 const HelperLinesRenderer = ({ horizontal, vertical }: HelperLinesProps) => {
     const { width, height, transform } = useStore(storeSelector);

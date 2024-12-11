@@ -3,7 +3,7 @@ import { Panel, useNodes } from '@xyflow/react';
 import cls from 'classnames';
 import { Button, CircularProgress } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { basicNodeConfigs } from '../../constant';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 import useInteractions from '../../hooks/useInteractions';
 import './style.less';
 
