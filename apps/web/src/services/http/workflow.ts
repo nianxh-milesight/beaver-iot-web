@@ -99,7 +99,7 @@ export interface WorkflowAPISchema extends APISchema {
 
     /** Get workflow log list */
     getLogList: {
-        request: {
+        request: void | {
             // TODO: use workflow log status enum
             status?: string;
         };
@@ -110,7 +110,7 @@ export interface WorkflowAPISchema extends APISchema {
             start_time: number;
             /** Running status */
             status: string;
-        };
+        }[];
     };
 
     /** Get workflow log detail */
@@ -185,7 +185,8 @@ export interface WorkflowAPISchema extends APISchema {
     /** Run workflow */
     runFlow: {
         request: {
-            id: ApiKey;
+            // TODO: use workflow data type
+            dsl: any;
         };
         response: {
             // TODO: use workflow log status enum
@@ -194,7 +195,7 @@ export interface WorkflowAPISchema extends APISchema {
                 node_id: ApiKey;
                 node_name: string;
                 status: string;
-                const: number;
+                cost: number;
                 input: Record<string, any>;
                 output: Record<string, any>;
             }[];

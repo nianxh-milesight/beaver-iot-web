@@ -117,13 +117,16 @@ const WorkflowEditor = () => {
 
     // ---------- Design Mode Change ----------
     const [designMode, setDesignMode] = useState<DesignMode>('canvas');
-    const handleDesignModeChange = useCallback((mode: DesignMode) => {
-        const data = toObject();
+    const handleDesignModeChange = useCallback(
+        (mode: DesignMode) => {
+            const data = toObject();
 
-        // TODO: check the workflow json data is valid
-        console.log('workflow data', data);
-        setDesignMode(mode);
-    }, []);
+            // TODO: check the workflow json data is valid
+            console.log('workflow data', data);
+            setDesignMode(mode);
+        },
+        [toObject],
+    );
 
     // ---------- Save Workflow ----------
     const handleSave = () => {
@@ -181,6 +184,7 @@ const WorkflowEditor = () => {
                             horizontal={helperLineHorizontal}
                             vertical={helperLineVertical}
                         />
+                        <LogPanel />
                         <ConfigPanel />
                         <EntryPanel loading={!!wid || loading} />
                     </ReactFlow>
