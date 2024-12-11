@@ -128,12 +128,24 @@ const Workflow = () => {
             </Stack>
         );
     }, [getIntlText, handleDeleteConfirm, selectedIds]);
-    const handlerImportModal = (isOpen: boolean, param?: ImportFormDataProps) => {
-        if (param) {
-            // TODO: Pass the DSL to the workflow.
-        }
-        setImportModal(isOpen);
-    };
+    const handlerImportModal = useCallback(
+        (isOpen: boolean, param?: ImportFormDataProps) => {
+            if (param) {
+                // TODO: Pass the DSL to the workflow.
+                // valid method to be add
+                const valid = true;
+                if (valid) {
+                    navigate('/workflow/editor', {
+                        state: {
+                            file: param?.file?.[0] ?? null,
+                        },
+                    });
+                }
+            }
+            setImportModal(isOpen);
+        },
+        [navigate],
+    );
     const handlerEditModal = (isAdd: boolean, isOpen: boolean, row?: EditFormDataProps): void => {
         const newEditOption: EditModalOption = {
             isAdd,
@@ -149,7 +161,7 @@ const Workflow = () => {
     };
     const submitEditModal = async (data: EditFormDataProps) => {
         const { isAdd } = editOption;
-        // const [error, res] = await awaitWrap(isAdd ? WorkflowAPI.addWorkflow(data) : WorkflowAPI.updateWorkflow(data));
+        // const [error, res] = await awaitWrap(WorkflowAPI.updateWorkflow(data));
         // if (isRequestSuccess(res)) {
         handlerEditModal(false, false);
         if (isAdd) {
