@@ -36,12 +36,12 @@ const ImportModal: React.FC<Props> = ({ visible, onCancel, onUpload, ...props })
 
     return (
         <Modal
+            size="lg"
             visible={visible}
             title={getIntlText('workflow.button.label_import_from_dsl')}
             className={cls({ loading: formState.isSubmitting })}
             onOk={handleSubmit(onSubmit)}
             onCancel={handleCancel}
-            sx={{ '& .MuiDialog-paper': { width: 600 } }}
             {...props}
         >
             {formItems.map(props => (
