@@ -1,5 +1,6 @@
 import { CSSProperties, useEffect, useRef } from 'react';
 import { ReactFlowState, useStore } from '@xyflow/react';
+import { useTheme } from '@milesight/shared/src/hooks';
 
 export * from './utils';
 
@@ -27,6 +28,8 @@ export type HelperLinesProps = {
  */
 const HelperLinesRenderer = ({ horizontal, vertical }: HelperLinesProps) => {
     const { width, height, transform } = useStore(storeSelector);
+    const { purple } = useTheme();
+    const lineColor = purple[500];
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -44,7 +47,7 @@ const HelperLinesRenderer = ({ horizontal, vertical }: HelperLinesProps) => {
 
         ctx.scale(dpi, dpi);
         ctx.clearRect(0, 0, width, height);
-        ctx.strokeStyle = '#0041d0';
+        ctx.strokeStyle = lineColor;
 
         if (typeof vertical === 'number') {
             ctx.moveTo(vertical * transform[2] + transform[0], 0);
@@ -57,7 +60,7 @@ const HelperLinesRenderer = ({ horizontal, vertical }: HelperLinesProps) => {
             ctx.lineTo(width, horizontal * transform[2] + transform[1]);
             ctx.stroke();
         }
-    }, [width, height, transform, horizontal, vertical]);
+    }, [width, height, transform, lineColor, horizontal, vertical]);
 
     return <canvas ref={canvasRef} className="react-flow__canvas" style={canvasStyle} />;
 };
