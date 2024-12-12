@@ -2,11 +2,7 @@ import { useCallback } from 'react';
 import {
     getIncomers,
     getOutgoers,
-    applyNodeChanges,
-    applyEdgeChanges,
     useReactFlow,
-    type OnNodesChange,
-    type OnEdgesChange,
     type OnConnect,
     type ReactFlowProps,
 } from '@xyflow/react';
@@ -19,7 +15,7 @@ import {
     DEFAULT_NODE_WIDTH,
     DEFAULT_NODE_HEIGHT,
     EDGE_TYPE_ADDABLE,
-} from '../constant';
+} from '../constants';
 import useWorkflow from './useWorkflow';
 
 type RFProps = ReactFlowProps<WorkflowNode, WorkflowEdge>;
@@ -71,20 +67,6 @@ const useInteractions = () => {
     } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const { checkNestedParallelLimit } = useWorkflow();
     const { width: bodyWidth, height: bodyHeight } = useSize(document.querySelector('body')) || {};
-
-    const handleNodesChange = useCallback<OnNodesChange<WorkflowNode>>(
-        changes => {
-            setNodes(nds => applyNodeChanges(changes, nds));
-        },
-        [setNodes],
-    );
-
-    const handleEdgesChange = useCallback<OnEdgesChange<WorkflowEdge>>(
-        changes => {
-            setEdges(eds => applyEdgeChanges(changes, eds));
-        },
-        [setEdges],
-    );
 
     // Handle nodes connect
     const handleConnect = useCallback<OnConnect>(
@@ -294,8 +276,6 @@ const useInteractions = () => {
 
     return {
         addNode,
-        handleNodesChange,
-        handleEdgesChange,
         handleConnect,
         handleBeforeDelete,
         handleEdgeMouseEnter,

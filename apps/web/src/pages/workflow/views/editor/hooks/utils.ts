@@ -1,6 +1,6 @@
 import { isEqual, groupBy } from 'lodash-es';
 import { getIncomers, getOutgoers, getConnectedEdges } from '@xyflow/react';
-import { basicNodeConfigs } from '../constant';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 
 type ParallelInfoItem = {
     parallelNodeId: ApiKey;
@@ -110,13 +110,13 @@ export const getParallelInfo = (
                 const sourceEdgesGroup = groupBy(outgoerConnectedEdges, 'sourceHandle');
                 const incomers = getIncomers(outgoer, nodes, edges);
 
+                // Parallel nodes are not allowed as multiple target nodes
                 if (outgoers.length > 1 && incomers.length > 1) hasAbnormalEdges = true;
 
                 Object.keys(sourceEdgesGroup).forEach(sourceHandle => {
                     nextHandles.push({ node: outgoer, handle: sourceHandle });
                 });
-                if (!outgoerConnectedEdges.length)
-                    nextHandles.push({ node: outgoer, handle: 'source' });
+                if (!outgoerConnectedEdges.length) nextHandles.push({ node: outgoer });
 
                 const outgoerKey = outgoer.id;
                 if (!nodeEdgesSet[outgoerKey]) nodeEdgesSet[outgoerKey] = new Set<string>();

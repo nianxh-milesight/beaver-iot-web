@@ -5,7 +5,7 @@ import { useI18n } from '@milesight/shared/src/hooks';
 import { checkRequired } from '@milesight/shared/src/utils/validators';
 
 /**
- * 表单数据类型
+ * Form Item Props
  */
 export type CommonFormDataProps = Record<string, any>;
 

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { Position, type NodeProps } from '@xyflow/react';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { basicNodeConfigs } from '../constant';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 import { Handle, IfElseNode, NodeContainer } from '../components';
 
 /**
- * 生成所有节点类型
+ * Get Node Types
  */
 const useNodeTypes = () => {
     const { getIntlText } = useI18n();

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useReactFlow, getOutgoers, type IsValidConnection } from '@xyflow/react';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
-import { PARALLEL_DEPTH_LIMIT } from '../constant';
+import { PARALLEL_DEPTH_LIMIT } from '../constants';
 import { getParallelInfo } from './utils';
 
 const useWorkflow = () => {

@@ -7,12 +7,15 @@ import {
     SelectionMode,
     useNodesState,
     useEdgesState,
+    useReactFlow,
     ReactFlowProvider,
     type NodeChange,
 } from '@xyflow/react';
-import { useTheme } from '@milesight/shared/src/hooks';
+import { Button } from '@mui/material';
+import { useI18n, useTheme } from '@milesight/shared/src/hooks';
+import { CheckIcon } from '@milesight/shared/src/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
-import { MIN_ZOOM, MAX_ZOOM } from './constant';
+import { MIN_ZOOM, MAX_ZOOM } from './constants';
 import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
 import {
     Topbar,
@@ -22,6 +25,9 @@ import {
     HelperLines,
     getHelperLines,
     EntryPanel,
+    LogPanel,
+    TestButton,
+    type DesignMode,
 } from './components';
 import demoData from './demo-data.json';
 
@@ -37,7 +43,9 @@ const edgeTypes: Record<WorkflowEdgeType, React.FC<any>> = {
  */
 const WorkflowEditor = () => {
     const { grey } = useTheme();
+    const { getIntlText } = useI18n();
     const nodeTypes = useNodeTypes();
+    const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const { isValidConnection } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
         useInteractions();
@@ -47,7 +55,11 @@ const WorkflowEditor = () => {
     // ---------- Fetch Data ----------
     const [searchParams] = useSearchParams();
     const wid = searchParams.get('wid');
-    const { loading } = useRequest(
+    const {
+        loading,
+        data: flowData,
+        run: getFlowDesign,
+    } = useRequest(
         async () => {
             if (!wid) return;
             // TODO: Call workflow detail API
@@ -62,6 +74,8 @@ const WorkflowEditor = () => {
             });
             setNodes(demoData.nodes as WorkflowNode[]);
             setEdges(demoData.edges as WorkflowEdge[]);
+
+            return { id: 'xxx', name: 'Workflow Name', remark: 'Workflow Remark', enabled: false };
         },
         {
             debounceWait: 300,
@@ -101,9 +115,45 @@ const WorkflowEditor = () => {
         [nodes, onNodesChange],
     );
 
+    // ---------- Design Mode Change ----------
+    const [designMode, setDesignMode] = useState<DesignMode>('canvas');
+    const handleDesignModeChange = useCallback(
+        (mode: DesignMode) => {
+            const data = toObject();
+
+            // TODO: check the workflow json data is valid
+            console.log('workflow data', data);
+            setDesignMode(mode);
+        },
+        [toObject],
+    );
+
+    // ---------- Save Workflow ----------
+    const handleSave = () => {
+        const data = toObject();
+
+        // TODO: check the workflow json is valid
+        console.log('workflow data', data);
+    };
+
     return (
         <div className="ms-main">
-            <Topbar />
+            <Topbar
+                data={flowData}
+                mode={designMode}
+                onDesignModeChange={handleDesignModeChange}
+                rightSlot={[
+                    <TestButton key="test-button" />,
+                    <Button
+                        key="save-button"
+                        variant="contained"
+                        startIcon={<CheckIcon />}
+                        onClick={handleSave}
+                    >
+                        {getIntlText('common.button.save')}
+                    </Button>,
+                ]}
+            />
             <div className="ms-view ms-view-wf_editor">
                 <div className="ms-view__inner">
                     <ReactFlow<WorkflowNode, WorkflowEdge>
@@ -134,6 +184,7 @@ const WorkflowEditor = () => {
                             horizontal={helperLineHorizontal}
                             vertical={helperLineVertical}
                         />
+                        <LogPanel />
                         <ConfigPanel />
                         <EntryPanel loading={!!wid || loading} />
                     </ReactFlow>

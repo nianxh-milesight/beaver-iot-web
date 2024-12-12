@@ -13,7 +13,7 @@ import NodeMenu from '../node-menu';
 import './style.less';
 
 /**
- * 自定义连线组件
+ * AddableEdge
  */
 const AddableEdge = ({
     id,

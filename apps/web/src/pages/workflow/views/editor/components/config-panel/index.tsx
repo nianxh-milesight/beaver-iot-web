@@ -8,22 +8,22 @@ import {
     type UseOnSelectionChangeOptions,
 } from '@xyflow/react';
 import cls from 'classnames';
-import { Paper, Stack, IconButton } from '@mui/material';
+import { Stack, IconButton } from '@mui/material';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 // import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon } from '@milesight/shared/src/components';
-import { basicNodeConfigs } from '../../constant';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 import { useCommonFormItems, type CommonFormDataProps } from './hooks';
 import './style.less';
 
 /**
- * 配置面板组件
+ * Config Panel
  */
 const ConfigPanel = () => {
     const { getIntlText } = useI18n();
 
-    // ---------- 节点相关逻辑处理 ----------
+    // ---------- Handle Node-related logic ----------
     const nodes = useNodes();
     const { updateNode } = useReactFlow();
     const selectedNode = useMemo(() => {
@@ -42,7 +42,7 @@ const ConfigPanel = () => {
         return basicNodeConfigs[selectedNode.type as WorkflowNodeType];
     }, [selectedNode]);
 
-    // ---------- 表单相关逻辑处理 ----------
+    // ---------- Handle Form-related logic ----------
     const { control, formState, handleSubmit, reset } = useForm<CommonFormDataProps>();
     const commonFormItems = useCommonFormItems();
 
@@ -50,7 +50,7 @@ const ConfigPanel = () => {
         <Panel
             position="top-right"
             className={cls('ms-workflow-panel-config-root', {
-                hidden: !nodeConfig,
+                hidden: !selectedNode,
             })}
         >
             {nodeConfig?.labelIntlKey && (

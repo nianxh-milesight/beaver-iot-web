@@ -1,16 +1,16 @@
 import React from 'react';
 import { Position, type Node, type NodeProps } from '@xyflow/react';
 import { useI18n } from '@milesight/shared/src/hooks';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 import Handle from '../handle';
 import NodeContainer from '../node-container';
-import { basicNodeConfigs } from '../../constant';
 
 export type IfElseNode = Node<IfElseNodeDataType, 'ifelse'>;
 
 const nodeConfig = basicNodeConfigs.ifelse;
 
 /**
- * 输入节点
+ * IFELSE Node
  */
 const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
     const { getIntlText } = useI18n();

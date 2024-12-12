@@ -13,18 +13,18 @@ import './style.less';
 
 export interface ControlsProps {
     /**
-     * 最小缩放比例
+     * Minimum zoom
      */
     minZoom?: number;
 
     /**
-     * 最大缩放比例
+     * Maximum zoom
      */
     maxZoom?: number;
 }
 
 /**
- * 工作流编辑器工具栏
+ * Workflow Editor Controls
  */
 const Controls: React.FC<ControlsProps> = ({ minZoom, maxZoom }) => {
     const nodes = useNodes();
