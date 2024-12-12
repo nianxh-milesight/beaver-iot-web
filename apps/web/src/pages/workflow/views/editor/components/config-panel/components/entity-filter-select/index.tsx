@@ -45,6 +45,7 @@ const entityTypes: EntityType[] = ['PROPERTY', 'EVENT', 'SERVICE'];
 const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
     required,
     disabled,
+    multiple = true,
     error,
     helperText,
     typeSelectProps,
@@ -55,8 +56,9 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
     const [innerValue, setInnerValue] = useControllableValue<EntityFilterSelectValueType[]>(props, {
         defaultValue: [DEFAULT_EMPTY_VALUE],
     });
-    const { list, remove, getKey, insert, replace } =
-        useDynamicList<EntityFilterSelectValueType>(innerValue);
+    const { list, remove, getKey, insert, replace } = useDynamicList<EntityFilterSelectValueType>(
+        innerValue || [DEFAULT_EMPTY_VALUE],
+    );
 
     useLayoutEffect(() => {
         setInnerValue?.(list);
@@ -113,19 +115,21 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                     )}
                 </div>
             ))}
-            <Button
-                fullWidth
-                variant="outlined"
-                className="ms-entity-filter-select-add-btn"
-                startIcon={<AddIcon />}
-                disabled={list.length >= MAX_VALUE_LENGTH}
-                onClick={() => {
-                    if (list.length >= MAX_VALUE_LENGTH) return;
-                    insert(list.length, DEFAULT_EMPTY_VALUE);
-                }}
-            >
-                {getIntlText('common.label.add')}
-            </Button>
+            {multiple && (
+                <Button
+                    fullWidth
+                    variant="outlined"
+                    className="ms-entity-filter-select-add-btn"
+                    startIcon={<AddIcon />}
+                    disabled={list.length >= MAX_VALUE_LENGTH}
+                    onClick={() => {
+                        if (list.length >= MAX_VALUE_LENGTH) return;
+                        insert(list.length, DEFAULT_EMPTY_VALUE);
+                    }}
+                >
+                    {getIntlText('common.label.add')}
+                </Button>
+            )}
         </div>
     );
 };
