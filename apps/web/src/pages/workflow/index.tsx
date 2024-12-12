@@ -11,17 +11,26 @@ import {
     toast,
 } from '@milesight/shared/src/components';
 import { Breadcrumbs, TablePro, useConfirm } from '@/components';
-import { deviceAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
+import {
+    deviceAPI,
+    awaitWrap,
+    getResponseData,
+    isRequestSuccess,
+    workflowAPI,
+} from '@/services/http';
 import { type FormDataProps as EditFormDataProps } from '@/pages/workflow/components/edit-modal/hook/useWorkflowFormItems';
 import { type FormDataProps as ImportFormDataProps } from '@/pages/workflow/components/import-modal/hook/useImportFormItems';
 import { EditModal, ImportModal } from '@/pages/workflow/components';
 import { useColumns, type UseColumnsProps, type TableRowDataType } from './hooks';
 import './style.less';
 
+type EditRowData = EditFormDataProps & {
+    id: ApiKey;
+};
 type EditModalOption = {
     isAdd: boolean;
     openModal: boolean;
-    dataSource?: EditFormDataProps;
+    dataSource?: EditRowData;
 };
 
 const Workflow = () => {
@@ -146,32 +155,45 @@ const Workflow = () => {
         },
         [navigate],
     );
-    const handlerEditModal = (isAdd: boolean, isOpen: boolean, row?: EditFormDataProps): void => {
+    const handlerEditModal = (isAdd: boolean, isOpen: boolean, row?: EditRowData): void => {
         const newEditOption: EditModalOption = {
             isAdd,
             openModal: isOpen,
         };
-        if (!isAdd && isOpen) {
+        if (row && isOpen) {
             newEditOption.dataSource = {
-                name: row?.name ?? '',
+                id: row.id,
+                name: row.name,
                 remark: row?.remark ?? '',
             };
         }
         SetEditOption(newEditOption);
     };
     const submitEditModal = async (data: EditFormDataProps) => {
-        const { isAdd } = editOption;
-        // const [error, res] = await awaitWrap(WorkflowAPI.updateWorkflow(data));
-        // if (isRequestSuccess(res)) {
-        handlerEditModal(false, false);
+        const { isAdd, dataSource } = editOption;
         if (isAdd) {
             navigate('/workflow/editor', { state: data });
         } else {
-            // toast.success(getIntlText('common.message.operation_success'));
+            let errorMsg = '';
+            if (dataSource) {
+                const [error, res] = await awaitWrap(
+                    workflowAPI.updateFlow({
+                        id: dataSource.id,
+                        name: data.name,
+                        remark: data?.remark ?? '',
+                    }),
+                );
+                if (isRequestSuccess(res)) {
+                    handlerEditModal(false, false);
+                    toast.success(getIntlText('common.message.operation_success'));
+                    return;
+                }
+                errorMsg = error?.message ?? getIntlText('common.message.something_wrong_title');
+            }
+            if (errorMsg) {
+                toast.error(errorMsg);
+            }
         }
-        // } else {
-        //     toast.error(error);
-        // }
     };
     const handleTableBtnClick: UseColumnsProps<TableRowDataType>['onButtonClick'] = useCallback(
         (type, record) => {
