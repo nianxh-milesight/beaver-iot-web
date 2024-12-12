@@ -13,6 +13,7 @@ import {
 import { Breadcrumbs, TablePro, useConfirm } from '@/components';
 import { deviceAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { useColumns, type UseColumnsProps, type TableRowDataType } from './hooks';
+import { LogModal } from './components';
 import './style.less';
 
 const Workflow = () => {
@@ -23,6 +24,7 @@ const Workflow = () => {
     const [keyword, setKeyword] = useState<string>();
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [selectedIds, setSelectedIds] = useState<readonly ApiKey[]>([]);
+    const [logModalVisible, setLogModalVisible] = useState(false);
     const {
         data: workflowList,
         loading,
@@ -136,6 +138,7 @@ const Workflow = () => {
     );
     const columns = useColumns<TableRowDataType>({ onButtonClick: handleTableBtnClick });
 
+    const handleCloseLogModal = useCallback(() => setLogModalVisible(false), []);
     return (
         <div className="ms-main">
             <Breadcrumbs />
@@ -161,6 +164,9 @@ const Workflow = () => {
                     />
                 </div>
             </div>
+            {logModalVisible && (
+                <LogModal visible={logModalVisible} onCancel={handleCloseLogModal} />
+            )}
         </div>
     );
 };
