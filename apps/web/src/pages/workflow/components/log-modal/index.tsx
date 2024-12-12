@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useVirtualList } from 'ahooks';
 import { Modal, type ModalProps } from '@milesight/shared/src/components';
 import { useI18n } from '@milesight/shared/src/hooks';
+import { Tooltip } from '@/components';
 import { LogItem } from './components';
+import ActionLog from '../action-log';
 import type { LogItemProps } from './types';
 import './style.less';
 
@@ -68,8 +70,12 @@ export default React.memo(({ visible, ...props }: IProps) => {
                     </div>
                 </div>
                 <div className="ms-log-right-bar">
-                    <div className="ms-log-title">{activeItem?.title || ''}</div>
-                    <div className="ms-log-detail">xxxx</div>
+                    <div className="ms-log-title">
+                        <Tooltip title={activeItem?.title || ''} autoEllipsis />
+                    </div>
+                    <div className="ms-log-detail">
+                        <ActionLog />
+                    </div>
                 </div>
             </div>
         </Modal>

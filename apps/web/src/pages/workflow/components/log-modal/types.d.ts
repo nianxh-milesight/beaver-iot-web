@@ -1,8 +1,20 @@
-export type LOG_STATUS = 'success' | 'failed';
+import type { LogStatus } from '../../config';
 
 export interface LogItemProps {
+    /**
+     * Key for Component render
+     */
     key: string | number;
-    status: LOG_STATUS;
+    /**
+     * Node status
+     */
+    status: LogStatus;
+    /**
+     * Title
+     */
     title: string;
+    /**
+     * Timestamp
+     */
     timestamp: number;
 }

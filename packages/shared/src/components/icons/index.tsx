@@ -89,6 +89,8 @@ export {
     History as HistoryIcon,
     UploadFile as UploadFileIcon,
     AttachFile as AttachFileIcon,
+    ArrowForwardIos as ArrowForwardIosIcon,
+    ArrowRight as ArrowRightIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';
