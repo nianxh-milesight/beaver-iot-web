@@ -8,6 +8,7 @@ import {
     type AutocompleteRenderInputParams,
 } from '@mui/material';
 import { useI18n, useVirtualList } from '@milesight/shared/src/hooks';
+import { KeyboardArrowDownIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
 import {
     entityAPI,
@@ -185,6 +186,7 @@ const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterMode
                     {...params}
                     required={required}
                     label={label || getIntlText('common.label.entity')}
+                    // slotProps={{ input: { readOnly: true } }}
                 />
             );
         },
@@ -222,7 +224,12 @@ const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterMode
             isOptionEqualToValue={(option, currentVal) => option.value === currentVal.value}
             slotProps={{
                 listbox: { component: Listbox },
+                popper: {
+                    sx: { minWidth: 300 },
+                    placement: 'bottom-end',
+                },
             }}
+            popupIcon={<KeyboardArrowDownIcon />}
             onInputChange={(_, keyword, reason) => {
                 if (reason !== 'input') {
                     getEntityList();

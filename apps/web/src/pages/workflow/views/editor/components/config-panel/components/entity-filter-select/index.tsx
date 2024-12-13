@@ -10,7 +10,11 @@ import {
 } from '@mui/material';
 import { useDynamicList, useControllableValue } from 'ahooks';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { DeleteOutlineIcon, AddIcon } from '@milesight/shared/src/components';
+import {
+    DeleteOutlineIcon,
+    AddIcon,
+    KeyboardArrowDownIcon,
+} from '@milesight/shared/src/components';
 import EntitySelect, { type EntitySelectProps, type EntitySelectValueType } from '../entity-select';
 import './style.less';
 
@@ -76,6 +80,7 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                             notched
                             labelId="entity-filter-select-type-label"
                             label={typeSelectProps?.label || getIntlText('common.label.type')}
+                            IconComponent={KeyboardArrowDownIcon}
                             value={item.type || ''}
                             onChange={e =>
                                 replace(index, { ...item, type: e.target.value as EntityType })
@@ -98,7 +103,7 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                         }}
                         onChange={(_, data) => {
                             if (!data) {
-                                replace(index, DEFAULT_EMPTY_VALUE);
+                                replace(index, { ...item, ...DEFAULT_EMPTY_VALUE });
                                 return;
                             }
 
