@@ -13,9 +13,8 @@ import {
 } from '@milesight/shared/src/components';
 import { Breadcrumbs, TablePro, useConfirm } from '@/components';
 import { awaitWrap, isRequestSuccess, workflowAPI } from '@/services/http';
-import { type FormDataProps as EditFormDataProps } from '@/pages/workflow/components/edit-modal/hook/useWorkflowFormItems';
 import { type FormDataProps as ImportFormDataProps } from '@/pages/workflow/components/import-modal/hook/useImportFormItems';
-import { EditModal, ImportModal } from '@/pages/workflow/components';
+import { ImportModal } from '@/pages/workflow/components';
 import { useColumns, type UseColumnsProps, type TableRowDataType } from './hooks';
 import './style.less';
 
@@ -25,7 +24,6 @@ const Workflow = () => {
 
     // ---------- 列表数据相关逻辑 ----------
     const [keyword, setKeyword] = useState<string>();
-    const [addModal, setAddModal] = useState<boolean>(false);
     const [importModal, setImportModal] = useState<boolean>(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [selectedIds, setSelectedIds] = useState<readonly ApiKey[]>([]);
@@ -87,7 +85,9 @@ const Workflow = () => {
         },
         [confirm, getIntlText, getWorkflowList, selectedIds],
     );
-
+    const handlerAddModal = () => {
+        navigate('/workflow/editor');
+    };
     // ---------- Table 渲染相关 ----------
     const toolbarRender = useMemo(() => {
         return (
@@ -96,7 +96,7 @@ const Workflow = () => {
                     variant="contained"
                     sx={{ height: 36, textTransform: 'none' }}
                     startIcon={<AddIcon />}
-                    onClick={() => setAddModal(true)}
+                    onClick={handlerAddModal}
                 >
                     {getIntlText('common.label.add')}
                 </Button>
@@ -139,9 +139,7 @@ const Workflow = () => {
         },
         [navigate],
     );
-    const handlerAddModal = async (data: EditFormDataProps) => {
-        navigate('/workflow/editor', { state: data });
-    };
+
     const handleTableBtnClick: UseColumnsProps<TableRowDataType>['onButtonClick'] = useCallback(
         (type, record) => {
             // console.log(type, record);
@@ -198,11 +196,6 @@ const Workflow = () => {
                     />
                 </div>
             </div>
-            <EditModal
-                visible={addModal}
-                onCancel={() => setAddModal(false)}
-                onConfirm={handlerAddModal}
-            />
             <ImportModal
                 visible={importModal}
                 onUpload={param => handlerImportModal(false, param)}
