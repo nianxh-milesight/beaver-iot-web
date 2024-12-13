@@ -55,7 +55,7 @@ export interface WorkflowAPISchema extends APISchema {
     /** Delete a workflow */
     deleteFlow: {
         request: {
-            id: ApiKey;
+            id: ApiKey[];
         };
         response: {
             /** ID */
