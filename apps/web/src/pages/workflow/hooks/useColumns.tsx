@@ -3,13 +3,11 @@ import { Stack, IconButton } from '@mui/material';
 import { useI18n, useTime } from '@milesight/shared/src/hooks';
 import { ListAltIcon, DeleteOutlineIcon, EditIcon } from '@milesight/shared/src/components';
 import { Tooltip, type ColumnType } from '@/components';
-import { type DeviceAPISchema } from '@/services/http';
+import { type WorkflowAPISchema } from '@/services/http';
 
 type OperationType = 'detail' | 'delete' | 'edit';
 
-export type TableRowDataType = ObjectToCamelCase<
-    DeviceAPISchema['getList']['response']['content'][0]
->;
+export type TableRowDataType = ObjectToCamelCase<WorkflowAPISchema['getList']['response']>;
 
 export interface UseColumnsProps<T> {
     /**
@@ -98,7 +96,7 @@ const useColumns = <T extends TableRowDataType>({ onButtonClick }: UseColumnsPro
                             <Tooltip title={getIntlText('common.label.delete')}>
                                 <IconButton
                                     color="error"
-                                    disabled={!row.deletable}
+                                    disabled={row.enabled}
                                     sx={{
                                         width: 30,
                                         height: 30,

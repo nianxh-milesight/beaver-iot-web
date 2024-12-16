@@ -35,5 +35,8 @@
     "workflow.editor.log_title_run": "Run Log",
     "workflow.editor.log_panel_title_test_run": "Test Run",
     "workflow.editor.log_panel_title_verification_result": "Verification Result",
-    "workflow.editor.save_warning_message": "The current workflow has been referenced, and saving it will update the workflow information synchronously. Are you sure you want to save it"
+    "workflow.editor.save_warning_message": "The current workflow has been referenced, and saving it will update the workflow information synchronously. Are you sure you want to save it",
+    "workflow.message.delete_tip": "Are you sure you want to delete the workflow? It cannot be restore after deletion.",
+    "workflow.label.deletion": "Deletion",
+    "workflow.editor.form_param_select_placeholder": "Enter or reference a variable"
 }

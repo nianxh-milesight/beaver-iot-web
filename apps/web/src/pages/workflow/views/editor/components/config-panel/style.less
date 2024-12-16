@@ -11,6 +11,8 @@
 }
 
 .@{prefix}-workflow-panel-config {
+    display: flex;
+    flex-direction: column;
     height: 100%;
     background-color: var(--component-background);
     border-radius: @border-radius-sm;
@@ -41,6 +43,18 @@
     }
 
     &-body {
+        flex: 1;
         padding: 0 @padding-xl @padding-lg;
+        overflow: auto;
+
+        .@{prefix}-common-form-items {
+            .@{mui-prefix}FormControl-root:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        .@{prefix}-divider {
+            margin: @margin-xl 0;
+        }
     }
 }

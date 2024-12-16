@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useReactFlow, getOutgoers, type IsValidConnection } from '@xyflow/react';
+import { useReactFlow, getIncomers, getOutgoers, type IsValidConnection } from '@xyflow/react';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
 import { PARALLEL_DEPTH_LIMIT } from '../constants';
@@ -59,9 +59,42 @@ const useWorkflow = () => {
         [getIntlText],
     );
 
+    // Get the only selected node that is not dragging
+    const getSelectedNode = useCallback(() => {
+        const nodes = getNodes();
+        const selectedNodes = nodes.filter(item => item.selected);
+
+        const node = selectedNodes?.[0];
+
+        if (selectedNodes.length > 1 || !node || !node.selected || node.dragging) {
+            return;
+        }
+
+        return node;
+    }, [getNodes]);
+
+    const getIncomeNodes = useCallback(
+        (currentNode?: WorkflowNode) => {
+            currentNode = currentNode || getSelectedNode();
+            const getAllIncomers = (node: WorkflowNode, result: WorkflowNode[] = []) => {
+                const incomers = getIncomers(node, getNodes(), getEdges());
+
+                result.push(...incomers);
+                incomers.forEach(item => getAllIncomers(item, result));
+
+                return result;
+            };
+
+            return getAllIncomers(currentNode!);
+        },
+        [getEdges, getNodes, getSelectedNode],
+    );
+
     return {
         isValidConnection,
         checkNestedParallelLimit,
+        getSelectedNode,
+        getIncomeNodes,
     };
 };
 

@@ -160,5 +160,6 @@
     "common.label.back": "Back",
     "common.label.create": "Create",
     "common.label.test": "Test",
-    "common.label.run": "Run"
+    "common.label.run": "Run",
+    "common.label.target": "Target"
 }
