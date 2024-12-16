@@ -3,6 +3,8 @@
  *
  * Note: use in IfelseNode
  */
-const ConditionsInput = () => {};
+const ConditionsInput = () => {
+    return <>Conditions Input</>;
+};
 
 export default ConditionsInput;

@@ -37,3 +37,13 @@ export const NODE_SPACING_X = 50;
  * Node Y-axis spacing
  */
 export const NODE_SPACING_Y = 50;
+
+/**
+ * Global parameter reference prefix
+ */
+export const PARAM_REFERENCE_PREFIX = '@';
+
+/**
+ * Global parameter reference key divider
+ */
+export const PARAM_REFERENCE_DIVIDER = '.';

@@ -1,5 +1,13 @@
-import { useCallback } from 'react';
-import { useReactFlow, getIncomers, getOutgoers, type IsValidConnection } from '@xyflow/react';
+import { useMemo, useCallback } from 'react';
+import {
+    useReactFlow,
+    useNodes,
+    useEdges,
+    getIncomers,
+    getOutgoers,
+    type IsValidConnection,
+} from '@xyflow/react';
+import { uniqBy } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
 import { PARALLEL_DEPTH_LIMIT } from '../constants';
@@ -7,7 +15,20 @@ import { getParallelInfo } from './utils';
 
 const useWorkflow = () => {
     const { getNodes, getEdges } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const nodes = useNodes<WorkflowNode>();
+    const edges = useEdges<WorkflowEdge>();
     const { getIntlText } = useI18n();
+
+    const selectedNode = useMemo(() => {
+        const selectedNodes = nodes.filter(item => item.selected);
+        const node = selectedNodes?.[0];
+
+        if (selectedNodes.length > 1 || !node || !node.selected || node.dragging) {
+            return;
+        }
+
+        return node;
+    }, [nodes]);
 
     // Check node connection cycle
     const isValidConnection = useCallback<IsValidConnection>(
@@ -61,7 +82,6 @@ const useWorkflow = () => {
 
     // Get the only selected node that is not dragging
     const getSelectedNode = useCallback(() => {
-        const nodes = getNodes();
         const selectedNodes = nodes.filter(item => item.selected);
 
         const node = selectedNodes?.[0];
@@ -71,26 +91,41 @@ const useWorkflow = () => {
         }
 
         return node;
-    }, [getNodes]);
+    }, [nodes]);
 
     const getIncomeNodes = useCallback(
         (currentNode?: WorkflowNode) => {
             currentNode = currentNode || getSelectedNode();
-            const getAllIncomers = (node: WorkflowNode, result: WorkflowNode[] = []) => {
-                const incomers = getIncomers(node, getNodes(), getEdges());
+            const getAllIncomers = (
+                node: WorkflowNode,
+                data: Record<ApiKey, WorkflowNode[]> = {},
+                depth = 1,
+            ) => {
+                if (!node) return [];
+                const incomers = getIncomers(node, nodes, edges);
 
-                result.push(...incomers);
-                incomers.forEach(item => getAllIncomers(item, result));
+                data[depth] = data[depth] || [];
+                data[depth].push(...incomers);
+                incomers.forEach(item => getAllIncomers(item, data, depth + 1));
 
-                return result;
+                const keys = Object.keys(data).sort((a, b) => +a - +b);
+                const result = keys.reduce((acc, key) => {
+                    acc.push(...data[key]);
+                    return acc;
+                }, [] as WorkflowNode[]);
+
+                return uniqBy(result, 'id');
             };
 
             return getAllIncomers(currentNode!);
         },
-        [getEdges, getNodes, getSelectedNode],
+        [nodes, edges, getSelectedNode],
     );
 
     return {
+        nodes,
+        edges,
+        selectedNode,
         isValidConnection,
         checkNestedParallelLimit,
         getSelectedNode,

@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { memo, useLayoutEffect } from 'react';
 import {
     Select,
     Button,
@@ -8,6 +8,7 @@ import {
     MenuItem,
     type SelectProps,
 } from '@mui/material';
+import { isEqual } from 'lodash-es';
 import { useDynamicList, useControllableValue } from 'ahooks';
 import { useI18n } from '@milesight/shared/src/hooks';
 import {
@@ -15,11 +16,12 @@ import {
     AddIcon,
     KeyboardArrowDownIcon,
 } from '@milesight/shared/src/components';
-import EntitySelect, { type EntitySelectProps, type EntitySelectValueType } from '../entity-select';
+import EntitySelect, { type EntitySelectProps } from '../entity-select';
 import './style.less';
 
-export type EntityFilterSelectValueType = EntitySelectValueType & {
-    type?: EntityType;
+export type EntityFilterSelectValueType = {
+    entityType?: EntityType;
+    entityKey?: ApiKey;
 };
 
 export interface EntityFilterSelectProps {
@@ -34,10 +36,10 @@ export interface EntityFilterSelectProps {
     entitySelectProps?: EntitySelectProps;
 }
 
-const DEFAULT_EMPTY_VALUE: EntityFilterSelectValueType = {
-    label: '',
-    value: '',
-};
+// const DEFAULT_EMPTY_VALUE: EntityFilterSelectValueType = {
+//     label: '',
+//     value: '',
+// };
 
 const MAX_VALUE_LENGTH = 10;
 
@@ -58,11 +60,16 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
 }) => {
     const { getIntlText } = useI18n();
     const [innerValue, setInnerValue] = useControllableValue<EntityFilterSelectValueType[]>(props, {
-        defaultValue: [DEFAULT_EMPTY_VALUE],
+        defaultValue: [],
     });
-    const { list, remove, getKey, insert, replace } = useDynamicList<EntityFilterSelectValueType>(
-        innerValue || [DEFAULT_EMPTY_VALUE],
-    );
+    const { list, remove, getKey, insert, replace, resetList } =
+        useDynamicList<EntityFilterSelectValueType>(innerValue || []);
+
+    useLayoutEffect(() => {
+        if (isEqual(innerValue, list)) return;
+        resetList(innerValue || []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [innerValue, resetList]);
 
     useLayoutEffect(() => {
         setInnerValue?.(list);
@@ -81,9 +88,12 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                             labelId="entity-filter-select-type-label"
                             label={typeSelectProps?.label || getIntlText('common.label.type')}
                             IconComponent={KeyboardArrowDownIcon}
-                            value={item.type || ''}
+                            value={item.entityType || ''}
                             onChange={e =>
-                                replace(index, { ...item, type: e.target.value as EntityType })
+                                replace(index, {
+                                    ...item,
+                                    entityType: e.target.value as EntityType,
+                                })
                             }
                         >
                             {entityTypes.map(type => (
@@ -97,19 +107,14 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                         label={entitySelectProps?.label || getIntlText('common.label.target')}
                         required={required}
                         disabled={disabled}
-                        value={item}
+                        value={item.entityKey}
                         filterModel={{
-                            type: item.type,
+                            type: item.entityType,
                         }}
-                        onChange={(_, data) => {
-                            if (!data) {
-                                replace(index, { ...item, ...DEFAULT_EMPTY_VALUE });
-                                return;
-                            }
-
+                        onChange={value => {
                             replace(index, {
                                 ...item,
-                                ...data,
+                                entityKey: value,
                             });
                         }}
                     />
@@ -129,7 +134,7 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                     disabled={list.length >= MAX_VALUE_LENGTH}
                     onClick={() => {
                         if (list.length >= MAX_VALUE_LENGTH) return;
-                        insert(list.length, DEFAULT_EMPTY_VALUE);
+                        insert(list.length, {});
                     }}
                 >
                     {getIntlText('common.label.add')}
@@ -139,4 +144,4 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
     );
 };
 
-export default EntityFilterSelect;
+export default memo(EntityFilterSelect);

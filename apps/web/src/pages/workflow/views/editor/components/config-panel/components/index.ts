@@ -1,5 +1,5 @@
 export { default as ConditionsInput } from './conditions-input';
-export { default as EntityAssignInput } from './entity-assign-input';
+export { default as EntityAssignSelect } from './entity-assign-select';
 export {
     default as EntitySelect,
     type EntitySelectProps,
@@ -14,3 +14,4 @@ export {
     default as EntityFilterSelect,
     type EntityFilterSelectValueType,
 } from './entity-filter-select';
+export { default as ParamAssignInput, type ParamAssignInputValueType } from './param-assign-input';

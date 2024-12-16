@@ -46,7 +46,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
             nodeType: node.type,
             outputs: [
                 {
-                    name: 'output11',
+                    name: 'output112123123123123123123123131231231',
                     type: 'string',
                     key: `${node.type}.${node.id}.1132e3123132`,
                 },
@@ -58,6 +58,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
             ],
         }));
 
+        // TODO: render Empty component when the options is empty
         return data.map(item => [
             <ListSubheader className="ms-param-select-option-groupname">
                 {item.nodeType}
@@ -65,9 +66,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
             item.outputs.map(output => (
                 <MenuItem className="ms-param-select-option" key={output.key} value={output.key}>
                     <div className="ms-param-select-item">
-                        <Tooltip autoEllipsis title={`${output.name} ${output.type}`}>
-                            <span className="name">{output.name}</span>
-                        </Tooltip>
+                        <Tooltip autoEllipsis className="name" title={output.name} />
                         <span className="type">{output.type}</span>
                     </div>
                 </MenuItem>
@@ -89,6 +88,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
                     labelId="param-select-label"
                     label={label || getIntlText('common.label.value')}
                     IconComponent={KeyboardArrowDownIcon}
+                    MenuProps={{ className: 'ms-param-select-menu' }}
                 >
                     {renderOptions()}
                 </Select>
