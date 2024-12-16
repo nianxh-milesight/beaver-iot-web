@@ -7,7 +7,7 @@ export interface EntityAPISchema extends APISchema {
             /** 搜索关键字 */
             keyword?: string;
             /** 实体类型 */
-            entity_type?: EntitySchema['type'];
+            entity_type?: EntitySchema['type'][];
             /** 实体值类型 */
             entity_value_type?: EntityValueDataType[];
             /** 实体属性（可读、可写、只读） */

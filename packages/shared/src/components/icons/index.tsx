@@ -89,6 +89,9 @@ export {
     History as HistoryIcon,
     UploadFile as UploadFileIcon,
     AttachFile as AttachFileIcon,
+    SettingsOutlined as SettingsOutlinedIcon,
+    KeyboardArrowUp as KeyboardArrowUpIcon,
+    KeyboardArrowDown as KeyboardArrowDownIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';
