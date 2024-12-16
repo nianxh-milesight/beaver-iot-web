@@ -1,0 +1,39 @@
+.ms-code-editor-content {
+    flex: 1;
+    overflow: hidden;
+
+    .cm-editor {
+        height: 100%;
+        outline: none;
+
+        .cm-gutters {
+            border: unset;
+            user-select: none;
+        }
+    }
+}
+
+.ms-editor {
+    &__lineNumbers {
+        &--hide {
+            .cm-lineNumbers,
+            .cm-foldGutter {
+                width: 0;
+            }
+        }
+    }
+
+    &__foldGutter {
+        &--hide {
+            .cm-foldGutter {
+                pointer-events: none;
+
+                .cm-gutterElement {
+                    span {
+                        visibility: hidden;
+                    }
+                }
+            }
+        }
+    }
+}
