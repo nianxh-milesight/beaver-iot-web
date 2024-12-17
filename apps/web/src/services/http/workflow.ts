@@ -119,14 +119,17 @@ export interface WorkflowAPISchema extends APISchema {
             id: ApiKey;
         };
         response: {
+            message_id: string;
             /** Node ID */
-            node_id: ApiKey;
-            /** Node Name */
-            node_name: string;
+            node_id: string;
+            /** Node's tag (not a custom name) */
+            node_label: string;
             /** Running status */
-            status: string;
+            status: 'SUCCESS' | 'ERROR';
             /** Cost Time */
-            cost: number;
+            time_cost: number;
+            /** Start Time */
+            start_time: number;
             // TODO
             input: Record<string, any>;
             // TODO

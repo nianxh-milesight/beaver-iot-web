@@ -8,6 +8,10 @@ import ActionLog from '../action-log';
 import type { LogItemProps } from './types';
 import './style.less';
 
+// TODO mock Data
+import traceData from './trace.json';
+import workflowData from './workflow.json';
+
 export type IProps = ModalProps;
 export default React.memo(({ visible, ...props }: IProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +78,11 @@ export default React.memo(({ visible, ...props }: IProps) => {
                         <Tooltip title={activeItem?.title || ''} autoEllipsis />
                     </div>
                     <div className="ms-log-detail">
-                        <ActionLog />
+                        <ActionLog
+                            // TODO mock Data
+                            traceData={traceData.traceInfo as any}
+                            workflowData={workflowData as any}
+                        />
                     </div>
                 </div>
             </div>

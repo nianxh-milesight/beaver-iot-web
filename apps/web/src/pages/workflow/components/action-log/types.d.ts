@@ -1,3 +1,5 @@
+import { type ReactFlowJsonObject } from '@xyflow/react';
+import { type WorkflowAPISchema } from '@/services/http';
 import type { LogStatus } from '../../config';
 
 /**
@@ -5,13 +7,13 @@ import type { LogStatus } from '../../config';
  */
 export interface AccordionLog {
     /**
-     * Key for Component render
-     */
-    key: string | number;
-    /**
      * Node Type
      */
     type: WorkflowNodeType;
+    /**
+     * Node Name
+     */
+    name: string;
     /**
      * Custom header render config
      */
@@ -21,13 +23,13 @@ export interface AccordionLog {
      */
     status: LogStatus;
     /**
-     * Input
+     * TODO Input
      */
-    input: string;
+    input: Record<string, any>;
     /**
-     * Output
+     * TODO Output
      */
-    output: string;
+    output: Record<string, any>;
     /**
      * Children
      */
@@ -51,3 +53,9 @@ export type CustomConfigItemType = {
      */
     iconBgColor?: string;
 };
+
+/**  Workflow Trace Type */
+export type WorkflowTraceType = WorkflowAPISchema['getLogDetail']['response'][number];
+
+/**  Workflow Data Type */
+export type WorkflowDataType = ReactFlowJsonObject<WorkflowNode, WorkflowEdge>;
