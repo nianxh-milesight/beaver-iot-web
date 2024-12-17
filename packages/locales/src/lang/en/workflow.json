@@ -57,5 +57,6 @@
     "workflow.label.entry_node_number_limit_tip": "工作流中必须且仅允许有 {1} 个入口节点",
     "workflow.node.config_panel_lable_arguments": "Arguments",
     "workflow.node.service_call_service_title": "Service Setting",
-    "workflow.node.service_call_Input_title": "Input Variables"
+    "workflow.node.service_call_Input_title": "Input Variables",
+    "workflow.message.import_dsl_error": "The DSL file contains errors. Please update the file and try again."
 }
