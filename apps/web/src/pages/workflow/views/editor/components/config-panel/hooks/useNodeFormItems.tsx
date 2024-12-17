@@ -4,15 +4,23 @@ import { TextField } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { checkRequired } from '@milesight/shared/src/utils/validators';
 import {
+    CodeEditor,
     ConditionsInput,
     EntityAssignSelect,
     EntityFilterSelect,
     EntitySelect,
     MarkdownEditor,
     ParamAssignInput,
-    ParamInputSelect,
+    ParamInput,
+    // ParamInputSelect,
     TimerInput,
 } from '../components';
+
+type NodeFormGroupType = {
+    groupName?: string;
+    helperText?: string;
+    children?: ControllerProps<NodeFormDataProps>[];
+};
 
 /**
  * Form Item Props
@@ -20,65 +28,239 @@ import {
 export type NodeFormDataProps = Record<string, any>;
 
 const useNodeFormItems = (node?: WorkflowNode) => {
-    const { getIntlText } = useI18n();
+    // const { getIntlText } = useI18n();
 
-    const formItems = useMemo(() => {
-        if (!node) return [];
-
-        const result: Partial<Record<WorkflowNodeType, ControllerProps<NodeFormDataProps>[]>> = {
+    const formConfigs = useMemo(() => {
+        const result: Partial<Record<WorkflowNodeType, NodeFormGroupType[]>> = {
             trigger: [
                 {
-                    name: 'debug',
-                    render({ field: { onChange, value }, fieldState: { error } }) {
-                        return <EntitySelect value={value} onChange={onChange} />;
-                    },
-                },
-                {
-                    name: 'debug2',
-                    render({ field: { onChange, value }, fieldState: { error } }) {
-                        return <EntityAssignSelect value={value} onChange={onChange} />;
-                    },
+                    // TODO: the name may come from api config
+                    groupName: 'Arguments',
+                    children: [
+                        {
+                            name: 'entityConfigs',
+                            render({ field: { onChange, value } }) {
+                                return <ParamInput value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
                 },
             ],
-            assigner: [],
-            select: [
+            timer: [
                 {
-                    name: 'entity',
-                    render({ field: { onChange, value }, fieldState: { error } }) {
-                        return <EntityFilterSelect value={value} onChange={onChange} />;
-                    },
+                    // TODO: the name may come from api config
+                    groupName: 'Timer Setting',
+                    children: [
+                        {
+                            name: 'timer',
+                            render({ field: { onChange, value } }) {
+                                return <TimerInput value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
                 },
             ],
             listener: [
                 {
-                    name: 'listener',
-                    render({ field: { onChange, value }, fieldState: { error } }) {
-                        return <EntityFilterSelect value={value} onChange={onChange} />;
-                    },
-                },
-            ],
-            code: [
-                {
-                    name: 'input_vars',
-                    render({ field: { onChange, value }, fieldState: { error } }) {
-                        return <ParamAssignInput value={value} onChange={onChange} />;
-                    },
+                    groupName: 'Entity Listening Setting',
+                    children: [
+                        {
+                            name: 'entities',
+                            render({ field: { onChange, value } }) {
+                                return <EntityFilterSelect value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
                 },
             ],
             ifelse: [
                 {
-                    name: 'condition',
-                    render({ field: { onChange, value }, fieldState: { error } }) {
-                        return <ConditionsInput />;
-                    },
+                    children: [
+                        {
+                            name: 'when',
+                            render({ field: { onChange, value } }) {
+                                return <ConditionsInput />;
+                            },
+                        },
+                    ],
+                },
+            ],
+            code: [
+                {
+                    groupName: 'Input Variables',
+                    children: [
+                        {
+                            name: 'input_vars',
+                            render({ field: { onChange, value } }) {
+                                return <ParamAssignInput value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
+                },
+                {
+                    children: [
+                        {
+                            name: 'code',
+                            render({ field: { onChange, value } }) {
+                                return <CodeEditor />;
+                            },
+                        },
+                    ],
+                },
+                {
+                    groupName: 'Output Variables',
+                    children: [
+                        {
+                            name: 'output_vars',
+                            render({ field: { onChange, value } }) {
+                                return <ParamInput showSwitch value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
+                },
+            ],
+            service: [
+                {
+                    groupName: 'Service Setting',
+                    children: [
+                        {
+                            name: 'service',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <EntitySelect
+                                        filterModel={{ type: 'SERVICE' }}
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                    ],
+                },
+                {
+                    groupName: 'Input Variables',
+                    helperText: 'Please select the service you want to call first.',
+                    children: [],
+                },
+            ],
+            assigner: [
+                {
+                    groupName: 'Assignment Setting',
+                    children: [
+                        {
+                            name: 'assignments',
+                            render({ field: { onChange, value } }) {
+                                return <EntityAssignSelect value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
+                },
+            ],
+            select: [
+                {
+                    groupName: 'Entity Select Setting',
+                    children: [
+                        {
+                            name: 'entitySelect',
+                            render({ field: { onChange, value } }) {
+                                return <EntityFilterSelect value={value} onChange={onChange} />;
+                            },
+                        },
+                    ],
+                },
+            ],
+            email: [
+                {
+                    groupName: 'Email Sending Source',
+                    children: [
+                        {
+                            name: 'emailType',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <TextField
+                                        label="Email Type"
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                        {
+                            name: 'emailApiKey',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <TextField
+                                        label="SerpApi API Key"
+                                        type="password"
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                    ],
+                },
+                {
+                    groupName: 'Email Content',
+                    children: [
+                        {
+                            name: 'emailRecipient',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <TextField
+                                        label="Email Recipient"
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                        {
+                            name: 'content',
+                            render({ field: { onChange, value } }) {
+                                return <MarkdownEditor />;
+                            },
+                        },
+                    ],
+                },
+            ],
+            webhook: [
+                {
+                    groupName: 'Webhook Arguments',
+                    children: [
+                        {
+                            name: 'webhookUrl',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <TextField
+                                        label="Webhook URL"
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                        {
+                            name: 'secretKey',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <TextField
+                                        label="Secret Key"
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                    ],
                 },
             ],
         };
 
-        return result[node.type!];
-    }, [node]);
+        return result;
+    }, []);
 
-    return formItems;
+    return !node?.type ? [] : formConfigs[node.type] || [];
 };
 
 export default useNodeFormItems;

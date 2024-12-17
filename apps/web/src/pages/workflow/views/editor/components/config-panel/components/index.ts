@@ -1,3 +1,4 @@
+export { default as CodeEditor } from './code-editor';
 export { default as ConditionsInput } from './conditions-input';
 export { default as EntityAssignSelect } from './entity-assign-select';
 export {

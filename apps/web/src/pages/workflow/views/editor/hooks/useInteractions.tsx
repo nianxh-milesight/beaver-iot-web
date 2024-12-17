@@ -65,7 +65,7 @@ const useInteractions = () => {
         fitView,
         flowToScreenPosition,
     } = useReactFlow<WorkflowNode, WorkflowEdge>();
-    const { checkNestedParallelLimit } = useWorkflow();
+    const { checkParallelLimit, checkNestedParallelLimit } = useWorkflow();
     const { width: bodyWidth, height: bodyHeight } = useSize(document.querySelector('body')) || {};
 
     // Handle nodes connect
@@ -218,6 +218,8 @@ const useInteractions = () => {
                 };
                 const outgoers = getOutgoers(prevNode, nodes, edges);
 
+                if (!checkParallelLimit(prevNodeId!, prevNodeSourceHandle)) return;
+
                 if (!outgoers.length) {
                     newNode.position = {
                         x:
@@ -270,6 +272,7 @@ const useInteractions = () => {
             setEdges,
             fitView,
             flowToScreenPosition,
+            checkParallelLimit,
             checkNestedParallelLimit,
         ],
     );

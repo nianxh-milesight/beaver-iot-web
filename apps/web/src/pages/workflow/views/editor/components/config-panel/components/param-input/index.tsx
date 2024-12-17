@@ -36,6 +36,8 @@ export interface ParamInputProps {
     typeSelectProps?: SelectProps;
     nameInputProps?: TextFieldProps;
     maxAddNum?: number;
+    value?: ParamInputValueType[];
+    onChange?: (value: ParamInputValueType[]) => void;
 }
 
 const DEFAULT_EMPTY_VALUE: ParamInputValueType = {

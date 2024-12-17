@@ -3,6 +3,8 @@
  *
  * Note: Use in EmailNode
  */
-const MarkdownEditor = () => {};
+const MarkdownEditor = () => {
+    return <>Markdown Editor</>;
+};
 
 export default MarkdownEditor;

@@ -38,6 +38,20 @@
     "workflow.message.delete_tip": "Are you sure you want to delete the workflow? It cannot be restore after deletion.",
     "workflow.label.deletion": "Deletion",
     "workflow.editor.form_param_select_placeholder": "Enter or reference a variable",
-    "workflow.node.config_panel_lable_arguments": "Arguments",
-    "workflow.node.trigger_switch_label": "Conttext"
+    "workflow.node.trigger_switch_label": "Context",
+    "workflow.editor.form_param_timer_type": "Timer Type",
+    "workflow.editor.form_param_execution_time_queue": "Execution Time Queue",
+    "workflow.editor.form_param_execution_time": "Execution Time",
+    "workflow.editor.form_param_expire_time": "Expire Time",
+    "workflow.editor.form_param_timer_type_once": "Single Execution",
+    "workflow.editor.form_param_timer_type_cycle": "Cycle Execution",
+    "workflow.editor.form_param_timer_period_everyday": "Every Day",
+    "workflow.editor.form_param_timer_period_monday": "Monday",
+    "workflow.editor.form_param_timer_period_tuesday": "Tuesday",
+    "workflow.editor.form_param_timer_period_wednesday": "Wednesday",
+    "workflow.editor.form_param_timer_period_thursday": "Thursday",
+    "workflow.editor.form_param_timer_period_friday": "Friday",
+    "workflow.editor.form_param_timer_period_saturday": "Saturday",
+    "workflow.editor.form_param_timer_period_sunday": "Sunday",
+    "workflow.label.parallel_limit_tip": "并行分支限制为 {1} 个"
 }

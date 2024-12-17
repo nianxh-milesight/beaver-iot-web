@@ -9,6 +9,11 @@ export const MIN_ZOOM = 0.25;
 export const MAX_ZOOM = 2;
 
 /**
+ * Parallel limit
+ */
+export const PARALLEL_LIMIT = 10;
+
+/**
  * Parallel nesting layer limit
  */
 export const PARALLEL_DEPTH_LIMIT = 3;

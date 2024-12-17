@@ -10,7 +10,7 @@ import {
 import { uniqBy } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
-import { PARALLEL_DEPTH_LIMIT } from '../constants';
+import { PARALLEL_LIMIT, PARALLEL_DEPTH_LIMIT } from '../constants';
 import { getParallelInfo } from './utils';
 
 const useWorkflow = () => {
@@ -29,6 +29,59 @@ const useWorkflow = () => {
 
         return node;
     }, [nodes]);
+    // Use nodeId, nodeType to avoid frequent render triggers
+    const selectedNodeId = selectedNode?.id;
+    const selectedNodeType = selectedNode?.type;
+
+    // Check Parallel Limit
+    const checkParallelLimit = useCallback(
+        (nodeId: ApiKey, nodeHandle?: string | null) => {
+            const edges = getEdges();
+            const connectedEdges = edges.filter(
+                edge =>
+                    edge.source === nodeId &&
+                    ((!nodeHandle && !edge.sourceHandle) || edge.sourceHandle === nodeHandle),
+            );
+
+            if (connectedEdges.length > PARALLEL_LIMIT - 1) {
+                toast.error({
+                    key: 'parallel-limit',
+                    content: getIntlText('workflow.label.parallel_limit_tip', {
+                        1: PARALLEL_LIMIT,
+                    }),
+                });
+                return false;
+            }
+
+            return true;
+        },
+        [getEdges, getIntlText],
+    );
+
+    // Check nested parallel limit
+    const checkNestedParallelLimit = useCallback(
+        (nodes: WorkflowNode[], edges: WorkflowEdge[], parentNodeId?: ApiKey) => {
+            const { parallelList, hasAbnormalEdges } = getParallelInfo(nodes, edges, parentNodeId);
+
+            // console.log({ parallelList, hasAbnormalEdges });
+            if (hasAbnormalEdges) return false;
+
+            const isGtLimit = parallelList.some(item => item.depth > PARALLEL_DEPTH_LIMIT);
+
+            if (isGtLimit) {
+                toast.error({
+                    key: 'parallel-depth-limit',
+                    content: getIntlText('workflow.label.parallel_depth_limit_tip', {
+                        1: PARALLEL_DEPTH_LIMIT,
+                    }),
+                });
+                return false;
+            }
+
+            return true;
+        },
+        [getIntlText],
+    );
 
     // Check node connection cycle
     const isValidConnection = useCallback<IsValidConnection>(
@@ -49,41 +102,20 @@ const useWorkflow = () => {
                 }
             };
 
+            if (!checkParallelLimit(connection.source, connection.sourceHandle)) return false;
+
             if (target?.id === connection.source) return false;
             return !hasCycle(target!);
         },
-        [getNodes, getEdges],
-    );
-
-    // Check nested parallel limit
-    const checkNestedParallelLimit = useCallback(
-        (nodes: WorkflowNode[], edges: WorkflowEdge[], parentNodeId?: ApiKey) => {
-            const { parallelList, hasAbnormalEdges } = getParallelInfo(nodes, edges, parentNodeId);
-
-            console.log({ parallelList, hasAbnormalEdges });
-            if (hasAbnormalEdges) return false;
-
-            const isGtLimit = parallelList.some(item => item.depth > PARALLEL_DEPTH_LIMIT);
-
-            if (isGtLimit) {
-                toast.error({
-                    key: 'parallel-depth-limit',
-                    content: getIntlText('workflow.label.parallel_depth_limit_tip', {
-                        1: PARALLEL_DEPTH_LIMIT,
-                    }),
-                });
-                return false;
-            }
-
-            return true;
-        },
-        [getIntlText],
+        [getNodes, getEdges, checkParallelLimit],
     );
 
     // Get the only selected node that is not dragging
     const getSelectedNode = useCallback(() => {
-        const selectedNodes = nodes.filter(item => item.selected);
-
+        const nodes = getNodes();
+        const selectedNodes = nodes.filter(
+            item => item.id === selectedNodeId && item.type === selectedNodeType,
+        );
         const node = selectedNodes?.[0];
 
         if (selectedNodes.length > 1 || !node || !node.selected || node.dragging) {
@@ -91,7 +123,7 @@ const useWorkflow = () => {
         }
 
         return node;
-    }, [nodes]);
+    }, [selectedNodeId, selectedNodeType, getNodes]);
 
     const getIncomeNodes = useCallback(
         (currentNode?: WorkflowNode) => {
@@ -125,8 +157,9 @@ const useWorkflow = () => {
     return {
         nodes,
         edges,
-        selectedNode,
+        // selectedNode,
         isValidConnection,
+        checkParallelLimit,
         checkNestedParallelLimit,
         getSelectedNode,
         getIncomeNodes,

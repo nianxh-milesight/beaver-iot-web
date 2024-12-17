@@ -7,6 +7,7 @@ import {
     ListSubheader,
     type SelectProps,
 } from '@mui/material';
+import { isNil } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { KeyboardArrowDownIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
@@ -78,7 +79,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
         <div className="ms-param-select">
             <FormControl fullWidth required={required} disabled={disabled}>
                 <InputLabel id="param-select-label">
-                    {label || getIntlText('common.label.value')}
+                    {!isNil(label) ? label : getIntlText('common.label.value')}
                 </InputLabel>
                 <Select<ParamSelectValueType>
                     {...props}
@@ -86,9 +87,19 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
                     notched
                     defaultValue=""
                     labelId="param-select-label"
-                    label={label || getIntlText('common.label.value')}
+                    label={!isNil(label) ? label : getIntlText('common.label.value')}
                     IconComponent={KeyboardArrowDownIcon}
-                    MenuProps={{ className: 'ms-param-select-menu' }}
+                    MenuProps={{
+                        className: 'ms-param-select-menu',
+                        anchorOrigin: {
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        },
+                        transformOrigin: {
+                            vertical: 'top',
+                            horizontal: 'right',
+                        },
+                    }}
                 >
                     {renderOptions()}
                 </Select>

@@ -56,5 +56,24 @@
         .@{prefix}-divider {
             margin: @margin-xl 0;
         }
+
+        .@{prefix}-node-form-group {
+            padding-bottom: @padding-xl;
+            border-bottom: 1px solid var(--border-color-base);
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            + .@{prefix}-node-form-group {
+                margin-top: @margin-xl;
+            }
+
+            &-title {
+                margin-bottom: @margin-md;
+                font-weight: @font-weight-bold;
+                .text-size(@font-size-lg);
+            }
+        }
     }
 }
