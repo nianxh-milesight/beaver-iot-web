@@ -57,9 +57,7 @@ const ParamInput: React.FC<ParamInputProps> = ({
     ...props
 }) => {
     const { getIntlText } = useI18n();
-    const [innerValue, setInnerValue] = useControllableValue<ParamInputValueType[]>(props, {
-        defaultValue: defaultValue || [],
-    });
+    const [innerValue, setInnerValue] = useControllableValue<ParamInputValueType[]>(props);
     const { list, remove, getKey, insert, replace } = useDynamicList<ParamInputValueType>(
         innerValue || [],
     );
