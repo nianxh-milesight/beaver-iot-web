@@ -54,5 +54,19 @@
     "workflow.editor.form_param_timer_period_saturday": "Saturday",
     "workflow.editor.form_param_timer_period_sunday": "Sunday",
     "workflow.label.parallel_limit_tip": "并行分支限制为 {1} 个",
-    "workflow.label.entry_node_number_limit_tip": "工作流中必须且仅允许有 {1} 个入口节点"
+    "workflow.label.entry_node_number_limit_tip": "工作流中必须且仅允许有 {1} 个入口节点",
+    "workflow.label.logic_keyword_if": "IF",
+    "workflow.label.logic_keyword_elseif": "ELSEIF",
+    "workflow.label.logic_keyword_and": "AND",
+    "workflow.label.logic_keyword_or": "OR",
+    "workflow.editor.form_button_add_condition": "Add Condition",
+    "workflow.label.free_node_limit_tip": "工作流中不允许有游离节点",
+    "workflow.label.condition_operator_contains": "Contains",
+    "workflow.label.condition_operator_not_contains": "Not Contains",
+    "workflow.label.condition_operator_start_with": "Start With",
+    "workflow.label.condition_operator_end_with": "End With",
+    "workflow.label.condition_operator_is": "Is",
+    "workflow.label.condition_operator_is_not": "Is Not",
+    "workflow.label.condition_operator_is_empty": "Is Empty",
+    "workflow.label.condition_operator_is_not_empty": "Is Not Empty"
 }

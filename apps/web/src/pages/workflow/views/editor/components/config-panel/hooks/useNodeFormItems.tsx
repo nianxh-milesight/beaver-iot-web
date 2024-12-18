@@ -79,7 +79,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                         {
                             name: 'when',
                             render({ field: { onChange, value } }) {
-                                return <ConditionsInput />;
+                                return <ConditionsInput value={value} onChange={onChange} />;
                             },
                         },
                     ],
@@ -101,7 +101,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     children: [
                         {
                             name: 'code',
-                            render({ field: { onChange, value }, fieldState, formState }) {
+                            render({ field: { onChange, value } }) {
                                 return <CodeEditor value={value} onChange={onChange} />;
                             },
                         },

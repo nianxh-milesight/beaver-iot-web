@@ -39,29 +39,32 @@ const useWorkflow = () => {
     const selectedNodeType = selectedNode?.type;
 
     // Check entry node number limit
-    const checkEntryNodeNumberLimit = useCallback(() => {
-        const nodes = getNodes();
-        const entryNodes = nodes.filter(node =>
-            entryNodeTypes.includes(node.type as WorkflowNodeType),
-        );
+    const checkEntryNodeNumberLimit = useCallback(
+        (nodes?: WorkflowNode[]) => {
+            nodes = nodes || getNodes();
+            const entryNodes = nodes.filter(node =>
+                entryNodeTypes.includes(node.type as WorkflowNodeType),
+            );
 
-        if (entryNodes.length > 1) {
-            toast.error({
-                key: 'entry-node-number-limit',
-                content: getIntlText('workflow.label.entry_node_number_limit_tip', {
-                    1: ENTRY_NODE_NUMBER_LIMIT,
-                }),
-            });
-            return false;
-        }
+            if (entryNodes.length !== ENTRY_NODE_NUMBER_LIMIT) {
+                toast.error({
+                    key: 'entry-node-number-limit',
+                    content: getIntlText('workflow.label.entry_node_number_limit_tip', {
+                        1: ENTRY_NODE_NUMBER_LIMIT,
+                    }),
+                });
+                return false;
+            }
 
-        return true;
-    }, [getNodes, getIntlText]);
+            return true;
+        },
+        [getNodes, getIntlText],
+    );
 
     // Check Parallel Limit
     const checkParallelLimit = useCallback(
-        (nodeId: ApiKey, nodeHandle?: string | null) => {
-            const edges = getEdges();
+        (nodeId: ApiKey, nodeHandle?: string | null, edges?: WorkflowEdge[]) => {
+            edges = edges || getEdges();
             const connectedEdges = edges.filter(
                 edge =>
                     edge.source === nodeId &&
@@ -180,18 +183,43 @@ const useWorkflow = () => {
         [nodes, edges, getSelectedNode],
     );
 
-    // const checkFreeNodeLimit = useCallback(() => {
+    // Check if there is a node that is not connected to an entry node
+    const checkFreeNodeLimit = useCallback(
+        (nodes?: WorkflowNode[]) => {
+            nodes = nodes || getNodes();
+            let result = false;
 
-    // }, [getNodes, getUpstreamNodes]);
+            result = nodes
+                .filter(node => !entryNodeTypes.includes(node.type as WorkflowNodeType))
+                .some(node => {
+                    const upstreamNodes = getUpstreamNodes(node);
+                    const hasEntryNode = upstreamNodes.some(item =>
+                        entryNodeTypes.includes(item.type as WorkflowNodeType),
+                    );
+
+                    return !hasEntryNode;
+                });
+
+            if (result) {
+                toast.error({
+                    key: 'free-node-limit',
+                    content: getIntlText('workflow.label.free_node_limit_tip'),
+                });
+            }
+
+            return result;
+        },
+        [getNodes, getUpstreamNodes, getIntlText],
+    );
 
     return {
         nodes,
         edges,
-        // selectedNode,
         isValidConnection,
         checkParallelLimit,
         checkNestedParallelLimit,
         checkEntryNodeNumberLimit,
+        checkFreeNodeLimit,
         getSelectedNode,
         getUpstreamNodes,
     };

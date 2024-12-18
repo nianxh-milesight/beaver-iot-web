@@ -1,4 +1,6 @@
 .@{prefix}-view-wf_editor {
+    position: relative;
+
     .@{prefix}-workflow {
         // ---------- Node style variable override ----------
         --xy-node-border: none;
@@ -93,5 +95,17 @@
         &-node-body {
             margin-top: @margin-sm;
         }
+    }
+
+    .@{prefix}-workflow-advance {
+        position: absolute;
+        inset: 0;
+        z-index: 1000;
+        padding: @padding-md;
+        overflow: auto;
+        font-family: @font-family-code;
+        white-space: pre-wrap;
+        background-color: var(--component-background);
+        .text-size(@font-size-sm);
     }
 }
