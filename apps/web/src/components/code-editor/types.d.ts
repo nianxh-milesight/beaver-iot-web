@@ -41,7 +41,7 @@ export interface EditorProps extends EditorContentProps {
      * Callback function triggered when the content value changes.
      * @param value - The new content value.
      */
-    onValueChange?: (value: string) => void;
+    onChange?: (value: string) => void;
 
     /** Custom editor toolbar header. */
     Header?: React.FC<EditorToolbarProps>;

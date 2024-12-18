@@ -17,7 +17,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
     });
     const [editorValue, setEditorValue] = useControllableValue<string>(props, {
         valuePropName: 'value',
-        trigger: 'onValueChange',
+        trigger: 'onChange',
     });
 
     const { handlers } = useEditorCommand({ editorInstanceRef });
