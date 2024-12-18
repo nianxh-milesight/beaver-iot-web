@@ -23,14 +23,18 @@ const ImportModal: React.FC<Props> = ({ visible, onCancel, onUpload, ...props })
     const { control, formState, handleSubmit, reset } = useForm<FormDataProps>();
 
     const onSubmit: SubmitHandler<FormDataProps> = async ({ ...params }) => {
-        const { res, contains } = await validateFile(params.file[0]);
-        if (res && contains) {
-            if (onUpload) {
-                await onUpload(contains);
+        try {
+            const res = await validateFile(params.file[0]);
+            if (res) {
+                if (onUpload) {
+                    await onUpload(res);
+                }
+                // Clear the form data upon confirmation.
+                reset();
+            } else {
+                throw new Error('error');
             }
-            // Clear the form data upon confirmation.
-            reset();
-        } else {
+        } catch (error) {
             toast.error(getIntlText('workflow.message.import_dsl_error'));
             reset();
         }
@@ -40,8 +44,8 @@ const ImportModal: React.FC<Props> = ({ visible, onCancel, onUpload, ...props })
         reset();
         onCancel && onCancel();
     });
-    const validateFile = (file: File): Promise<{ res: boolean; contains?: WorkflowSchema }> => {
-        return new Promise(resolve => {
+    const validateFile = (file: File): Promise<WorkflowSchema | null> => {
+        return new Promise((resolve, reject) => {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = event => {
@@ -54,16 +58,18 @@ const ImportModal: React.FC<Props> = ({ visible, onCancel, onUpload, ...props })
                             const isError = result.nodes.some(
                                 item => !nodeTypes.includes(item.type as WorkflowNodeType),
                             );
-                            resolve({ res: !isError, contains: result });
+                            if (!isError) {
+                                resolve(result);
+                            }
                         }
-                        resolve({ res: false });
+                        reject();
                     } catch (error) {
-                        resolve({ res: false });
+                        reject();
                     }
                 };
                 reader.readAsText(file);
             } else {
-                resolve({ res: false });
+                reject();
             }
         });
     };
