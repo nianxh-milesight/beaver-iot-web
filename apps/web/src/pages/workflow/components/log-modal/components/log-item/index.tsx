@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import cls from 'classnames';
-import { useTime } from '@milesight/shared/src/hooks';
 import { Tooltip } from '@/components';
 import { LogStatusMap } from '@/pages/workflow/config';
 import type { LogItemProps } from '../../types';
@@ -12,8 +11,7 @@ export interface IProps {
     onClick?: (data: LogItemProps) => void;
 }
 export default React.memo(({ data, isActive, onClick }: IProps) => {
-    const { status, title, timestamp } = data || {};
-    const { getTimeFormat } = useTime();
+    const { status, title } = data || {};
 
     const { className: statusClassName, icon } = useMemo(() => LogStatusMap[status], [status]);
     return (
@@ -28,14 +26,14 @@ export default React.memo(({ data, isActive, onClick }: IProps) => {
                 <p className="ms-log-title">
                     <Tooltip title={title} autoEllipsis />
                 </p>
-                <p className="ms-log-timestamp">
+                {/* <p className="ms-log-timestamp">
                     <Tooltip
                         title={
                             timestamp ? getTimeFormat(timestamp, 'fullDateTimeSecondFormat') : ''
                         }
                         autoEllipsis
                     />
-                </p>
+                </p> */}
             </div>
         </div>
     );

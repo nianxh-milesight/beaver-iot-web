@@ -99,18 +99,20 @@ export interface WorkflowAPISchema extends APISchema {
 
     /** Get workflow log list */
     getLogList: {
-        request: void | {
+        request: SearchRequestType & {
             // TODO: use workflow log status enum
             status?: string;
         };
-        response: {
-            /** ID */
-            id: ApiKey;
-            /** Start Time */
-            start_time: number;
-            /** Running status */
-            status: string;
-        }[];
+        response: SearchResponseType<
+            {
+                /** ID */
+                id: ApiKey;
+                /** Start Time */
+                start_time: number;
+                /** Running status */
+                status: 'SUCCESS' | 'ERROR';
+            }[]
+        >;
     };
 
     /** Get workflow log detail */

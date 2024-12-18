@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useVirtualList } from 'ahooks';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { CircularProgress } from '@mui/material';
 import { Modal, type ModalProps } from '@milesight/shared/src/components';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { Tooltip } from '@/components';
+import { Empty, Tooltip } from '@/components';
 import { LogItem } from './components';
+import { useRenderList, useSourceData } from './hooks';
 import ActionLog from '../action-log';
-import type { LogItemProps } from './types';
+import type { LogRenderListType } from './types';
 import './style.less';
 
 // TODO mock Data
@@ -17,39 +18,30 @@ export default React.memo(({ visible, ...props }: IProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const { getIntlText } = useI18n();
-    const [activeItem, setActiveItem] = useState<LogItemProps>();
+    const [activeItem, setActiveItem] = useState<LogRenderListType>();
 
-    // TODO: mock data
-    const list: LogItemProps[] = useMemo(() => {
-        return Array.from({ length: 1000 }).map(() => ({
-            key: Math.random().toString(36).substring(2, 9),
-            title: Math.random().toString(36).substring(2, 9),
-            status: Math.random() > 0.5 ? 'success' : 'failed',
-            timestamp: Date.now(),
-        }));
-    }, []);
-
-    /** virtual list */
-    const [virtualList, scrollTo] = useVirtualList(list, {
-        containerTarget: containerRef,
-        wrapperTarget: listRef,
-        itemHeight: 62,
-        overscan: 10,
+    const { getLogList } = useSourceData();
+    const { scrollItem, virtualList, getLogListLoading } = useRenderList({
+        containerRef,
+        listRef,
+        getLogList,
     });
 
     /** When initializing, set the first as the default value */
     useEffect(() => {
-        const [firstItem] = list || [];
+        if (activeItem) return;
 
+        const [firstItem] = scrollItem?.list || [];
         setActiveItem(firstItem);
-        scrollTo(0);
-    }, [list]);
+    }, [scrollItem, activeItem]);
 
     /** handle click left bar */
-    const handleClick = useCallback((data: LogItemProps) => {
+    const handleClick = useCallback((data: LogRenderListType) => {
         setActiveItem(data);
     }, []);
 
+    const isLoading = !!getLogListLoading;
+    const isEmpty = !getLogListLoading && !scrollItem?.list?.length;
     return (
         <Modal
             size="lg"
@@ -61,30 +53,55 @@ export default React.memo(({ visible, ...props }: IProps) => {
             {...props}
         >
             <div className="ms-log-container">
-                <div className="ms-log-left-bar" ref={containerRef}>
-                    <div className="ms-log-list" ref={listRef}>
-                        {virtualList.map(({ data }) => (
-                            <LogItem
-                                data={data}
-                                key={data.key}
-                                isActive={data.key === activeItem?.key}
-                                onClick={handleClick}
-                            />
-                        ))}
+                {isLoading && (
+                    <div className="ms-log-loading">
+                        <CircularProgress />
                     </div>
-                </div>
-                <div className="ms-log-right-bar">
-                    <div className="ms-log-title">
-                        <Tooltip title={activeItem?.title || ''} autoEllipsis />
+                )}
+                {isEmpty && (
+                    <div className="ms-log-empty">
+                        <Empty text={getIntlText('workflow.label.no_log_record')} />
                     </div>
-                    <div className="ms-log-detail">
-                        <ActionLog
-                            // TODO mock Data
-                            traceData={traceData.traceInfo as any}
-                            workflowData={workflowData as any}
-                        />
-                    </div>
-                </div>
+                )}
+                {!isLoading && !isEmpty && (
+                    <>
+                        <div className="ms-log-left-bar">
+                            <div className="ms-log-left-bar__scroll" ref={containerRef}>
+                                <div className="ms-log-left-bar__list" ref={listRef}>
+                                    {virtualList.map(({ data }) => {
+                                        if (data?.$$isFooterNode) {
+                                            return (
+                                                <div className="ms-log-left-bar__more">
+                                                    <CircularProgress size={22} />
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <LogItem
+                                                data={data}
+                                                key={data.id}
+                                                isActive={data.id === activeItem?.id}
+                                                onClick={handleClick}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="ms-log-right-bar">
+                            <div className="ms-log-right-bar__title">
+                                <Tooltip title={activeItem?.title || ''} autoEllipsis />
+                            </div>
+                            <div className="ms-log-right-bar__detail">
+                                <ActionLog
+                                    // TODO mock Data
+                                    traceData={traceData.traceInfo as any}
+                                    workflowData={workflowData as any}
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </Modal>
     );

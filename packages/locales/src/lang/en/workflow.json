@@ -40,5 +40,6 @@
     "workflow.label.deletion": "Deletion",
     "workflow.editor.form_param_select_placeholder": "Enter or reference a variable",
     "workflow.label.branch": "Branch{1}",
-    "workflow.label.parallel": "Parallel{1}"
+    "workflow.label.parallel": "Parallel{1}",
+    "workflow.label.no_log_record": "No log is recorded"
 }
