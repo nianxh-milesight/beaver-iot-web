@@ -11,9 +11,9 @@ import {
     EntitySelect,
     MarkdownEditor,
     ParamAssignInput,
-    ParamInput,
     // ParamInputSelect,
     TimerInput,
+    ParamInput,
 } from '../components';
 
 type NodeFormGroupType = {
