@@ -35,6 +35,8 @@ export interface EditorProps extends EditorContentProps {
      */
     onLangChange?: (value: string) => void;
 
+    /** default value */
+    defaultValue?: string;
     /** The content value of the editor. */
     value?: string;
     /**
@@ -44,7 +46,7 @@ export interface EditorProps extends EditorContentProps {
     onChange?: (value: string) => void;
 
     /** Custom editor toolbar header. */
-    Header?: React.FC<EditorToolbarProps>;
+    Header?: React.FC<EditorToolbarProps> | null;
 }
 
 /** Interface for editor language options. */

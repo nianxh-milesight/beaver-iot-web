@@ -16,6 +16,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         trigger: 'onLangChange',
     });
     const [editorValue, setEditorValue] = useControllableValue<string>(props, {
+        defaultValuePropName: 'defaultValue',
         valuePropName: 'value',
         trigger: 'onChange',
     });
@@ -24,7 +25,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
     /** Methods exposed to external components */
     useImperativeHandle(ref, () => handlers);
 
-    const EditorHeaderComponent = CustomHeader === void 0 ? EditorHeader : CustomHeader;
+    const EditorHeaderComponent = CustomHeader === void 0 ? EditorHeader : CustomHeader!;
     return (
         <div className="ms-code-editor">
             {CustomHeader !== null && (
