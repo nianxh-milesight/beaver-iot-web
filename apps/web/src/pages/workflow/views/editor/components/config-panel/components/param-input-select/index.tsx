@@ -68,7 +68,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
     ...props
 }) => {
     const { getIntlText } = useI18n();
-    const { getIncomeNodes } = useWorkflow();
+    const { getUpstreamNodes } = useWorkflow();
     const containerRef = useRef<HTMLDivElement>(null);
     const [data, setData] = useControllableValue<ParamInputSelectValueType>(props);
     const [inputValue, setInputValue] = useState<string>('');
@@ -77,7 +77,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
     const { width: containerWidth } = useSize(containerRef) || {};
 
     const [options, renderedOptions] = useMemo(() => {
-        const incomeNodes = getIncomeNodes();
+        const incomeNodes = getUpstreamNodes();
         const result = incomeNodes.reduce((acc, node) => {
             // TODO: get the correct nodes params
             demoOutputs.forEach(output => {
@@ -128,7 +128,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
         }, [] as React.ReactNode[]);
 
         return [result, renderedOptions];
-    }, [selectValue, getIncomeNodes, setData]);
+    }, [selectValue, getUpstreamNodes, setData]);
 
     useLayoutEffect(() => {
         // Direct input value

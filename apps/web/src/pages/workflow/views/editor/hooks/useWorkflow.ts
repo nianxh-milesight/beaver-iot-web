@@ -10,8 +10,13 @@ import {
 import { uniqBy } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
-import { PARALLEL_LIMIT, PARALLEL_DEPTH_LIMIT } from '../constants';
+import { basicNodeConfigs } from '@/pages/workflow/config';
+import { PARALLEL_LIMIT, PARALLEL_DEPTH_LIMIT, ENTRY_NODE_NUMBER_LIMIT } from '../constants';
 import { getParallelInfo } from './utils';
+
+const entryNodeTypes = Object.values(basicNodeConfigs)
+    .filter(item => item.category === 'entry')
+    .map(item => item.type);
 
 const useWorkflow = () => {
     const { getNodes, getEdges } = useReactFlow<WorkflowNode, WorkflowEdge>();
@@ -32,6 +37,26 @@ const useWorkflow = () => {
     // Use nodeId, nodeType to avoid frequent render triggers
     const selectedNodeId = selectedNode?.id;
     const selectedNodeType = selectedNode?.type;
+
+    // Check entry node number limit
+    const checkEntryNodeNumberLimit = useCallback(() => {
+        const nodes = getNodes();
+        const entryNodes = nodes.filter(node =>
+            entryNodeTypes.includes(node.type as WorkflowNodeType),
+        );
+
+        if (entryNodes.length > 1) {
+            toast.error({
+                key: 'entry-node-number-limit',
+                content: getIntlText('workflow.label.entry_node_number_limit_tip', {
+                    1: ENTRY_NODE_NUMBER_LIMIT,
+                }),
+            });
+            return false;
+        }
+
+        return true;
+    }, [getNodes, getIntlText]);
 
     // Check Parallel Limit
     const checkParallelLimit = useCallback(
@@ -125,7 +150,8 @@ const useWorkflow = () => {
         return node;
     }, [selectedNodeId, selectedNodeType, getNodes]);
 
-    const getIncomeNodes = useCallback(
+    // Get all upstream nodes of the current node
+    const getUpstreamNodes = useCallback(
         (currentNode?: WorkflowNode) => {
             currentNode = currentNode || getSelectedNode();
             const getAllIncomers = (
@@ -154,6 +180,10 @@ const useWorkflow = () => {
         [nodes, edges, getSelectedNode],
     );
 
+    // const checkFreeNodeLimit = useCallback(() => {
+
+    // }, [getNodes, getUpstreamNodes]);
+
     return {
         nodes,
         edges,
@@ -161,8 +191,9 @@ const useWorkflow = () => {
         isValidConnection,
         checkParallelLimit,
         checkNestedParallelLimit,
+        checkEntryNodeNumberLimit,
         getSelectedNode,
-        getIncomeNodes,
+        getUpstreamNodes,
     };
 };
 

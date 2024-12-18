@@ -19,6 +19,11 @@ export const PARALLEL_LIMIT = 10;
 export const PARALLEL_DEPTH_LIMIT = 3;
 
 /**
+ * Entry node number limit
+ */
+export const ENTRY_NODE_NUMBER_LIMIT = 1;
+
+/**
  * The addable Edge type
  */
 export const EDGE_TYPE_ADDABLE: WorkflowEdgeType = 'addable';

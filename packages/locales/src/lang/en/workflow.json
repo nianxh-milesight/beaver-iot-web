@@ -53,5 +53,6 @@
     "workflow.editor.form_param_timer_period_friday": "Friday",
     "workflow.editor.form_param_timer_period_saturday": "Saturday",
     "workflow.editor.form_param_timer_period_sunday": "Sunday",
-    "workflow.label.parallel_limit_tip": "并行分支限制为 {1} 个"
+    "workflow.label.parallel_limit_tip": "并行分支限制为 {1} 个",
+    "workflow.label.entry_node_number_limit_tip": "工作流中必须且仅允许有 {1} 个入口节点"
 }

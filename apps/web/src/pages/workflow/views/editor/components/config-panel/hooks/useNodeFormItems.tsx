@@ -101,8 +101,8 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     children: [
                         {
                             name: 'code',
-                            render({ field: { onChange, value } }) {
-                                return <CodeEditor />;
+                            render({ field: { onChange, value }, fieldState, formState }) {
+                                return <CodeEditor value={value} onChange={onChange} />;
                             },
                         },
                     ],
@@ -178,6 +178,8 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        fullWidth
+                                        autoComplete="off"
                                         label="Email Type"
                                         value={value}
                                         onChange={onChange}
@@ -190,6 +192,8 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        fullWidth
+                                        autoComplete="new-password"
                                         label="SerpApi API Key"
                                         type="password"
                                         value={value}
@@ -208,6 +212,8 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        fullWidth
+                                        autoComplete="off"
                                         label="Email Recipient"
                                         value={value}
                                         onChange={onChange}
@@ -218,7 +224,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                         {
                             name: 'content',
                             render({ field: { onChange, value } }) {
-                                return <MarkdownEditor />;
+                                return <MarkdownEditor value={value} onChange={onChange} />;
                             },
                         },
                     ],
@@ -233,6 +239,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        fullWidth
                                         label="Webhook URL"
                                         value={value}
                                         onChange={onChange}
@@ -245,6 +252,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        fullWidth
                                         label="Secret Key"
                                         value={value}
                                         onChange={onChange}

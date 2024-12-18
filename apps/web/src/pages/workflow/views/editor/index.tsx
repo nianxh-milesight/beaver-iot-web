@@ -46,7 +46,7 @@ const WorkflowEditor = () => {
     const { getIntlText } = useI18n();
     const nodeTypes = useNodeTypes();
     const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
-    const { isValidConnection } = useWorkflow();
+    const { isValidConnection, checkNestedParallelLimit } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
         useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
@@ -132,7 +132,9 @@ const WorkflowEditor = () => {
     const handleSave = () => {
         const data = toObject();
 
+        if (!checkNestedParallelLimit(data.nodes, data.edges)) return;
         // TODO: check the workflow json is valid
+
         console.log('workflow data', data);
     };
 

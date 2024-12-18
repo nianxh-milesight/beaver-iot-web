@@ -73,7 +73,7 @@ const ConditionsInput = () => {
                                     <MenuItem>222</MenuItem>
                                 </Select>
                             </div>
-                            <TextField fullWidth placeholder="Value" />
+                            <TextField fullWidth autoComplete="off" placeholder="Value" />
                         </div>
                         <IconButton>
                             <DeleteOutlineIcon />

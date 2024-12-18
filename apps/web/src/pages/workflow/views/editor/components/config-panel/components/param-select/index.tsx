@@ -36,10 +36,10 @@ export type ParamSelectProps = SelectProps<ParamSelectValueType>;
  */
 const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ...props }) => {
     const { getIntlText } = useI18n();
-    const { getIncomeNodes } = useWorkflow();
+    const { getUpstreamNodes } = useWorkflow();
 
     const renderOptions = useCallback(() => {
-        const incomeNodes = getIncomeNodes();
+        const incomeNodes = getUpstreamNodes();
         // TODO: get the correct nodes params
         const data: OptionItemType[] = incomeNodes.map(node => ({
             nodeId: node.id,
@@ -73,7 +73,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
                 </MenuItem>
             )),
         ]);
-    }, [getIncomeNodes]);
+    }, [getUpstreamNodes]);
 
     return (
         <div className="ms-param-select">
