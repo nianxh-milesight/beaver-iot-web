@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo, useRef, forwardRef } from 'react';
-import { useRequest } from 'ahooks';
+import React, { useCallback, useMemo, useState, useRef, forwardRef, useLayoutEffect } from 'react';
 import {
     Autocomplete,
     TextField,
@@ -7,19 +6,17 @@ import {
     type AutocompleteProps,
     type AutocompleteRenderInputParams,
 } from '@mui/material';
-import { useI18n, useVirtualList } from '@milesight/shared/src/hooks';
+import { useControllableValue, useDebounceFn } from 'ahooks';
+import { useI18n, useVirtualList, useStoreShallow } from '@milesight/shared/src/hooks';
 import { KeyboardArrowDownIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
-import {
-    entityAPI,
-    awaitWrap,
-    getResponseData,
-    isRequestSuccess,
-    type EntityAPISchema,
-} from '@/services/http';
+import { type EntityAPISchema } from '@/services/http';
+import useConfigPanelStore, { type EntityFilterParams } from '../../store';
 import './style.less';
 
-export type EntitySelectValueType = {
+export type EntitySelectValueType = ApiKey;
+
+export type EntitySelectOptionType = {
     /** Entity Name */
     label: string;
     /** Entity ID */
@@ -36,33 +33,23 @@ export type EntitySelectValueType = {
     };
 };
 
-export interface EntitySelectProps<
-    Multiple extends boolean | undefined = false,
-    DisableClearable extends boolean | undefined = false,
-    FreeSolo extends boolean | undefined = false,
-> extends Omit<
-        AutocompleteProps<EntitySelectValueType, Multiple, DisableClearable, FreeSolo>,
-        'loading' | 'options' | 'renderInput'
-    > {
+export interface EntitySelectProps {
     label?: string;
 
     required?: boolean;
 
+    disabled?: boolean;
+
     /**
      * API Filter Model
      */
-    filterModel?: {
-        /** Search Keyword */
-        keyword?: string;
-        /** Entity Type */
-        type?: EntityType | EntityType[];
-        /** Entity Value Type */
-        valueType?: EntityValueDataType | EntityValueDataType[];
-        /** Entity Access Mode */
-        accessMode?: EntityAccessMode | EntityAccessMode[];
-        /** Exclude Children */
-        excludeChildren?: boolean;
-    };
+    filterModel?: Omit<EntityFilterParams, 'keyword'>;
+
+    value?: EntitySelectValueType;
+
+    defaultValue?: EntitySelectValueType;
+
+    onChange?: (value: EntitySelectValueType) => void;
 }
 
 /**
@@ -91,7 +78,7 @@ const Listbox = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
             containerTarget: containerRef,
             wrapperTarget: wrapperRef,
             itemHeight: 58,
-            overscan: 10,
+            overscan: 5,
         });
 
         return (
@@ -111,52 +98,45 @@ const Listbox = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
  *
  * Note: This is a basic component, use in EntityListeningNode, ServiceNode, EntitySelectNode
  */
-const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterModel, ...props }) => {
+const EntitySelect: React.FC<EntitySelectProps> = ({
+    label,
+    required,
+    disabled,
+    filterModel,
+    ...props
+}) => {
     const { getIntlText } = useI18n();
-    const {
-        loading,
-        data: entityList,
-        run: getEntityList,
-    } = useRequest(
-        async (keyword?: string) => {
-            const entityType =
-                filterModel?.type &&
-                (Array.isArray(filterModel.type) ? filterModel.type : [filterModel.type]);
-            const valueType =
-                filterModel?.valueType &&
-                (Array.isArray(filterModel.valueType)
-                    ? filterModel.valueType
-                    : [filterModel.valueType]);
-            const accessMode =
-                filterModel?.accessMode &&
-                (Array.isArray(filterModel.accessMode)
-                    ? filterModel.accessMode
-                    : [filterModel.accessMode]);
-            const [error, resp] = await awaitWrap(
-                entityAPI.getList({
-                    keyword,
-                    entity_type: entityType,
-                    entity_value_type: valueType,
-                    entity_access_mod: accessMode,
-                    exclude_children: filterModel?.excludeChildren,
-                    page_number: 1,
-                    page_size: 999,
-                }),
-            );
+    const [value, setValue] = useControllableValue<EntitySelectValueType | undefined>(props);
 
-            if (error || !isRequestSuccess(resp)) return;
-            const data = getResponseData(resp)!;
-            return data?.content || [];
-        },
-        {
-            manual: true,
-            debounceWait: 300,
-            refreshDeps: [filterModel],
-        },
+    // ---------- Entity List Data ----------
+    const { entityList, getEntityList } = useConfigPanelStore(
+        useStoreShallow(['entityList', 'getEntityList']),
     );
+    const filteredEntityList = useMemo(() => {
+        if (!filterModel) return entityList;
+
+        return entityList?.filter(entity => {
+            let { type, valueType, accessMode } = filterModel;
+
+            type = type && (Array.isArray(type) ? type : [type]);
+            valueType = valueType && (Array.isArray(valueType) ? valueType : [valueType]);
+            accessMode = accessMode && (Array.isArray(accessMode) ? accessMode : [accessMode]);
+
+            return (
+                (!type || type.includes(entity.entity_type)) &&
+                (!valueType || valueType.includes(entity.entity_value_type)) &&
+                (!accessMode || accessMode.includes(entity.entity_access_mod))
+            );
+        });
+    }, [entityList, filterModel]);
+
+    // ---------- Search Entity Data ----------
+    const [searchedEntityList, setSearchedEntityList] = useState<typeof entityList>();
+
+    // ---------- Autocomplete Render ----------
     const options = useMemo(() => {
-        if (!entityList?.length) return [];
-        const result: EntitySelectValueType[] = entityList.map(item => {
+        const list = searchedEntityList || filteredEntityList || [];
+        const result: EntitySelectOptionType[] = list.map(item => {
             const entityValueAttribute = (() => {
                 try {
                     return JSON.parse(item.entity_value_attribute);
@@ -166,7 +146,7 @@ const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterMode
             })();
             return {
                 label: item.entity_name,
-                value: item.entity_id,
+                value: item.entity_key,
                 valueType: item.entity_value_type,
                 description: [item.device_name, item.integration_name].filter(Boolean).join(', '),
                 rawData: {
@@ -177,7 +157,7 @@ const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterMode
         });
 
         return result;
-    }, [entityList]);
+    }, [filteredEntityList, searchedEntityList]);
 
     const renderInput = useCallback(
         (params: AutocompleteRenderInputParams) => {
@@ -186,37 +166,71 @@ const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterMode
                     {...params}
                     required={required}
                     label={label || getIntlText('common.label.entity')}
-                    // slotProps={{ input: { readOnly: true } }}
                 />
             );
         },
         [label, required, getIntlText],
     );
 
-    const renderOption = useCallback<NonNullable<EntitySelectProps['renderOption']>>(
-        (optionProps, option) => {
-            const { label, value, description } = option || {};
+    const renderOption = useCallback<
+        NonNullable<
+            AutocompleteProps<
+                EntitySelectOptionType,
+                undefined,
+                undefined,
+                undefined
+            >['renderOption']
+        >
+    >((optionProps, option) => {
+        const { label, value, description } = option || {};
 
-            return (
-                <MenuItem {...(optionProps || {})} key={value}>
-                    <div className="ms-entity-select-item">
-                        <div className="ms-entity-select-item__label">
-                            <Tooltip autoEllipsis title={label} />
-                        </div>
-                        <div className="ms-entity-select-item__description">
-                            <Tooltip autoEllipsis title={description} />
-                        </div>
+        return (
+            <MenuItem {...(optionProps || {})} key={value}>
+                <div className="ms-entity-select-item">
+                    <div className="ms-entity-select-item__label">
+                        <Tooltip autoEllipsis title={label} />
                     </div>
-                </MenuItem>
-            );
+                    <div className="ms-entity-select-item__description">
+                        <Tooltip autoEllipsis title={description} />
+                    </div>
+                </div>
+            </MenuItem>
+        );
+    }, []);
+
+    const { run: handleInputChange } = useDebounceFn<
+        NonNullable<
+            AutocompleteProps<
+                EntitySelectOptionType,
+                undefined,
+                undefined,
+                undefined
+            >['onInputChange']
+        >
+    >(
+        async (_, keyword, reason) => {
+            if (keyword && reason === 'input') {
+                const list = await getEntityList({ ...filterModel, keyword });
+                setSearchedEntityList(list);
+                return;
+            }
+
+            setSearchedEntityList(undefined);
         },
-        [],
+        { wait: 300 },
     );
 
+    // ---------- Autocomplete Inner Value ----------
+    const [innerValue, setInnerValue] = useState<EntitySelectOptionType | null>(null);
+    useLayoutEffect(() => {
+        const option = options.find(item => item.value === value);
+        setInnerValue(option || null);
+    }, [value, options]);
+
     return (
-        <Autocomplete
-            {...props}
-            loading={loading}
+        <Autocomplete<EntitySelectOptionType, undefined, undefined, undefined>
+            value={innerValue}
+            disabled={disabled}
             options={options}
             renderInput={renderInput}
             renderOption={renderOption}
@@ -230,15 +244,10 @@ const EntitySelect: React.FC<EntitySelectProps> = ({ label, required, filterMode
                 },
             }}
             popupIcon={<KeyboardArrowDownIcon />}
-            onInputChange={(_, keyword, reason) => {
-                if (reason !== 'input') {
-                    getEntityList();
-                    return;
-                }
-
-                getEntityList(keyword);
+            onInputChange={handleInputChange}
+            onChange={(_, data) => {
+                setValue(data?.value);
             }}
-            onOpen={() => getEntityList()}
         />
     );
 };

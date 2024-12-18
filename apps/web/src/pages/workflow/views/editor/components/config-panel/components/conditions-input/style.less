@@ -1,0 +1,115 @@
+.@{prefix}-conditions-input {
+    &-item-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 32px;
+        margin-bottom: @margin-md;
+
+        .btns {
+            display: flex;
+            gap: @margin-xs;
+            align-items: center;
+        }
+
+        .@{mui-prefix}ToggleButton-root {
+            padding: @padding-xxs @padding-xs;
+        }
+    }
+
+    &-item-content {
+        position: relative;
+        margin-bottom: @margin-xl;
+        border-bottom: 1px solid var(--border-color-base);
+
+        &.multiple-conditions {
+            padding-left: 64px;
+
+            .logic-operator {
+                display: block;
+            }
+        }
+
+        .logic-operator {
+            position: absolute;
+            top: 12px;
+            bottom: 96px;
+            left: 28px;
+            display: none;
+            width: 36px;
+            border: 1px solid var(--border-color-base);
+            border-right: none;
+            border-radius: @border-radius-base;
+
+            .@{mui-prefix}Chip-root {
+                position: absolute;
+                top: 50%;
+                left: 0;
+                max-width: none;
+                background-color: var(--component-background);
+                border-color: var(--border-color-base);
+                border-radius: @border-radius-base;
+                cursor: pointer;
+                transform: translate(-50%, -50%);
+                .text-size(@font-size-sm);
+
+                .@{mui-prefix}Chip-label {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .@{mui-prefix}SvgIcon-root {
+                    font-size: @font-size-base;
+                }
+            }
+        }
+
+        .field-item {
+            display: flex;
+            gap: @margin-xs;
+
+            .input-wrapper {
+                flex: 1;
+
+                .select {
+                    display: flex;
+
+                    > .@{prefix}-param-select {
+                        flex: 1;
+                        .@{mui-prefix}OutlinedInput-notchedOutline {
+                            border-radius: @border-radius-base 0 0 0;
+                        }
+                    }
+
+                    > .@{mui-prefix}InputBase-root {
+                        flex: 1;
+                        margin-left: -1px;
+
+                        .@{mui-prefix}OutlinedInput-notchedOutline {
+                            border-radius: 0 @border-radius-base 0 0;
+                        }
+                    }
+                }
+
+                > .@{mui-prefix}FormControl-root {
+                    margin: 0;
+                    margin-top: -1px;
+
+                    .@{mui-prefix}OutlinedInput-notchedOutline {
+                        border-radius: 0 0 @border-radius-base @border-radius-base;
+                    }
+                }
+            }
+
+            > .@{mui-prefix}ButtonBase-root {
+                width: 30px;
+                height: 30px;
+                margin-top: 5px;
+            }
+        }
+
+        .@{prefix}-conditions-input-item-add-btn {
+            margin: @margin-sm 0 @margin-xl;
+        }
+    }
+}

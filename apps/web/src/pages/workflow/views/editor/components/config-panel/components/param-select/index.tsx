@@ -7,6 +7,7 @@ import {
     ListSubheader,
     type SelectProps,
 } from '@mui/material';
+import { isNil } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { KeyboardArrowDownIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
@@ -35,10 +36,10 @@ export type ParamSelectProps = SelectProps<ParamSelectValueType>;
  */
 const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ...props }) => {
     const { getIntlText } = useI18n();
-    const { getIncomeNodes } = useWorkflow();
+    const { getUpstreamNodes } = useWorkflow();
 
     const renderOptions = useCallback(() => {
-        const incomeNodes = getIncomeNodes();
+        const incomeNodes = getUpstreamNodes();
         // TODO: get the correct nodes params
         const data: OptionItemType[] = incomeNodes.map(node => ({
             nodeId: node.id,
@@ -46,7 +47,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
             nodeType: node.type,
             outputs: [
                 {
-                    name: 'output11',
+                    name: 'output112123123123123123123123131231231',
                     type: 'string',
                     key: `${node.type}.${node.id}.1132e3123132`,
                 },
@@ -58,6 +59,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
             ],
         }));
 
+        // TODO: render Empty component when the options is empty
         return data.map(item => [
             <ListSubheader className="ms-param-select-option-groupname">
                 {item.nodeType}
@@ -65,21 +67,19 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
             item.outputs.map(output => (
                 <MenuItem className="ms-param-select-option" key={output.key} value={output.key}>
                     <div className="ms-param-select-item">
-                        <Tooltip autoEllipsis title={`${output.name} ${output.type}`}>
-                            <span className="name">{output.name}</span>
-                        </Tooltip>
+                        <Tooltip autoEllipsis className="name" title={output.name} />
                         <span className="type">{output.type}</span>
                     </div>
                 </MenuItem>
             )),
         ]);
-    }, [getIncomeNodes]);
+    }, [getUpstreamNodes]);
 
     return (
         <div className="ms-param-select">
             <FormControl fullWidth required={required} disabled={disabled}>
                 <InputLabel id="param-select-label">
-                    {label || getIntlText('common.label.value')}
+                    {!isNil(label) ? label : getIntlText('common.label.value')}
                 </InputLabel>
                 <Select<ParamSelectValueType>
                     {...props}
@@ -87,8 +87,19 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
                     notched
                     defaultValue=""
                     labelId="param-select-label"
-                    label={label || getIntlText('common.label.value')}
+                    label={!isNil(label) ? label : getIntlText('common.label.value')}
                     IconComponent={KeyboardArrowDownIcon}
+                    MenuProps={{
+                        className: 'ms-param-select-menu',
+                        anchorOrigin: {
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        },
+                        transformOrigin: {
+                            vertical: 'top',
+                            horizontal: 'right',
+                        },
+                    }}
                 >
                     {renderOptions()}
                 </Select>

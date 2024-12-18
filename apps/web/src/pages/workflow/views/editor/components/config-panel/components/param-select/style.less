@@ -1,8 +1,4 @@
 .@{prefix}-param-select {
-    // .@{mui-prefix}InputBase-root {
-    //     padding-right: @padding-xs;
-    // }
-
     &-option-groupname.@{mui-prefix}ListSubheader-root {
         .text-size(@font-size-sm);
 
@@ -17,7 +13,7 @@
             .text-size(@font-size-base);
 
             .name {
-                max-width: 50%;
+                max-width: 200px;
             }
 
             .type {
@@ -31,6 +27,12 @@
         }
     }
 
+    &-menu {
+        .@{mui-prefix}Paper-root {
+            max-height: 450px;
+        }
+    }
+
     .@{mui-prefix}InputBase-root {
         .@{prefix}-param-select-item {
             display: inline-flex;
@@ -40,17 +42,19 @@
             .text-size(@font-size-base);
 
             .name {
-                color: var(--text-color-secondary);
-
-                &::after {
-                    display: inline-block;
-                    margin: 0 @margin-xxs;
-                    content: '/';
-                }
+                max-width: 120px;
             }
 
             .type {
                 font-size: @font-size-sm;
+
+                &::before {
+                    display: inline-block;
+                    margin: 0 @margin-xxs;
+                    color: var(--text-color-secondary);
+                    content: '/';
+                    .text-size(@font-size-base);
+                }
             }
         }
     }

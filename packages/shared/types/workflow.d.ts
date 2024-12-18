@@ -94,6 +94,16 @@ declare type TriggerNodeDataType = BaseNodeDataType<{
     }[];
 }>;
 
+declare type TimePeriodType =
+    | 'EVERYDAY'
+    | 'Monday'
+    | 'Tuesday'
+    | 'Wednesday'
+    | 'Thursday'
+    | 'Friday'
+    | 'Saturday'
+    | 'Sunday';
+
 /**
  * 定时器节点参数类型
  */
@@ -104,26 +114,18 @@ declare type TimerNodeDataType = BaseNodeDataType<{
      * @param CYCLE 周期执行
      */
     type: 'ONCE' | 'CYCLE';
-    /** 首次执行时间 */
-    firstExecutionTime?: number;
+    /** 执行时间 */
+    executionTime?: number;
     /** 过期时间，默认 2035/01/01 00:00 */
     expireTime?: number;
     /** 周期配置 */
     settings?: {
         /** 执行周期 */
-        period:
-            | 'EVERYDAY'
-            | 'Monday'
-            | 'Tuesday'
-            | 'Wednesday'
-            | 'Thursday'
-            | 'Friday'
-            | 'Saturday'
-            | 'Sunday';
+        period?: TimePeriodType;
         /**
          * 执行时间，该数据为零点到所选时间点的毫秒数，默认 32400000(09:00)
          */
-        time: number;
+        time?: number;
     }[];
 }>;
 

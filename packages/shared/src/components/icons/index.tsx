@@ -92,6 +92,7 @@ export {
     SettingsOutlined as SettingsOutlinedIcon,
     KeyboardArrowUp as KeyboardArrowUpIcon,
     KeyboardArrowDown as KeyboardArrowDownIcon,
+    Sync as SyncIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';

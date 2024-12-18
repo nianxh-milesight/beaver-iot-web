@@ -9,7 +9,7 @@
                 "x": 0,
                 "y": 0
             },
-            "type": "trigger"
+            "type": "timer"
         },
         {
             "id": "2",
@@ -92,6 +92,33 @@
                 "y": 200
             },
             "type": "select"
+        },
+        {
+            "id": "6",
+            "data": {},
+            "position": {
+                "x": 900,
+                "y": 0
+            },
+            "type": "assigner"
+        },
+        {
+            "id": "7",
+            "data": {},
+            "position": {
+                "x": 900,
+                "y": 100
+            },
+            "type": "email"
+        },
+        {
+            "id": "8",
+            "data": {},
+            "position": {
+                "x": 900,
+                "y": 200
+            },
+            "type": "webhook"
         }
     ],
     "edges": [
@@ -121,6 +148,24 @@
             "target": "5",
             "type": "addable",
             "sourceHandle": "case-else"
+        },
+        {
+            "id": "3-6",
+            "source": "3",
+            "target": "6",
+            "type": "addable"
+        },
+        {
+            "id": "4-7",
+            "source": "4",
+            "target": "7",
+            "type": "addable"
+        },
+        {
+            "id": "5-8",
+            "source": "5",
+            "target": "8",
+            "type": "addable"
         }
     ]
 }

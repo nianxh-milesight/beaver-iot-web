@@ -1,14 +1,14 @@
 import React from 'react';
 import { TextField, type TextFieldProps } from '@mui/material';
 
-export type MarkdownEditorProps = TextFieldProps;
+export type CodeEditorProps = TextFieldProps;
 
 /**
- * Markdown Editor Component
+ * Code Editor Component
  *
- * Note: Use in EmailNode
+ * Note: Use in CodeNode, IfelseNode
  */
-const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ ...props }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ ...props }) => {
     return (
         <TextField
             {...props}
@@ -21,4 +21,4 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ ...props }) => {
     );
 };
 
-export default MarkdownEditor;
+export default CodeEditor;
