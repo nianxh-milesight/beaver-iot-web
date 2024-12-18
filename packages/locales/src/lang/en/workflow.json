@@ -70,7 +70,5 @@
     "workflow.label.condition_operator_is_empty": "Is Empty",
     "workflow.label.condition_operator_is_not_empty": "Is Not Empty",
     "workflow.node.config_panel_lable_arguments": "Arguments",
-    "workflow.node.service_call_service_title": "Service Setting",
-    "workflow.node.service_call_Input_title": "Input Variables",
     "workflow.message.import_dsl_error": "The DSL file contains errors. Please update the file and try again."
 }
