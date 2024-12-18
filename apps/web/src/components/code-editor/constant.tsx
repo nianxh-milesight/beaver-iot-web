@@ -29,4 +29,12 @@ export const editorLangOptions: {
         lang: 'mvel',
         label: 'mvel',
     },
+    {
+        lang: 'markdown',
+        label: 'Markdown',
+    },
+    {
+        lang: 'text',
+        label: 'Text',
+    },
 ];
