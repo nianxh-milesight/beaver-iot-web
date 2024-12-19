@@ -14,7 +14,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ ...props }) => {
             {...props}
             multiline
             fullWidth
-            placeholder="Content"
+            placeholder="Please enter"
             rows={5}
             sx={{ margin: 0 }}
         />
