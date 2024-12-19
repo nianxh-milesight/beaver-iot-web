@@ -26,8 +26,7 @@ const useImportFormItems = () => {
             render({ field: { onChange, value }, fieldState: { error } }) {
                 return (
                     <UploadField
-                        // TODO: to be add
-                        // accept=''
+                        accept="application/json"
                         value={value}
                         error={error?.message}
                         uploadIcon={

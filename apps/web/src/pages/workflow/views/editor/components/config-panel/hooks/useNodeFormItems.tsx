@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { type ControllerProps } from 'react-hook-form';
 import { TextField } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
@@ -11,9 +11,10 @@ import {
     EntitySelect,
     MarkdownEditor,
     ParamAssignInput,
-    ParamInput,
     // ParamInputSelect,
     TimerInput,
+    ParamInput,
+    ServiceParamAssignInput,
 } from '../components';
 
 type NodeFormGroupType = {
@@ -29,7 +30,7 @@ export type NodeFormDataProps = Record<string, any>;
 
 const useNodeFormItems = (node?: WorkflowNode) => {
     // const { getIntlText } = useI18n();
-
+    const [serviceKey, setServiceKey] = useState<ApiKey>();
     const formConfigs = useMemo(() => {
         const result: Partial<Record<WorkflowNodeType, NodeFormGroupType[]>> = {
             trigger: [
@@ -130,7 +131,10 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                                     <EntitySelect
                                         filterModel={{ type: 'SERVICE' }}
                                         value={value}
-                                        onChange={onChange}
+                                        onChange={value => {
+                                            setServiceKey(value);
+                                            onChange(value);
+                                        }}
                                     />
                                 );
                             },
@@ -140,7 +144,20 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                 {
                     groupName: 'Input Variables',
                     helperText: 'Please select the service you want to call first.',
-                    children: [],
+                    children: [
+                        {
+                            name: 'paramList',
+                            render({ field: { onChange, value } }) {
+                                return (
+                                    <ServiceParamAssignInput
+                                        serviceKey={serviceKey}
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            },
+                        },
+                    ],
                 },
             ],
             assigner: [
@@ -278,7 +295,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
         };
 
         return result;
-    }, []);
+    }, [serviceKey]);
 
     return !node?.type ? [] : formConfigs[node.type] || [];
 };
