@@ -12,6 +12,7 @@ export {
     CodeEditor,
     CodeEditorToolbar,
     CodeEditorSelect,
+    COMMON_EDITOR_HEADER_CLASS,
     type EditorProps,
     type EditorSupportLang,
     type EditorSelectProps,

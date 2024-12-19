@@ -38,3 +38,6 @@ export const editorLangOptions: {
         label: 'Text',
     },
 ];
+
+/** Common editor header class name  */
+export const COMMON_EDITOR_HEADER_CLASS = 'ms-code-editor-header';
