@@ -44,7 +44,7 @@ export default React.memo(({ visible, ...props }: IProps) => {
     const isEmpty = !getLogListLoading && !scrollItem?.list?.length;
     return (
         <Modal
-            size="lg"
+            size="xl"
             footer={null}
             showCloseIcon
             visible={visible}

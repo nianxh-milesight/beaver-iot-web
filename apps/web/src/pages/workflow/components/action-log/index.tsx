@@ -44,12 +44,13 @@ export default function AccordionUsage({ traceData, workflowData }: IProps) {
             const nestNode = cloneDeep(node) as WorkflowNestNode;
             // TODO name
             const { id, type, $$name } = nestNode || {};
-            const { status, input, output } = traceMap[id] || {};
+            const { status, input, output, time_cost: timeCost } = traceMap[id] || {};
 
             nestNode.attrs = {
                 name: $$name,
                 type: type!,
                 status: status === 'SUCCESS' ? 'success' : 'failed',
+                timeCost,
                 input,
                 output,
             };
@@ -65,6 +66,7 @@ export default function AccordionUsage({ traceData, workflowData }: IProps) {
     };
     /** Generate Tree Data */
     const treeData = useMemo(() => {
+        // TODO Reconstructs the tree generation logic
         const { nodes, edges } = workflowData || {};
         const nestNodes = (nodes || []).map(node => wrapperNode(node));
 

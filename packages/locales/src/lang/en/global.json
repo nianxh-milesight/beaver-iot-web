@@ -161,5 +161,6 @@
     "common.label.create": "Create",
     "common.label.test": "Test",
     "common.label.run": "Run",
-    "common.label.target": "Target"
+    "common.label.target": "Target",
+    "common.label.ms": "ms"
 }

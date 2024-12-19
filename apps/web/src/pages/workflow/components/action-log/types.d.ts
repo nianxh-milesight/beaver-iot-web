@@ -23,6 +23,10 @@ export interface AccordionLog {
      */
     status: LogStatus;
     /**
+     * Node time cost
+     */
+    timeCost: number;
+    /**
      * TODO Input
      */
     input: Record<string, any>;
