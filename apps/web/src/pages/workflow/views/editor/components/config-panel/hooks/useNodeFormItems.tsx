@@ -239,6 +239,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        required
                                         fullWidth
                                         label="Webhook URL"
                                         value={value}
@@ -258,6 +259,17 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                                         onChange={onChange}
                                     />
                                 );
+                            },
+                        },
+                    ],
+                },
+                {
+                    groupName: 'Custom Data',
+                    children: [
+                        {
+                            name: 'custom_data',
+                            render({ field: { onChange, value } }) {
+                                return <ParamAssignInput value={value} onChange={onChange} />;
                             },
                         },
                     ],
