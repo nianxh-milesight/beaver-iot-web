@@ -14,6 +14,7 @@ import {
     // ParamInputSelect,
     TimerInput,
     ParamInput,
+    ServiceEntityCall,
 } from '../components';
 
 type NodeFormGroupType = {
@@ -273,6 +274,14 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                             },
                         },
                     ],
+                },
+            ],
+            service: [
+                {
+                    name: 'service',
+                    render({ field: { onChange, value }, fieldState: { error } }) {
+                        return <ServiceEntityCall required value={value} onChange={onChange} />;
+                    },
                 },
             ],
         };

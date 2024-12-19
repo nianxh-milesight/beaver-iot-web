@@ -16,3 +16,4 @@ export {
     type EntityFilterSelectValueType,
 } from './entity-filter-select';
 export { default as ParamAssignInput, type ParamAssignInputValueType } from './param-assign-input';
+export { default as ServiceEntityCall } from './service-entity-call';
