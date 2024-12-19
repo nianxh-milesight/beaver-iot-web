@@ -171,20 +171,24 @@ declare type WorkflowFilterOperator =
 declare type IfElseNodeDataType = BaseNodeDataType<{
     when: {
         id: ApiKey;
-        [logic: WorkflowLogicOperator]: {
-            /**
-             * 表达式类型（默认 `condition`，且当前仅支持 `condition`）
-             * @param mvel mvel 表达式
-             * @param condition 条件表达式
-             */
-            expressionType: 'mvel' | 'condition';
-            /** 表达式值 */
-            expressionValue: {
-                id: ApiKey;
-                key: ApiKey;
-                operator: WorkflowFilterOperator;
-                value?: string;
-            };
+        logicOperator: WorkflowLogicOperator;
+        /**
+         * 表达式类型（默认 `condition`）
+         * @param mvel mvel 表达式
+         * @param condition 条件表达式
+         */
+        expressionType: 'mvel' | 'condition';
+        conditions: {
+            id: ApiKey;
+            expressionValue?:
+                | string
+                | {
+                      key?: ApiKey;
+                      operator?: WorkflowFilterOperator;
+                      value?: string;
+                  };
+            /** 表达式备注 */
+            expressionDescription?: string;
         }[];
     }[];
     otherwise: {

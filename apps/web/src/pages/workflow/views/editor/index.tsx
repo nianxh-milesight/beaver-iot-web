@@ -46,11 +46,32 @@ const WorkflowEditor = () => {
     const { getIntlText } = useI18n();
     const nodeTypes = useNodeTypes();
     const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
-    const { isValidConnection, checkNestedParallelLimit } = useWorkflow();
+    const {
+        isValidConnection,
+        checkParallelLimit,
+        checkNestedParallelLimit,
+        checkEntryNodeNumberLimit,
+        checkFreeNodeLimit,
+    } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
         useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
+    const checkWorkflowValid = useCallback(() => {
+        const { nodes, edges } = toObject();
+        if (!checkEntryNodeNumberLimit(nodes)) return false;
+        if (checkFreeNodeLimit(nodes)) return false;
+        if (!checkNestedParallelLimit(nodes, edges)) return false;
+        if (nodes.some(node => !checkParallelLimit(node.id, undefined, edges))) return false;
+
+        return true;
+    }, [
+        toObject,
+        checkEntryNodeNumberLimit,
+        checkFreeNodeLimit,
+        checkNestedParallelLimit,
+        checkParallelLimit,
+    ]);
 
     // ---------- Fetch Data ----------
     const [searchParams] = useSearchParams();
@@ -119,23 +140,25 @@ const WorkflowEditor = () => {
     const [designMode, setDesignMode] = useState<DesignMode>('canvas');
     const handleDesignModeChange = useCallback(
         (mode: DesignMode) => {
-            const data = toObject();
+            if (!checkWorkflowValid()) return;
 
-            // TODO: check the workflow json data is valid
+            const data = toObject();
+            // TODO: check the nodes json data is valid
             console.log('workflow data', data);
+
             setDesignMode(mode);
         },
-        [toObject],
+        [toObject, checkWorkflowValid],
     );
 
     // ---------- Save Workflow ----------
     const handleSave = () => {
-        const data = toObject();
+        if (!checkWorkflowValid()) return;
 
-        if (!checkNestedParallelLimit(data.nodes, data.edges)) return;
-        // TODO: check the workflow json is valid
+        const { nodes, edges, viewport } = toObject();
 
-        console.log('workflow data', data);
+        // TODO: check the nodes data is valid
+        console.log('workflow data', { nodes, edges, viewport });
     };
 
     return (
@@ -190,6 +213,17 @@ const WorkflowEditor = () => {
                         <ConfigPanel />
                         <EntryPanel loading={!!wid || loading} />
                     </ReactFlow>
+                    {designMode === 'advanced' && (
+                        <div className="ms-workflow-advance">
+                            <div
+                                className="ms-workflow-advance-editor"
+                                contentEditable
+                                suppressContentEditableWarning
+                            >
+                                {JSON.stringify(toObject(), null, 4)}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
