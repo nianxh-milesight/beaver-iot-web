@@ -18,3 +18,4 @@ export {
 export { default as ParamAssignInput, type ParamAssignInputValueType } from './param-assign-input';
 export { default as EmailTypeSelect, EMAIL_TYPE } from './email-type-select';
 export { default as EmailContent } from './email-content';
+export { default as ServiceParamAssignInput } from './service-param-assign-input';

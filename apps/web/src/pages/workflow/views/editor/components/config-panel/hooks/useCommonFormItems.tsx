@@ -27,7 +27,7 @@ const useCommonFormItems = () => {
                         <TextField
                             required
                             fullWidth
-                            type="text"
+                            autoComplete="off"
                             label={getIntlText('common.label.name')}
                             error={!!error}
                             helperText={error ? error.message : null}
@@ -44,7 +44,7 @@ const useCommonFormItems = () => {
                     return (
                         <TextField
                             fullWidth
-                            type="text"
+                            autoComplete="off"
                             label={getIntlText('common.label.remark')}
                             error={!!error}
                             helperText={error ? error.message : null}

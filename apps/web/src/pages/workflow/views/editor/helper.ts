@@ -1,3 +1,4 @@
+import { genRandomString } from '@milesight/shared/src/utils/tools';
 import {
     checkRequired,
     checkRangeLength,
@@ -39,4 +40,12 @@ export const parseRefParamKey = (key: string) => {
     if (!isRefParamKey(key)) return {};
     const [nodeType, nodeId, valueKey] = key.slice(1).split(PARAM_REFERENCE_DIVIDER);
     return { nodeType, nodeId, valueKey };
+};
+
+/**
+ * Generate Workflow Node, Edge or Condition uuid, format as `{node}:{8-bit random string}:{timestamp}`
+ * @param type node/edge
+ */
+export const genUuid = (type: 'node' | 'edge' | 'condition' | 'subcondition') => {
+    return `${type}:${genRandomString(8, { lowerCase: true })}:${Date.now()}`;
 };
