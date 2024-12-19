@@ -123,18 +123,14 @@ const Workflow = () => {
         );
     }, [getIntlText, handleDeleteConfirm, selectedIds]);
     const handlerImportModal = useCallback(
-        (isOpen: boolean, param?: ImportFormDataProps) => {
-            if (param) {
-                // TODO: Pass the DSL to the workflow.
-                // valid method to be add
-                const valid = true;
-                if (valid) {
-                    navigate('/workflow/editor', {
-                        state: {
-                            file: param?.file?.[0] ?? null,
-                        },
-                    });
-                }
+        (isOpen: boolean, contains?: WorkflowSchema) => {
+            if (contains) {
+                // TODO: wid should be deleted
+                navigate('/workflow/editor?wid=12121', {
+                    state: {
+                        workflowSchema: contains,
+                    },
+                });
             }
             setImportModal(isOpen);
         },

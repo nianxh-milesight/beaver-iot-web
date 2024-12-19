@@ -94,6 +94,16 @@ declare type TriggerNodeDataType = BaseNodeDataType<{
     }[];
 }>;
 
+declare type TimePeriodType =
+    | 'EVERYDAY'
+    | 'Monday'
+    | 'Tuesday'
+    | 'Wednesday'
+    | 'Thursday'
+    | 'Friday'
+    | 'Saturday'
+    | 'Sunday';
+
 /**
  * 定时器节点参数类型
  */
@@ -104,26 +114,18 @@ declare type TimerNodeDataType = BaseNodeDataType<{
      * @param CYCLE 周期执行
      */
     type: 'ONCE' | 'CYCLE';
-    /** 首次执行时间 */
-    firstExecutionTime?: number;
+    /** 执行时间 */
+    executionTime?: number;
     /** 过期时间，默认 2035/01/01 00:00 */
     expireTime?: number;
     /** 周期配置 */
     settings?: {
         /** 执行周期 */
-        period:
-            | 'EVERYDAY'
-            | 'Monday'
-            | 'Tuesday'
-            | 'Wednesday'
-            | 'Thursday'
-            | 'Friday'
-            | 'Saturday'
-            | 'Sunday';
+        period?: TimePeriodType;
         /**
          * 执行时间，该数据为零点到所选时间点的毫秒数，默认 32400000(09:00)
          */
-        time: number;
+        time?: number;
     }[];
 }>;
 
@@ -169,20 +171,24 @@ declare type WorkflowFilterOperator =
 declare type IfElseNodeDataType = BaseNodeDataType<{
     when: {
         id: ApiKey;
-        [logic: WorkflowLogicOperator]: {
-            /**
-             * 表达式类型（默认 `condition`，且当前仅支持 `condition`）
-             * @param mvel mvel 表达式
-             * @param condition 条件表达式
-             */
-            expressionType: 'mvel' | 'condition';
-            /** 表达式值 */
-            expressionValue: {
-                id: ApiKey;
-                key: ApiKey;
-                operator: WorkflowFilterOperator;
-                value?: string;
-            };
+        logicOperator: WorkflowLogicOperator;
+        /**
+         * 表达式类型（默认 `condition`）
+         * @param mvel mvel 表达式
+         * @param condition 条件表达式
+         */
+        expressionType: 'mvel' | 'condition';
+        conditions: {
+            id: ApiKey;
+            expressionValue?:
+                | string
+                | {
+                      key?: ApiKey;
+                      operator?: WorkflowFilterOperator;
+                      value?: string;
+                  };
+            /** 表达式备注 */
+            expressionDescription?: string;
         }[];
     }[];
     otherwise: {

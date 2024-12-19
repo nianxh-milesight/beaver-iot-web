@@ -113,6 +113,8 @@ declare interface EntityData {
     entity_key: string;
     /** 实体名称 */
     entity_name: string;
+    /** Entity Type */
+    entity_type: EntityType;
     /** 实体值属性 */
     entity_value_attribute: string;
     /** 实体值类型 */

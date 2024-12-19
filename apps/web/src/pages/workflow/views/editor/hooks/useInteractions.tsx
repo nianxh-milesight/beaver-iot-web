@@ -8,7 +8,7 @@ import {
 } from '@xyflow/react';
 import { useSize } from 'ahooks';
 import { cloneDeep, maxBy } from 'lodash-es';
-import { genRandomString } from '@milesight/shared/src/utils/tools';
+import { genUuid } from '../helper';
 import {
     NODE_SPACING_X,
     NODE_SPACING_Y,
@@ -44,14 +44,6 @@ type AddNodeFunc = (
 ) => void;
 
 /**
- * Generate Workflow Node or Edge uuid, format as `{node}:{timestamp}:{8-bit random string}`
- * @param type node/edge
- */
-const genUuid = (type: 'node' | 'edge') => {
-    return `${type}:${Date.now()}:${genRandomString(8, { lowerCase: true })}`;
-};
-
-/**
  * Workflow Interactions Hook
  */
 const useInteractions = () => {
@@ -65,7 +57,7 @@ const useInteractions = () => {
         fitView,
         flowToScreenPosition,
     } = useReactFlow<WorkflowNode, WorkflowEdge>();
-    const { checkNestedParallelLimit } = useWorkflow();
+    const { checkParallelLimit, checkNestedParallelLimit } = useWorkflow();
     const { width: bodyWidth, height: bodyHeight } = useSize(document.querySelector('body')) || {};
 
     // Handle nodes connect
@@ -218,6 +210,8 @@ const useInteractions = () => {
                 };
                 const outgoers = getOutgoers(prevNode, nodes, edges);
 
+                if (!checkParallelLimit(prevNodeId!, prevNodeSourceHandle)) return;
+
                 if (!outgoers.length) {
                     newNode.position = {
                         x:
@@ -270,6 +264,7 @@ const useInteractions = () => {
             setEdges,
             fitView,
             flowToScreenPosition,
+            checkParallelLimit,
             checkNestedParallelLimit,
         ],
     );

@@ -3,56 +3,50 @@
         {
             "id": "1",
             "data": {
-                "label": "Hello"
+                "name": "Hello"
             },
             "position": {
                 "x": 0,
                 "y": 0
             },
-            "type": "trigger"
+            "type": "timer"
         },
         {
             "id": "2",
             "data": {
-                "label": "World",
-                "cases": [
-                    {
-                        "id": "case-1",
-                        "conditions:": [
-                            {
-                                "id": "condition-1",
-                                "key": "var1",
-                                "value": "a",
-                                "operator": "CONTAINS"
-                            },
-                            {
-                                "id": "condition-2",
-                                "key": "var2",
-                                "value": "b",
-                                "operator": "START_WITH"
-                            }
-                        ],
-                        "logic": "AND"
-                    },
-                    {
-                        "id": "case-2",
-                        "conditions:": [
-                            {
-                                "id": "condition-3",
-                                "key": "var4",
-                                "value": "aa",
-                                "operator": "CONTAINS"
-                            },
-                            {
-                                "id": "condition-4",
-                                "key": "var5",
-                                "value": "bb",
-                                "operator": "START_WITH"
-                            }
-                        ],
-                        "logic": "OR"
+                "name": "World",
+                "parameters": {
+                    "when": [
+                        {
+                            "id": "",
+                            "logicOperator": "AND",
+                            "conditions": [
+                                {
+                                    "expressionType": "mvel",
+                                    "expressionValue": "request.body['a.b.c'] != null"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "",
+                            "logicOperator": "OR",
+                            "conditions": [
+                                {
+                                    "expressionType": "condition",
+                                    "expressionValue": {
+                                        "id": "",
+                                        "key": "",
+                                        "value": "",
+                                        "operator": ""
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "otherwise": {
+                        "id": ""
                     }
-                ]
+                }
             },
             "position": {
                 "x": 300,
@@ -63,7 +57,7 @@
         {
             "id": "3",
             "data": {
-                "label": "Code"
+                "name": "Code"
             },
             "position": {
                 "x": 600,
@@ -74,7 +68,7 @@
         {
             "id": "4",
             "data": {
-                "label": "Service"
+                "name": "Service"
             },
             "position": {
                 "x": 600,
@@ -85,13 +79,40 @@
         {
             "id": "5",
             "data": {
-                "label": "Select"
+                "name": "Select"
             },
             "position": {
                 "x": 600,
                 "y": 200
             },
             "type": "select"
+        },
+        {
+            "id": "6",
+            "data": {},
+            "position": {
+                "x": 900,
+                "y": 0
+            },
+            "type": "assigner"
+        },
+        {
+            "id": "7",
+            "data": {},
+            "position": {
+                "x": 900,
+                "y": 100
+            },
+            "type": "email"
+        },
+        {
+            "id": "8",
+            "data": {},
+            "position": {
+                "x": 900,
+                "y": 200
+            },
+            "type": "webhook"
         }
     ],
     "edges": [
@@ -121,6 +142,24 @@
             "target": "5",
             "type": "addable",
             "sourceHandle": "case-else"
+        },
+        {
+            "id": "3-6",
+            "source": "3",
+            "target": "6",
+            "type": "addable"
+        },
+        {
+            "id": "4-7",
+            "source": "4",
+            "target": "7",
+            "type": "addable"
+        },
+        {
+            "id": "5-8",
+            "source": "5",
+            "target": "8",
+            "type": "addable"
         }
     ]
 }
