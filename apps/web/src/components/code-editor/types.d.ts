@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ReactCodeMirrorProps, EditorView, EditorState } from '@uiw/react-codemirror';
 import type { SelectChangeEvent } from '@mui/material';
+import { type SelectProps } from '@milesight/shared/src/components';
 
 /** Supported languages for the code editor. */
 export type EditorSupportLang =
@@ -52,7 +53,7 @@ export interface EditorProps extends EditorContentProps {
 /** Interface for editor language options. */
 export interface IEditorLangOption {
     /** The language type. */
-    lang: EditorSupportLang;
+    value: EditorSupportLang;
     /** The label for the language. */
     label: string;
 }
@@ -72,7 +73,7 @@ export interface EditorSelectProps {
      * @param option - The language option.
      * @returns The rendered node.
      */
-    renderOptions?: (option: IEditorLangOption) => React.ReactNode;
+    renderOptions?: SelectProps<EditorSupportLang>['renderOptions'];
 }
 
 /** Props for the code editor toolbar. */

@@ -2,39 +2,39 @@ import type { EditorSupportLang } from './types';
 
 /** Editor language options */
 export const editorLangOptions: {
-    lang: EditorSupportLang;
+    value: EditorSupportLang;
     label: string;
 }[] = [
     {
-        lang: 'javascript',
+        value: 'javascript',
         label: 'JavaScript',
     },
     {
-        lang: 'python',
+        value: 'python',
         label: 'Python',
     },
     {
-        lang: 'json',
+        value: 'json',
         label: 'JSON',
     },
     {
-        lang: 'yaml',
+        value: 'yaml',
         label: 'YAML',
     },
     {
-        lang: 'groovy',
+        value: 'groovy',
         label: 'Groovy',
     },
     {
-        lang: 'mvel',
+        value: 'mvel',
         label: 'mvel',
     },
     {
-        lang: 'markdown',
+        value: 'markdown',
         label: 'Markdown',
     },
     {
-        lang: 'text',
+        value: 'text',
         label: 'Text',
     },
 ];
