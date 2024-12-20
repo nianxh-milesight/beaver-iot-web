@@ -36,17 +36,17 @@ export const DEFAULT_NODE_WIDTH = 240;
 /**
  * The default node height
  */
-export const DEFAULT_NODE_HEIGHT = 50;
+export const DEFAULT_NODE_HEIGHT = 48;
 
 /**
  * Node X-axis spacing
  */
-export const NODE_SPACING_X = 50;
+export const NODE_SPACING_X = 48;
 
 /**
  * Node Y-axis spacing
  */
-export const NODE_SPACING_Y = 50;
+export const NODE_SPACING_Y = 48;
 
 /**
  * Global parameter reference prefix
@@ -57,3 +57,47 @@ export const PARAM_REFERENCE_PREFIX = '@';
  * Global parameter reference key divider
  */
 export const PARAM_REFERENCE_DIVIDER = '.';
+
+/**
+ * Logic operator map
+ */
+export const logicOperatorMap: Partial<Record<WorkflowLogicOperator, { labelIntlKey: string }>> = {
+    OR: {
+        labelIntlKey: 'workflow.label.logic_keyword_or',
+    },
+    AND: {
+        labelIntlKey: 'workflow.label.logic_keyword_and',
+    },
+};
+
+/**
+ * Condition operator map
+ */
+export const conditionOperatorMap: Partial<
+    Record<WorkflowFilterOperator, { labelIntlKey: string }>
+> = {
+    CONTAINS: {
+        labelIntlKey: 'workflow.label.condition_operator_contains',
+    },
+    NOT_CONTAINS: {
+        labelIntlKey: 'workflow.label.condition_operator_not_contains',
+    },
+    START_WITH: {
+        labelIntlKey: 'workflow.label.condition_operator_start_with',
+    },
+    END_WITH: {
+        labelIntlKey: 'workflow.label.condition_operator_end_with',
+    },
+    IS: {
+        labelIntlKey: 'workflow.label.condition_operator_is',
+    },
+    IS_NOT: {
+        labelIntlKey: 'workflow.label.condition_operator_is_not',
+    },
+    IS_EMPTY: {
+        labelIntlKey: 'workflow.label.condition_operator_is_empty',
+    },
+    IS_NOT_EMPTY: {
+        labelIntlKey: 'workflow.label.condition_operator_is_not_empty',
+    },
+};

@@ -6,6 +6,7 @@
 import { stringify } from 'qs';
 import axios, { type Canceler } from 'axios';
 import { camelCase, isPlainObject } from 'lodash-es';
+import { PRIVATE_PROPERTY_PREFIX } from '../config';
 
 /**
  * 判断是否为本地 IP 地址
@@ -687,4 +688,14 @@ export const withPromiseResolvers = <T>() => {
     });
 
     return { promise, resolve: resolve!, reject: reject! };
+};
+
+/**
+ * Check if a key is a frontend private property
+ */
+export const checkPrivateProperty = (key?: string) => {
+    if (!key) return false;
+    const regx = new RegExp(`^\\${PRIVATE_PROPERTY_PREFIX}`);
+
+    return regx.test(key);
 };
