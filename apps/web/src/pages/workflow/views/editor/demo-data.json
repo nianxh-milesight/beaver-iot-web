@@ -14,39 +14,7 @@
         {
             "id": "2",
             "data": {
-                "name": "World",
-                "parameters": {
-                    "when": [
-                        {
-                            "id": "",
-                            "logicOperator": "AND",
-                            "conditions": [
-                                {
-                                    "expressionType": "mvel",
-                                    "expressionValue": "request.body['a.b.c'] != null"
-                                }
-                            ]
-                        },
-                        {
-                            "id": "",
-                            "logicOperator": "OR",
-                            "conditions": [
-                                {
-                                    "expressionType": "condition",
-                                    "expressionValue": {
-                                        "id": "",
-                                        "key": "",
-                                        "value": "",
-                                        "operator": ""
-                                    }
-                                }
-                            ]
-                        }
-                    ],
-                    "otherwise": {
-                        "id": ""
-                    }
-                }
+                "name": "World"
             },
             "position": {
                 "x": 300,

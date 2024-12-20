@@ -46,6 +46,6 @@ export const parseRefParamKey = (key: string) => {
  * Generate Workflow Node, Edge or Condition uuid, format as `{node}:{8-bit random string}:{timestamp}`
  * @param type node/edge
  */
-export const genUuid = (type: 'node' | 'edge' | 'condition' | 'subcondition') => {
-    return `${type}:${genRandomString(8, { lowerCase: true })}:${Date.now()}`;
+export const genUuid = (type: 'node' | 'edge' | 'condition' | 'subcondition' | 'temp') => {
+    return `${type}_${genRandomString(8, { lowerCase: true })}`;
 };

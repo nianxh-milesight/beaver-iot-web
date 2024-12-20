@@ -1,20 +1,135 @@
-import React from 'react';
-import { Position, type Node, type NodeProps } from '@xyflow/react';
+import React, { useMemo, useEffect } from 'react';
+import { Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
+import { isString } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
+import { Tooltip } from '@/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
+import { logicOperatorMap, conditionOperatorMap, DEFAULT_NODE_HEIGHT } from '../../constants';
+import useWorkflow from '../../hooks/useWorkflow';
 import Handle from '../handle';
 import NodeContainer from '../node-container';
+import './style.less';
 
-export type IfElseNode = Node<IfElseNodeDataType, 'ifelse'>;
+export type IfElseNode = WorkflowNode<'ifelse'>;
+
+const NODE_HEADER_HEIGHT = 12 + 24 + 8;
+
+const CONDITION_TITLE_HEIGHT = 22;
+const CONDITION_HEIGHT = 28;
+const CONDITION_GAP = 4;
+const CONDITION_BLOCK_GAP = 8;
 
 const nodeConfig = basicNodeConfigs.ifelse;
+
+const DEFAULT_IF_SOURCE_HANDLE_ID = '$temp:if';
+const DEFAULT_ELSE_SOURCE_HANDLE_ID = '$temp:else';
+
+const calculateHandleTop = (blockIndex: number, preConditionCount: number) => {
+    return (
+        NODE_HEADER_HEIGHT +
+        blockIndex * CONDITION_BLOCK_GAP +
+        (blockIndex + 0.5) * CONDITION_TITLE_HEIGHT +
+        preConditionCount * (CONDITION_HEIGHT + CONDITION_GAP)
+    );
+};
 
 /**
  * IFELSE Node
  */
 const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
+    const { id: nodeId, selected } = props;
     const { getIntlText } = useI18n();
-    console.log(props);
+
+    // ---------- Render Handles ----------
+    const { when, otherwise } = props.data.parameters?.settings || {};
+    const whenList = useMemo(
+        () =>
+            when ||
+            ([{ id: DEFAULT_IF_SOURCE_HANDLE_ID, conditions: [] }] as unknown as NonNullable<
+                typeof when
+            >),
+        [when],
+    );
+    const otherwiseItem = useMemo(
+        () => otherwise || { id: DEFAULT_ELSE_SOURCE_HANDLE_ID },
+        [otherwise],
+    );
+    const handles = useMemo(() => {
+        const result = [
+            <Handle
+                type="target"
+                position={Position.Left}
+                nodeProps={props}
+                style={{ top: DEFAULT_NODE_HEIGHT / 2 }}
+            />,
+        ];
+
+        whenList.forEach((block, index) => {
+            const preConditionCount = whenList.slice(0, index).reduce((acc, item) => {
+                const count = item.expressionType === 'mvel' ? 1 : item.conditions?.length || 1;
+                return acc + count;
+            }, 0);
+
+            result.push(
+                <Handle
+                    id={`${block.id}`}
+                    type="source"
+                    position={Position.Right}
+                    nodeProps={props}
+                    style={{ top: calculateHandleTop(index, preConditionCount) }}
+                />,
+            );
+        });
+
+        const preConditionCount = whenList.reduce((acc, item) => {
+            const count = item.expressionType === 'mvel' ? 1 : item.conditions?.length || 1;
+            return acc + count;
+        }, 0);
+        result.push(
+            <Handle
+                id={`${otherwiseItem.id}`}
+                type="source"
+                position={Position.Right}
+                nodeProps={props}
+                style={{ top: calculateHandleTop(whenList?.length || 1, preConditionCount) - 1 }}
+            />,
+        );
+        return result;
+    }, [whenList.length, otherwiseItem.id]);
+
+    // ---------- Update Edges ----------
+    const { getUpstreamNodeParams } = useWorkflow();
+    const { getNode, getEdges, setEdges, updateEdge } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const updateNodeInternals = useUpdateNodeInternals();
+    const [, nodeParams] = getUpstreamNodeParams(getNode(props.id));
+
+    // Replace the temp handle id to real id
+    useEffect(() => {
+        if (!when?.length || !otherwise) return;
+        const edges = [...getEdges()];
+        const tempIfEdge = edges.find(
+            edge => edge.source === nodeId && edge.sourceHandle === DEFAULT_IF_SOURCE_HANDLE_ID,
+        );
+        const tempElseEdge = edges.find(
+            edge => edge.source === nodeId && edge.sourceHandle === DEFAULT_ELSE_SOURCE_HANDLE_ID,
+        );
+
+        if (!tempIfEdge || !tempElseEdge) return;
+
+        updateEdge(tempIfEdge.id, {
+            sourceHandle: `${when[0].id || DEFAULT_IF_SOURCE_HANDLE_ID}`,
+        });
+        updateEdge(tempElseEdge.id, {
+            sourceHandle: `${otherwise.id || DEFAULT_ELSE_SOURCE_HANDLE_ID}`,
+        });
+        updateNodeInternals(nodeId);
+    }, [nodeId, when, otherwise, getEdges, updateEdge, updateNodeInternals]);
+
+    // Update handles
+    useEffect(() => {
+        if (selected) return;
+        updateNodeInternals(nodeId);
+    }, [nodeId, selected, when, updateNodeInternals]);
 
     return (
         <NodeContainer
@@ -23,34 +138,99 @@ const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
             icon={nodeConfig.icon}
             iconBgColor={nodeConfig.iconBgColor}
             nodeProps={props}
-            handles={[
-                <Handle type="target" position={Position.Left} nodeProps={props} />,
-                // TODO: 根据条件动态渲染多个操作柄
-                <Handle
-                    id="case-1"
-                    type="source"
-                    position={Position.Right}
-                    nodeProps={props}
-                    style={{ top: 20 }}
-                />,
-                <Handle
-                    id="case-2"
-                    type="source"
-                    position={Position.Right}
-                    nodeProps={props}
-                    style={{ top: 40 }}
-                />,
-                <Handle
-                    id="case-else"
-                    type="source"
-                    position={Position.Right}
-                    nodeProps={props}
-                    style={{ top: 60 }}
-                />,
-            ]}
+            handles={handles}
         >
-            {/* TODO: render conditions detail... */}
-            <span>render cases...</span>
+            <div className="ms-condition-block-root">
+                {whenList?.map((block, blockIndex) => (
+                    <div className="ms-condition-block" key={block.id}>
+                        <div className="ms-condition-block-title">
+                            {blockIndex === 0
+                                ? getIntlText('workflow.label.logic_keyword_if')
+                                : getIntlText('workflow.label.logic_keyword_elseif')}
+                        </div>
+                        <div className="ms-condition-list">
+                            {!block.conditions.length && (
+                                <div className="ms-condition-item">
+                                    <span className="placeholder">
+                                        {getIntlText('workflow.editor.valid.condition_not_setup')}
+                                    </span>
+                                </div>
+                            )}
+                            {block.conditions?.map((condition, index) => {
+                                const { expressionValue, expressionDescription } = condition;
+                                const param = isString(expressionValue)
+                                    ? undefined
+                                    : nodeParams?.find(
+                                          param => param.valueKey === expressionValue?.key,
+                                      );
+                                const operatorText =
+                                    isString(expressionValue) || !expressionValue?.operator
+                                        ? undefined
+                                        : getIntlText(
+                                              conditionOperatorMap[expressionValue.operator]
+                                                  ?.labelIntlKey || '',
+                                          );
+                                const logicOperatorText = getIntlText(
+                                    logicOperatorMap[block.logicOperator]?.labelIntlKey || '',
+                                );
+                                const isEmpty = isString(expressionValue)
+                                    ? !expressionValue || !expressionDescription
+                                    : !expressionValue?.key ||
+                                      !expressionValue?.operator ||
+                                      !expressionValue?.value;
+
+                                return (
+                                    <div className="ms-condition-item" key={condition.id}>
+                                        {isEmpty ? (
+                                            <span className="placeholder">
+                                                {getIntlText(
+                                                    'workflow.editor.valid.condition_not_setup',
+                                                )}
+                                            </span>
+                                        ) : isString(expressionValue) ? (
+                                            <Tooltip
+                                                autoEllipsis
+                                                className="description"
+                                                title={expressionDescription}
+                                            />
+                                        ) : (
+                                            <>
+                                                <Tooltip
+                                                    autoEllipsis
+                                                    className="name"
+                                                    title={param?.valueName || expressionValue?.key}
+                                                />
+                                                <span className="operator">{operatorText}</span>
+                                                <Tooltip autoEllipsis className="value" title="" />
+                                                {index === block.conditions.length && (
+                                                    <span className="logic-operator">
+                                                        {logicOperatorText}
+                                                    </span>
+                                                )}
+                                                <Tooltip
+                                                    autoEllipsis
+                                                    className="value"
+                                                    title={expressionValue?.value}
+                                                />
+                                            </>
+                                        )}
+                                        {index !== block.conditions.length - 1 && (
+                                            <span className="logic-operator">
+                                                {logicOperatorText}
+                                            </span>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+                <div className="ms-condition-block">
+                    <div className="ms-condition-block-title">
+                        {getIntlText('workflow.label.logic_keyword_else')}
+                    </div>
+                </div>
+            </div>
         </NodeContainer>
     );
 };

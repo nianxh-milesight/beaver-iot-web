@@ -68,7 +68,8 @@ const ConfigPanel = () => {
             formDataInit.current = false;
             return;
         }
-        const nodeData = selectedNode.data;
+        const { name, remark, parameters } = selectedNode.data || {};
+        const data: Record<string, any> = { name, remark, ...parameters };
 
         reset();
         /**
@@ -76,8 +77,8 @@ const ConfigPanel = () => {
          * ensure that the initial data is filled in after the rendering is complete.
          */
         setTimeout(() => {
-            Object.keys(nodeData).forEach(key => {
-                setValue(key, nodeData[key]);
+            Object.keys(data).forEach(key => {
+                setValue(key, data[key]);
             });
             formDataInit.current = true;
         }, 0);
@@ -87,8 +88,9 @@ const ConfigPanel = () => {
     useDebounceEffect(
         () => {
             if (!openPanel || !formDataInit.current) return;
+            const { name, remark, ...formData } = latestFormData || {};
 
-            updateNodeData(selectedNode.id, latestFormData || {});
+            updateNodeData(selectedNode.id, { name, remark, parameters: formData });
         },
         [openPanel, selectedNode, latestFormData, updateNodeData],
         { wait: 300 },

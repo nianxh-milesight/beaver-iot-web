@@ -17,7 +17,7 @@ type ParamInputSelectValueType =
 
 type OptionItemType = {
     nodeId: ApiKey;
-    nodeName: string;
+    nodeName?: string;
     nodeType?: WorkflowNodeType;
     valueName?: string;
     valueType?: string;
@@ -68,7 +68,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
     ...props
 }) => {
     const { getIntlText } = useI18n();
-    const { getUpstreamNodes } = useWorkflow();
+    const { getUpstreamNodeParams } = useWorkflow();
     const containerRef = useRef<HTMLDivElement>(null);
     const [data, setData] = useControllableValue<ParamInputSelectValueType>(props);
     const [inputValue, setInputValue] = useState<string>('');
@@ -77,14 +77,13 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
     const { width: containerWidth } = useSize(containerRef) || {};
 
     const [options, renderedOptions] = useMemo(() => {
-        const incomeNodes = getUpstreamNodes();
-        const result = incomeNodes.reduce((acc, node) => {
-            // TODO: get the correct nodes params
-            demoOutputs.forEach(output => {
+        const [nodeParams] = getUpstreamNodeParams();
+        const result = nodeParams?.reduce((acc, param) => {
+            param.outputs?.forEach(output => {
                 acc.push({
-                    nodeId: node.id,
-                    nodeName: node.data?.name,
-                    nodeType: node.type,
+                    nodeId: param.nodeId,
+                    nodeName: param.nodeName,
+                    nodeType: param.nodeType,
                     valueName: output.name,
                     valueType: output.type,
                     valueKey: output.key,
@@ -94,27 +93,25 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
         }, [] as OptionItemType[]);
 
         // TODO: render Empty component when the options is empty
-        const renderedOptions = incomeNodes.reduce((acc, node) => {
+        const renderedOptions = nodeParams?.reduce((acc, node) => {
             acc.push(
-                <ListSubheader key={node.id} className="ms-param-input-select-option-groupname">
-                    {node.type}
+                <ListSubheader key={node.nodeId} className="ms-param-input-select-option-groupname">
+                    {node.nodeType}
                 </ListSubheader>,
             );
 
-            // TODO: get the correct nodes params
-            demoOutputs.forEach(output => {
+            node.outputs.forEach(output => {
                 acc.push(
                     <MenuItem
                         className="ms-param-input-select-option"
-                        key={genRefParamKey(node.type!, node.id, output.key)}
+                        key={output.key}
                         selected={
-                            node.id === selectValue?.nodeId && output.key === selectValue?.valueKey
+                            node.nodeId === selectValue?.nodeId &&
+                            output.key === selectValue?.valueKey
                         }
                         onClick={() => {
                             setAnchorEl(null);
-                            setData({
-                                ref: genRefParamKey(node.type!, node.id, output.key),
-                            });
+                            setData({ ref: output.key });
                         }}
                     >
                         <div className="ms-param-input-select-item">
@@ -128,7 +125,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
         }, [] as React.ReactNode[]);
 
         return [result, renderedOptions];
-    }, [selectValue, getUpstreamNodes, setData]);
+    }, [selectValue, getUpstreamNodeParams, setData]);
 
     useLayoutEffect(() => {
         // Direct input value
@@ -141,12 +138,10 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
         // Reference to an entity
         if (data?.ref) {
             setInputValue('');
-            const option = options.find(
-                item => genRefParamKey(item.nodeType!, item.nodeId, item.valueKey!) === data.ref,
-            );
+            const option = options?.find(item => item.valueKey === data.ref);
 
             setSelectValue(val => {
-                if (val && genRefParamKey(val.nodeType!, val.nodeId, val.valueKey!) === data.ref) {
+                if (val && val.valueKey === data.ref) {
                     return val;
                 }
                 return option;
