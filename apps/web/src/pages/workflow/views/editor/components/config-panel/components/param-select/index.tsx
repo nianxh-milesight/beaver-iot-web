@@ -16,17 +16,6 @@ import './style.less';
 
 type ParamSelectValueType = string;
 
-type OptionItemType = {
-    nodeId: ApiKey;
-    nodeName?: string;
-    nodeType?: WorkflowNodeType;
-    outputs: {
-        name: string;
-        type: string;
-        key: string;
-    }[];
-};
-
 export type ParamSelectProps = SelectProps<ParamSelectValueType>;
 
 /**
@@ -36,31 +25,13 @@ export type ParamSelectProps = SelectProps<ParamSelectValueType>;
  */
 const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ...props }) => {
     const { getIntlText } = useI18n();
-    const { getUpstreamNodes } = useWorkflow();
+    const { getUpstreamNodeParams } = useWorkflow();
 
     const renderOptions = useCallback(() => {
-        const incomeNodes = getUpstreamNodes();
-        // TODO: get the correct nodes params
-        const data: OptionItemType[] = incomeNodes.map(node => ({
-            nodeId: node.id,
-            nodeName: node.data?.name,
-            nodeType: node.type,
-            outputs: [
-                {
-                    name: 'output112123123123123123123123131231231',
-                    type: 'string',
-                    key: `${node.type}.${node.id}.1132e3123132`,
-                },
-                {
-                    name: 'output22',
-                    type: 'number',
-                    key: `${node.type}.${node.id}.11eyu3123132`,
-                },
-            ],
-        }));
+        const [data] = getUpstreamNodeParams();
 
         // TODO: render Empty component when the options is empty
-        return data.map(item => [
+        return data?.map(item => [
             <ListSubheader className="ms-param-select-option-groupname">
                 {item.nodeType}
             </ListSubheader>,
@@ -73,7 +44,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
                 </MenuItem>
             )),
         ]);
-    }, [getUpstreamNodes]);
+    }, [getUpstreamNodeParams]);
 
     return (
         <div className="ms-param-select">

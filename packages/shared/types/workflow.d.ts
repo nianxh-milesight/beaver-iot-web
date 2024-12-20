@@ -67,7 +67,7 @@ declare type WorkflowNodeStatus = 'error' | 'success' | 'loading';
 /**
  * 节点基础数据类型（以 $ 开头的均为前端私有属性）
  */
-declare type BaseNodeDataType<T extends Record<string, any>> = {
+declare type BaseNodeDataType<T extends Record<string, any> = Record<string, any>> = {
     /** 名称 */
     name: string;
     /** 描述 */
@@ -169,30 +169,32 @@ declare type WorkflowFilterOperator =
  * 注意：实际节点渲染时需默认增加一个 else 分支
  */
 declare type IfElseNodeDataType = BaseNodeDataType<{
-    when: {
-        id: ApiKey;
-        logicOperator: WorkflowLogicOperator;
-        /**
-         * 表达式类型（默认 `condition`）
-         * @param mvel mvel 表达式
-         * @param condition 条件表达式
-         */
-        expressionType: 'mvel' | 'condition';
-        conditions: {
+    settings: {
+        when: {
             id: ApiKey;
-            expressionValue?:
-                | string
-                | {
-                      key?: ApiKey;
-                      operator?: WorkflowFilterOperator;
-                      value?: string;
-                  };
-            /** 表达式备注 */
-            expressionDescription?: string;
+            logicOperator: WorkflowLogicOperator;
+            /**
+             * 表达式类型（默认 `condition`）
+             * @param mvel mvel 表达式
+             * @param condition 条件表达式
+             */
+            expressionType: 'mvel' | 'condition';
+            conditions: {
+                id: ApiKey;
+                expressionValue?:
+                    | string
+                    | {
+                          key?: ApiKey;
+                          operator?: WorkflowFilterOperator;
+                          value?: string;
+                      };
+                /** 表达式备注 */
+                expressionDescription?: string;
+            }[];
         }[];
-    }[];
-    otherwise: {
-        id: ApiKey;
+        otherwise: {
+            id: ApiKey;
+        };
     };
 }>;
 
@@ -316,18 +318,40 @@ declare type WebhookNodeDataType = BaseNodeDataType & {
 /**
  * 工作流节点模型
  */
-declare type WorkflowNode =
-    | ReactFlowNode<Partial<TriggerNodeDataType>, 'trigger'>
-    | ReactFlowNode<Partial<TimerNodeDataType>, 'timer'>
-    | ReactFlowNode<Partial<ListenerNodeDataType>, 'listener'>
-    | ReactFlowNode<Partial<IfElseNodeDataType>, 'ifelse'>
-    // | ReactFlowNode<EndNodeDataType, 'end'>
-    | ReactFlowNode<Partial<CodeNodeDataType>, 'code'>
-    | ReactFlowNode<Partial<ServiceNodeDataType>, 'service'>
-    | ReactFlowNode<Partial<AssignerNodeDataType>, 'assigner'>
-    | ReactFlowNode<Partial<SelectNodeDataType>, 'select'>
-    | ReactFlowNode<Partial<EmailNodeDataType>, 'email'>
-    | ReactFlowNode<Partial<WebhookNodeDataType>, 'webhook'>;
+// declare type WorkflowNode =
+//     | ReactFlowNode<Partial<TriggerNodeDataType>, 'trigger'>
+//     | ReactFlowNode<Partial<TimerNodeDataType>, 'timer'>
+//     | ReactFlowNode<Partial<ListenerNodeDataType>, 'listener'>
+//     | ReactFlowNode<Partial<IfElseNodeDataType>, 'ifelse'>
+//     // | ReactFlowNode<EndNodeDataType, 'end'>
+//     | ReactFlowNode<Partial<CodeNodeDataType>, 'code'>
+//     | ReactFlowNode<Partial<ServiceNodeDataType>, 'service'>
+//     | ReactFlowNode<Partial<AssignerNodeDataType>, 'assigner'>
+//     | ReactFlowNode<Partial<SelectNodeDataType>, 'select'>
+//     | ReactFlowNode<Partial<EmailNodeDataType>, 'email'>
+//     | ReactFlowNode<Partial<WebhookNodeDataType>, 'webhook'>
+//     | ReactFlowNode<Partial<BaseNodeDataType>, any>;
+declare type WorkflowNode<T extends WorkflowNodeType | undefined = undefined> = T extends 'trigger'
+    ? ReactFlowNode<Partial<TriggerNodeDataType>, 'trigger'>
+    : T extends 'timer'
+      ? ReactFlowNode<Partial<TimerNodeDataType>, 'timer'>
+      : T extends 'listener'
+        ? ReactFlowNode<Partial<ListenerNodeDataType>, 'listener'>
+        : T extends 'ifelse'
+          ? ReactFlowNode<Partial<IfElseNodeDataType>, 'ifelse'>
+          : T extends 'code'
+            ? ReactFlowNode<Partial<CodeNodeDataType>, 'code'>
+            : T extends 'service'
+              ? ReactFlowNode<Partial<ServiceNodeDataType>, 'service'>
+              : T extends 'assigner'
+                ? ReactFlowNode<Partial<AssignerNodeDataType>, 'assigner'>
+                : T extends 'select'
+                  ? ReactFlowNode<Partial<SelectNodeDataType>, 'select'>
+                  : T extends 'email'
+                    ? ReactFlowNode<Partial<EmailNodeDataType>, 'email'>
+                    : T extends 'webhook'
+                      ? ReactFlowNode<Partial<WebhookNodeDataType>, 'webhook'>
+                      : ReactFlowNode<Partial<BaseNodeDataType>>;
 
 /**
  * 工作流边模型

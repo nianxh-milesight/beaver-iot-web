@@ -14,6 +14,26 @@ import { basicNodeConfigs } from '@/pages/workflow/config';
 import { PARALLEL_LIMIT, PARALLEL_DEPTH_LIMIT, ENTRY_NODE_NUMBER_LIMIT } from '../constants';
 import { getParallelInfo } from './utils';
 
+export type NodeParamType = {
+    nodeId: ApiKey;
+    nodeName?: string;
+    nodeType?: WorkflowNodeType;
+    outputs: {
+        name: string;
+        type: string;
+        key: string;
+    }[];
+};
+
+export type FlattenNodeParamType = {
+    nodeId: ApiKey;
+    nodeName?: string;
+    nodeType?: WorkflowNodeType;
+    valueName: string;
+    valueType: string;
+    valueKey: string;
+};
+
 const entryNodeTypes = Object.values(basicNodeConfigs)
     .filter(item => item.category === 'entry')
     .map(item => item.type);
@@ -183,6 +203,49 @@ const useWorkflow = () => {
         [nodes, edges, getSelectedNode],
     );
 
+    const getUpstreamNodeParams = useCallback(
+        (currentNode?: WorkflowNode): [NodeParamType[], FlattenNodeParamType[]] | [] => {
+            currentNode = currentNode || getSelectedNode();
+            if (!currentNode) return [];
+
+            const incomeNodes = getUpstreamNodes(currentNode);
+            // TODO: get the correct nodes params
+            const result: NodeParamType[] = incomeNodes.map(node => ({
+                nodeId: node.id,
+                nodeName: node.data?.name,
+                nodeType: node.type as WorkflowNodeType,
+                outputs: [
+                    {
+                        name: 'output112123123123123123123123131231231',
+                        type: 'string',
+                        key: `${node.type}.${node.id}.1132e3123132`,
+                    },
+                    {
+                        name: 'output22',
+                        type: 'number',
+                        key: `${node.type}.${node.id}.11eyu3123132`,
+                    },
+                ],
+            }));
+            const flattenResult = result.reduce((acc, item) => {
+                acc.push(
+                    ...item.outputs.map(output => ({
+                        nodeId: item.nodeId,
+                        nodeName: item.nodeName,
+                        nodeType: item.nodeType,
+                        valueName: output.name,
+                        valueType: output.type,
+                        valueKey: output.key,
+                    })),
+                );
+                return acc;
+            }, [] as FlattenNodeParamType[]);
+
+            return [result, flattenResult];
+        },
+        [getSelectedNode, getUpstreamNodes],
+    );
+
     // Check if there is a node that is not connected to an entry node
     const checkFreeNodeLimit = useCallback(
         (nodes?: WorkflowNode[]) => {
@@ -222,6 +285,7 @@ const useWorkflow = () => {
         checkFreeNodeLimit,
         getSelectedNode,
         getUpstreamNodes,
+        getUpstreamNodeParams,
     };
 };
 

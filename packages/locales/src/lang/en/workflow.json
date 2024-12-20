@@ -57,7 +57,8 @@
     "workflow.label.entry_node_number_limit_tip": "工作流中必须且仅允许有 {1} 个入口节点",
     "workflow.label.node_email_type": "Email Type",
     "workflow.label.logic_keyword_if": "IF",
-    "workflow.label.logic_keyword_elseif": "ELSEIF",
+    "workflow.label.logic_keyword_else": "ELSE",
+    "workflow.label.logic_keyword_elseif": "ELIF",
     "workflow.label.logic_keyword_and": "AND",
     "workflow.label.logic_keyword_or": "OR",
     "workflow.editor.form_button_add_condition": "Add Condition",
@@ -79,5 +80,6 @@
     "workflow.email.label_smtp_config_password": "SMTP Password",
     "workflow.email.label_smtp_config_encryption_method": "Encryption Method",
     "workflow.email.label_smtp_config_encryption_none": "None",
-    "workflow.email.label_smtp_config_encryption_start_tls": "StartTLS"
+    "workflow.email.label_smtp_config_encryption_start_tls": "StartTLS",
+    "workflow.editor.valid.condition_not_setup": "Condition not setup"
 }

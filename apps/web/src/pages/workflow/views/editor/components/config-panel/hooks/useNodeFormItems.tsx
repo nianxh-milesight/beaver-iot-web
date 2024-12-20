@@ -85,7 +85,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                 {
                     children: [
                         {
-                            name: 'when',
+                            name: 'settings',
                             render({ field: { onChange, value } }) {
                                 return <ConditionsInput value={value} onChange={onChange} />;
                             },
@@ -285,7 +285,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
         return result;
     }, [serviceKey]);
 
-    return !node?.type ? [] : formConfigs[node.type] || [];
+    return !node?.type ? [] : formConfigs[node.type as WorkflowNodeType] || [];
 };
 
 export default useNodeFormItems;

@@ -22,10 +22,11 @@ import {
     KeyboardArrowDownIcon,
 } from '@milesight/shared/src/components';
 import { genUuid } from '../../../../helper';
+import { logicOperatorMap, conditionOperatorMap } from '../../../../constants';
 import ParamSelect from '../param-select';
 import './style.less';
 
-export type ConditionsInputValueType = NonNullable<IfElseNodeDataType['parameters']>;
+export type ConditionsInputValueType = NonNullable<IfElseNodeDataType['parameters']>['settings'];
 
 type ConditionBlockValueType = ConditionsInputValueType['when'][number];
 
@@ -35,42 +36,6 @@ export type ConditionsInputProps = {
     value?: ConditionsInputValueType;
     defaultValue?: ConditionsInputValueType;
     onChange?: (value: ConditionsInputValueType) => void;
-};
-
-const logicOperatorMap: Partial<Record<WorkflowLogicOperator, { labelIntlKey: string }>> = {
-    OR: {
-        labelIntlKey: 'workflow.label.logic_keyword_or',
-    },
-    AND: {
-        labelIntlKey: 'workflow.label.logic_keyword_and',
-    },
-};
-
-const conditionOperatorMap: Partial<Record<WorkflowFilterOperator, { labelIntlKey: string }>> = {
-    CONTAINS: {
-        labelIntlKey: 'workflow.label.condition_operator_contains',
-    },
-    NOT_CONTAINS: {
-        labelIntlKey: 'workflow.label.condition_operator_not_contains',
-    },
-    START_WITH: {
-        labelIntlKey: 'workflow.label.condition_operator_start_with',
-    },
-    END_WITH: {
-        labelIntlKey: 'workflow.label.condition_operator_end_with',
-    },
-    IS: {
-        labelIntlKey: 'workflow.label.condition_operator_is',
-    },
-    IS_NOT: {
-        labelIntlKey: 'workflow.label.condition_operator_is_not',
-    },
-    IS_EMPTY: {
-        labelIntlKey: 'workflow.label.condition_operator_is_empty',
-    },
-    IS_NOT_EMPTY: {
-        labelIntlKey: 'workflow.label.condition_operator_is_not_empty',
-    },
 };
 
 const genConditionValue = (): ConditionValueType => {
@@ -225,8 +190,40 @@ const ConditionsInput: React.FC<ConditionsInputProps> = props => {
                         </div>
                         {expressionType === 'mvel' ? (
                             <div className="ms-conditions-input-item-mvel">
-                                <TextField fullWidth multiline rows={5} sx={{ marginTop: 0 }} />
-                                <TextField fullWidth placeholder="Condition Description" />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    autoComplete="off"
+                                    rows={5}
+                                    sx={{ marginTop: 0 }}
+                                    value={conditions[0]?.expressionValue || ''}
+                                    onChange={e =>
+                                        replaceCondition(
+                                            0,
+                                            {
+                                                expressionValue: e.target.value,
+                                            },
+                                            block,
+                                            blockIndex,
+                                        )
+                                    }
+                                />
+                                <TextField
+                                    fullWidth
+                                    autoComplete="off"
+                                    placeholder="Condition Description"
+                                    value={conditions[0]?.expressionDescription || ''}
+                                    onChange={e =>
+                                        replaceCondition(
+                                            0,
+                                            {
+                                                expressionDescription: e.target.value,
+                                            },
+                                            block,
+                                            blockIndex,
+                                        )
+                                    }
+                                />
                             </div>
                         ) : (
                             <div
