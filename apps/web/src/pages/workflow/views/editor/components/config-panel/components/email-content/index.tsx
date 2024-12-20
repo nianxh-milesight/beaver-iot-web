@@ -1,25 +1,37 @@
 import React from 'react';
+import { useControllableValue } from 'ahooks';
 
-import { useI18n } from '@milesight/shared/src/hooks';
-import { AddCircleIcon } from '@milesight/shared/src/components';
-import MarkdownEditor, { type MarkdownEditorProps } from '../markdown-editor';
+import { CodeEditor } from '@/components';
+
+import { ContentHeader } from './components';
 
 import styles from './style.module.less';
+
+export interface EmailContentProps {
+    value?: string;
+    onChange: (value: string) => void;
+}
 
 /**
  * Email Notify Node
  * The Email Content Enter Component
  */
-const EmailContent: React.FC<MarkdownEditorProps> = props => {
-    const { getIntlText } = useI18n();
+const EmailContent: React.FC<EmailContentProps> = props => {
+    const { value, onChange } = props;
+
+    const [content, setContent] = useControllableValue({
+        value: value || '',
+        onChange,
+    });
 
     return (
         <div className={styles['email-content']}>
-            <div className={styles.header}>
-                <div className={styles.title}>{getIntlText('common.label.content')}</div>
-                <AddCircleIcon color="primary" />
-            </div>
-            <MarkdownEditor {...props} />
+            <CodeEditor
+                editorLang="markdown"
+                value={content}
+                Header={ContentHeader}
+                onChange={setContent}
+            />
         </div>
     );
 };

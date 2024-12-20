@@ -1,7 +1,7 @@
 import React from 'react';
 import { useControllableValue } from 'ahooks';
 
-import { TextField, type SelectProps } from '@mui/material';
+import { TextField } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { KeyboardArrowDownIcon, MuiSelect } from '@milesight/shared/src/components';
 
@@ -25,27 +25,29 @@ export const EmailTypeOptions = [
     },
 ];
 
-export type EmailTypeSelectProps = Omit<
-    SelectProps,
-    'notched' | 'variant' | 'labelId' | 'IconComponent' | 'label'
->;
+export interface EmailConfigProps {
+    provider?: EMAIL_TYPE;
+    gmailConfig?: {
+        apiKey: string;
+    };
+    smtpConfig?: SmtpProps;
+}
+
+export type EmailSendSourceProps = {
+    value?: EmailConfigProps;
+    onChange: (val: EmailConfigProps) => void;
+};
 
 /**
  * Email Notify Node
  * The Email Sending Source Component
  */
-const EmailSendSource: React.FC<EmailTypeSelectProps> = props => {
-    const { required, disabled, value, onChange, ...restProps } = props;
+const EmailSendSource: React.FC<EmailSendSourceProps> = props => {
+    const { value, onChange } = props;
 
     const { getIntlText } = useI18n();
 
-    const [state, setState] = useControllableValue<{
-        provider?: EMAIL_TYPE;
-        gmailConfig?: {
-            apiKey: string;
-        };
-        smtpConfig?: SmtpProps;
-    }>({
+    const [state, setState] = useControllableValue<EmailConfigProps>({
         value: value || {},
         onChange,
     });
@@ -95,15 +97,13 @@ const EmailSendSource: React.FC<EmailTypeSelectProps> = props => {
                 <MuiSelect
                     formControlProps={{
                         fullWidth: true,
-                        required,
-                        disabled,
+                        required: true,
                     }}
                     notched
                     variant="outlined"
                     label={getIntlText('workflow.label.node_email_type')}
                     options={EmailTypeOptions}
                     IconComponent={KeyboardArrowDownIcon}
-                    disabled={disabled}
                     value={state.provider || ''}
                     onChange={e => {
                         const provider = e.target.value as EMAIL_TYPE;
@@ -118,7 +118,6 @@ const EmailSendSource: React.FC<EmailTypeSelectProps> = props => {
                             provider,
                         });
                     }}
-                    {...restProps}
                 />
             </div>
 

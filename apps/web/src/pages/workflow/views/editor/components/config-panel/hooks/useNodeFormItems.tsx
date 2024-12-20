@@ -200,9 +200,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                         {
                             name: 'config',
                             render({ field: { onChange, value } }) {
-                                return (
-                                    <EmailSendSource required value={value} onChange={onChange} />
-                                );
+                                return <EmailSendSource value={value} onChange={onChange} />;
                             },
                         },
                     ],
