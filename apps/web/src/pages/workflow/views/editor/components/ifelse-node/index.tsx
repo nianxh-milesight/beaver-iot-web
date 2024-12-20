@@ -54,6 +54,10 @@ const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
         () => otherwise || { id: DEFAULT_ELSE_SOURCE_HANDLE_ID },
         [otherwise],
     );
+    const conditionCount = whenList.reduce((acc, item) => {
+        const count = item.expressionType === 'mvel' ? 1 : item.conditions?.length || 1;
+        return acc + count;
+    }, 0);
     const handles = useMemo(() => {
         const result = [
             <Handle
@@ -95,41 +99,56 @@ const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
             />,
         );
         return result;
-    }, [whenList.length, otherwiseItem.id]);
+    }, [whenList.length, conditionCount, otherwiseItem.id]);
 
     // ---------- Update Edges ----------
     const { getUpstreamNodeParams } = useWorkflow();
-    const { getNode, getEdges, setEdges, updateEdge } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { getNode, getEdges, setEdges } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const updateNodeInternals = useUpdateNodeInternals();
     const [, nodeParams] = getUpstreamNodeParams(getNode(props.id));
 
-    // Replace the temp handle id to real id
+    // Replace the temp handle id to real id; Remove the useless edges;
     useEffect(() => {
+        if (!selected) {
+            updateNodeInternals(nodeId);
+            return;
+        }
+
         if (!when?.length || !otherwise) return;
-        const edges = [...getEdges()];
-        const tempIfEdge = edges.find(
+        let edges = [...getEdges()];
+        const handleIds = when
+            .map(item => item.id)
+            .concat(otherwise.id, DEFAULT_IF_SOURCE_HANDLE_ID, DEFAULT_ELSE_SOURCE_HANDLE_ID);
+
+        edges = edges.filter(edge => {
+            if (edge.source !== nodeId) return true;
+            if (handleIds.includes(edge.sourceHandle!)) return true;
+            return false;
+        });
+        const tempIfEdgeIndex = edges.findIndex(
             edge => edge.source === nodeId && edge.sourceHandle === DEFAULT_IF_SOURCE_HANDLE_ID,
         );
-        const tempElseEdge = edges.find(
+        const tempElseEdgeIndex = edges.findIndex(
             edge => edge.source === nodeId && edge.sourceHandle === DEFAULT_ELSE_SOURCE_HANDLE_ID,
         );
 
-        if (!tempIfEdge || !tempElseEdge) return;
+        if (tempIfEdgeIndex >= 0) {
+            edges[tempIfEdgeIndex] = {
+                ...edges[tempIfEdgeIndex],
+                sourceHandle: `${when[0].id || DEFAULT_IF_SOURCE_HANDLE_ID}`,
+            };
+        }
 
-        updateEdge(tempIfEdge.id, {
-            sourceHandle: `${when[0].id || DEFAULT_IF_SOURCE_HANDLE_ID}`,
-        });
-        updateEdge(tempElseEdge.id, {
-            sourceHandle: `${otherwise.id || DEFAULT_ELSE_SOURCE_HANDLE_ID}`,
-        });
-        updateNodeInternals(nodeId);
-    }, [nodeId, when, otherwise, getEdges, updateEdge, updateNodeInternals]);
+        if (tempElseEdgeIndex >= 0) {
+            edges[tempElseEdgeIndex] = {
+                ...edges[tempElseEdgeIndex],
+                sourceHandle: `${otherwise.id || DEFAULT_ELSE_SOURCE_HANDLE_ID}`,
+            };
+        }
 
-    // Update handles
-    useEffect(() => {
-        if (selected) return;
+        setEdges(edges);
         updateNodeInternals(nodeId);
-    }, [nodeId, selected, when, updateNodeInternals]);
+    }, [nodeId, when, otherwise, selected, getEdges, setEdges, updateNodeInternals]);
 
     return (
         <NodeContainer
