@@ -81,5 +81,6 @@
     "workflow.email.label_smtp_config_encryption_method": "Encryption Method",
     "workflow.email.label_smtp_config_encryption_none": "None",
     "workflow.email.label_smtp_config_encryption_start_tls": "StartTLS",
-    "workflow.editor.valid.condition_not_setup": "Condition not setup"
+    "workflow.editor.valid.condition_not_setup": "Condition not setup",
+    "workflow.label.node_id": "Node ID"
 }

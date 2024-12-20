@@ -32,7 +32,7 @@ const ParamSelect: React.FC<ParamSelectProps> = ({ label, required, disabled, ..
 
         // TODO: render Empty component when the options is empty
         return data?.map(item => [
-            <ListSubheader className="ms-param-select-option-groupname">
+            <ListSubheader className="ms-param-select-option-groupname" key={item.nodeId}>
                 {item.nodeType}
             </ListSubheader>,
             item.outputs.map(output => (
