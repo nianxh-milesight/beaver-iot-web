@@ -7,6 +7,10 @@ import type { LogStatus } from '../../config';
  */
 export interface AccordionLog {
     /**
+     * Unique ID of web usage
+     */
+    $$token: string;
+    /**
      * Node Type
      */
     type: WorkflowNodeType;
@@ -63,3 +67,32 @@ export type WorkflowTraceType = WorkflowAPISchema['getLogDetail']['response'][nu
 
 /**  Workflow Data Type */
 export type WorkflowDataType = ReactFlowJsonObject<WorkflowNode, WorkflowEdge>;
+
+/** Workflow Custom Node Type */
+export type WorkflowNestNode<T extends WorkflowNodeType = WorkflowNodeType> = WorkflowNode<T> & {
+    attrs: AccordionLog;
+    children?: WorkflowNestNode<T>[];
+};
+/** Workflow Nested Data Type */
+export interface WorkflowNestDataType extends WorkflowDataType {
+    nodes: WorkflowNestNode[];
+}
+
+/** Parallel Node Result */
+export interface ParallelNodeResult {
+    node: WorkflowNestNode;
+    incomers: WorkflowNestNode[];
+    usableIncome: WorkflowNestNode;
+}
+/** level struct type */
+export type LevelStructType = {
+    label: string;
+    value: number;
+    parentValue?: number;
+};
+
+/** action log props */
+export interface ActionLogProps {
+    traceData: WorkflowTraceType[];
+    workflowData: WorkflowDataType;
+}
