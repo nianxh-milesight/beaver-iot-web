@@ -17,3 +17,4 @@ export {
 } from './entity-filter-select';
 export { default as ParamAssignInput, type ParamAssignInputValueType } from './param-assign-input';
 export { default as ServiceParamAssignInput } from './service-param-assign-input';
+export { default as MoreMenu } from './more-menu';

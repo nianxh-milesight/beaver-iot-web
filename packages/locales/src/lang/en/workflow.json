@@ -72,5 +72,6 @@
     "workflow.label.condition_operator_is_not_empty": "Is Not Empty",
     "workflow.node.config_panel_lable_arguments": "Arguments",
     "workflow.message.import_dsl_error": "The DSL file contains errors. Please update the file and try again.",
-    "workflow.editor.valid.condition_not_setup": "Condition not setup"
+    "workflow.editor.valid.condition_not_setup": "Condition not setup",
+    "workflow.label.node_id": "Node ID"
 }

@@ -16,6 +16,7 @@ import {
     type NodeFormDataProps,
 } from './hooks';
 import useConfigPanelStore from './store';
+import { MoreMenu } from './components';
 import './style.less';
 
 type FormDataProps = CommonFormDataProps & NodeFormDataProps;
@@ -121,6 +122,12 @@ const ConfigPanel = () => {
                                 <PlayArrowIcon />
                             </IconButton>
                         )}
+                        <MoreMenu />
+                        <Divider
+                            flexItem
+                            orientation="vertical"
+                            sx={{ height: 20, alignSelf: 'center' }}
+                        />
                         <IconButton
                             onClick={() => {
                                 if (!selectedNode) return;
