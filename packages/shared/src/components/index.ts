@@ -12,3 +12,4 @@ export { default as EntityForm } from './entity-form';
 export * from './icons';
 export * as MUIForm from './mui-form';
 export { default as LoadingButton } from './loading-button';
+export { default as MuiSelect } from './select';

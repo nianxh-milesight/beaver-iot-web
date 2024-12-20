@@ -16,6 +16,6 @@ export {
     type EntityFilterSelectValueType,
 } from './entity-filter-select';
 export { default as ParamAssignInput, type ParamAssignInputValueType } from './param-assign-input';
-export { default as EmailTypeSelect, EMAIL_TYPE } from './email-type-select';
+export { default as EmailSendSource, EMAIL_TYPE } from './email-send-source';
 export { default as EmailContent } from './email-content';
 export { default as ServiceParamAssignInput } from './service-param-assign-input';

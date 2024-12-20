@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { get } from 'lodash-es';
 
 import { type ControllerProps } from 'react-hook-form';
 import { TextField } from '@mui/material';
@@ -14,11 +13,10 @@ import {
     ParamAssignInput,
     // ParamInputSelect,
     TimerInput,
-    EmailTypeSelect,
-    EMAIL_TYPE,
     EmailContent,
     ParamInput,
     ServiceParamAssignInput,
+    EmailSendSource,
 } from '../components';
 
 type NodeFormGroupType = {
@@ -200,29 +198,10 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Email Sending Source',
                     children: [
                         {
-                            name: 'emailType',
-
+                            name: 'config',
                             render({ field: { onChange, value } }) {
                                 return (
-                                    <EmailTypeSelect required value={value} onChange={onChange} />
-                                );
-                            },
-                        },
-                        {
-                            name: 'emailApiKey',
-                            shouldRender: data => {
-                                return get(data, 'emailType') === EMAIL_TYPE.GMAIL;
-                            },
-                            render({ field: { onChange, value } }) {
-                                return (
-                                    <TextField
-                                        fullWidth
-                                        autoComplete="new-password"
-                                        label="SerpApi API Key"
-                                        type="text"
-                                        value={value}
-                                        onChange={onChange}
-                                    />
+                                    <EmailSendSource required value={value} onChange={onChange} />
                                 );
                             },
                         },
@@ -232,7 +211,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Email Content',
                     children: [
                         {
-                            name: 'emailRecipient',
+                            name: 'recipient',
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
