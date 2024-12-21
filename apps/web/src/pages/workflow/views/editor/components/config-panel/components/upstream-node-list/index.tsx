@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { useControllableValue } from 'ahooks';
+import { isEmpty } from 'lodash-es';
 
+import { useI18n } from '@milesight/shared/src/hooks';
 import { MenuList, MenuItem, ListSubheader } from '@mui/material';
-import { Tooltip } from '@/components';
+import { Tooltip, Empty } from '@/components';
 import useWorkflow, {
     type FlattenNodeParamType,
 } from '@/pages/workflow/views/editor/hooks/useWorkflow';
@@ -19,28 +21,13 @@ export interface UpstreamNodeListProps {
  */
 const UpstreamNodeList: React.FC<UpstreamNodeListProps> = props => {
     const { getUpstreamNodeParams } = useWorkflow();
-    const [nodeParams] = getUpstreamNodeParams();
+    const [upstreamNodes, flattenUpstreamNodes] = getUpstreamNodeParams();
+    const { getIntlText } = useI18n();
 
     const [state, setState] = useControllableValue<FlattenNodeParamType>(props);
 
-    const upstreamNodes = useMemo(() => {
-        return nodeParams?.reduce((acc, param) => {
-            param.outputs?.forEach(output => {
-                acc.push({
-                    nodeId: param.nodeId,
-                    nodeName: param.nodeName,
-                    nodeType: param.nodeType,
-                    valueName: output.name,
-                    valueType: output.type,
-                    valueKey: output.key,
-                });
-            });
-            return acc;
-        }, [] as FlattenNodeParamType[]);
-    }, [nodeParams]);
-
     const renderedUpstreamNodes = useMemo(() => {
-        return nodeParams?.reduce((acc, node) => {
+        return upstreamNodes?.reduce((acc, node) => {
             acc.push(
                 <ListSubheader key={node.nodeId} className="ms-upstream-node-list-option-groupname">
                     {node.nodeType}
@@ -54,7 +41,7 @@ const UpstreamNodeList: React.FC<UpstreamNodeListProps> = props => {
                         key={output.key}
                         selected={node.nodeId === state?.nodeId && output.key === state?.valueKey}
                         onClick={() => {
-                            const node = upstreamNodes?.find(r => r.valueKey === output.key);
+                            const node = flattenUpstreamNodes?.find(r => r.valueKey === output.key);
                             if (node) setState(node);
                         }}
                     >
@@ -67,12 +54,17 @@ const UpstreamNodeList: React.FC<UpstreamNodeListProps> = props => {
             });
             return acc;
         }, [] as React.ReactNode[]);
-    }, [state, nodeParams, upstreamNodes, setState]);
+    }, [state, upstreamNodes, flattenUpstreamNodes, setState]);
 
-    /**
-     * TODO: render Empty component when the options is empty
-     */
-    return <MenuList>{renderedUpstreamNodes}</MenuList>;
+    const renderList = () => {
+        if (isEmpty(upstreamNodes) || isEmpty(flattenUpstreamNodes)) {
+            return <Empty type="nodata" text={getIntlText('common.label.empty')} />;
+        }
+
+        return <MenuList>{renderedUpstreamNodes}</MenuList>;
+    };
+
+    return renderList();
 };
 
 export default UpstreamNodeList;
