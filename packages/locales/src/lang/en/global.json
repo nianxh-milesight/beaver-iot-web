@@ -162,5 +162,7 @@
     "common.label.test": "Test",
     "common.label.run": "Run",
     "common.label.target": "Target",
-    "common.label.week": "Week"
+    "common.label.week": "Week",
+    "common.label.input": "Input",
+    "common.label.output": "Output"
 }

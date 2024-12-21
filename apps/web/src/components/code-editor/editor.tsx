@@ -7,7 +7,7 @@ import type { EditorSupportLang, EditorProps, EditorHandlers } from './types';
 import './style.less';
 
 export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) => {
-    const { Header: CustomHeader, ...rest } = props;
+    const { title, Header: CustomHeader, ...rest } = props;
     const editorInstanceRef = useRef<ReactCodeMirrorRef>(null);
 
     const [editorLang, setEditorLang] = useControllableValue<EditorSupportLang>(props, {
@@ -30,6 +30,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         <div className="ms-code-editor">
             {CustomHeader !== null && (
                 <EditorHeaderComponent
+                    title={title}
                     editorHandlers={handlers}
                     editorLang={editorLang}
                     editorValue={editorValue}
