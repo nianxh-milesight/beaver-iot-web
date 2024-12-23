@@ -8,6 +8,7 @@ import {
 } from '@xyflow/react';
 import { useSize } from 'ahooks';
 import { cloneDeep, maxBy } from 'lodash-es';
+import { basicNodeConfigs } from '@/pages/workflow/config';
 import { genUuid } from '../helper';
 import {
     NODE_SPACING_X,
@@ -115,9 +116,11 @@ const useInteractions = () => {
             const edges = cloneDeep(getEdges());
             const prevNode = nodes.find(node => node.id === prevNodeId);
             const nextNode = nodes.find(node => node.id === nextNodeId);
+            const nodeConfig = basicNodeConfigs[nodeType] || {};
             const newNode: WorkflowNode = {
                 id: genUuid('node'),
                 type: nodeType,
+                componentName: nodeConfig.componentName,
                 position: position || {
                     x: 0,
                     y: 0,

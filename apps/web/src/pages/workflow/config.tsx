@@ -44,6 +44,10 @@ export type NodeConfigItemType = {
      */
     type: WorkflowNodeType;
     /**
+     * Backend component name
+     */
+    componentName: string;
+    /**
      * Label i18n key
      */
     labelIntlKey: string;
@@ -75,6 +79,7 @@ export type NodeConfigItemType = {
 export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     trigger: {
         type: 'trigger',
+        componentName: 'trigger',
         labelIntlKey: 'workflow.label.trigger_node_name',
         descIntlKey: 'workflow.label.trigger_node_desc',
         icon: <InputIcon />,
@@ -83,6 +88,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     timer: {
         type: 'timer',
+        componentName: 'simpleTimer',
         labelIntlKey: 'workflow.label.timer_node_name',
         descIntlKey: 'workflow.label.timer_node_desc',
         icon: <TimerIcon />,
@@ -91,6 +97,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     listener: {
         type: 'listener',
+        componentName: 'eventListener',
         labelIntlKey: 'workflow.label.listener_node_name',
         descIntlKey: 'workflow.label.listener_node_desc',
         icon: <HearingIcon />,
@@ -99,6 +106,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     ifelse: {
         type: 'ifelse',
+        componentName: 'choice',
         labelIntlKey: 'workflow.label.ifelse_node_name',
         icon: <CallSplitIcon sx={{ transform: 'rotate(90deg)' }} />,
         iconBgColor: '#F57C00',
@@ -114,6 +122,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     // },
     code: {
         type: 'code',
+        componentName: 'code',
         labelIntlKey: 'workflow.label.code_node_name',
         icon: <SettingsEthernetIcon />,
         iconBgColor: '#26A69A',
@@ -122,6 +131,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     assigner: {
         type: 'assigner',
+        componentName: 'variableAssigner',
         labelIntlKey: 'workflow.label.assigner_node_name',
         icon: <EntityIcon />,
         iconBgColor: '#26A69A',
@@ -129,6 +139,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     service: {
         type: 'service',
+        componentName: 'serviceInvocation',
         labelIntlKey: 'workflow.label.service_node_name',
         icon: <RoomServiceIcon />,
         iconBgColor: '#26A69A',
@@ -137,6 +148,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     select: {
         type: 'select',
+        componentName: 'entitySelector',
         labelIntlKey: 'workflow.label.select_node_name',
         icon: <FactCheckIcon />,
         iconBgColor: '#26A69A',
@@ -145,6 +157,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     email: {
         type: 'email',
+        componentName: 'email',
         labelIntlKey: 'workflow.label.email_node_name',
         icon: <EmailIcon />,
         iconBgColor: '#7E57C2',
@@ -153,6 +166,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
     },
     webhook: {
         type: 'webhook',
+        componentName: 'webhook',
         labelIntlKey: 'workflow.label.webhook_node_name',
         icon: <WebhookIcon />,
         iconBgColor: '#7E57C2',
