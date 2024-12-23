@@ -86,5 +86,8 @@
     "workflow.email.label_smtp_config_encryption_none": "None",
     "workflow.email.label_smtp_config_encryption_start_tls": "StartTLS",
     "workflow.editor.valid.condition_not_setup": "Condition not setup",
-    "workflow.label.node_id": "Node ID"
+    "workflow.label.node_id": "Node ID",
+    "workflow.label.abnormal_edge_tip": "节点嵌套错误，请检查重试",
+    "workflow.editor.node_delete_confirm_title": "删除节点",
+    "workflow.editor.node_delete_confirm_desc": "确定删除此节点？"
 }

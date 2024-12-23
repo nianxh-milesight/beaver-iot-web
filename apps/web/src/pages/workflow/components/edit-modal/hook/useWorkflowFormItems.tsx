@@ -8,7 +8,7 @@ import { checkRequired, checkMaxLength } from '@milesight/shared/src/utils/valid
  * type of dataSource
  */
 export type FormDataProps = {
-    name: string;
+    name?: string;
     remark?: string;
 };
 

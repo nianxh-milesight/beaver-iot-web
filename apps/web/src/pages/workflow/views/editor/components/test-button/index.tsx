@@ -7,7 +7,7 @@ import { PlayArrowIcon, HistoryIcon } from '@milesight/shared/src/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { TabPanel } from '@/components';
 import LogList, { type LogType, type LogListProps } from './log-list';
-import useLogStore from '../../log-store';
+import useFlowStore from '../../store';
 import './style.less';
 
 export type TestButtonType = 'test' | 'history';
@@ -19,6 +19,7 @@ type LogTabItem = {
 };
 
 interface Props {
+    disabled?: boolean;
     onClick?: () => void | Promise<void>;
 }
 
@@ -27,7 +28,7 @@ const DEFAULT_TAB_KEY: LogType = 'test';
 /**
  * Test Button
  */
-const TestButton: React.FC<Props> = () => {
+const TestButton: React.FC<Props> = ({ disabled }) => {
     const { getIntlText } = useI18n();
     const nodes = useNodes<WorkflowNode>();
     const {
@@ -39,7 +40,7 @@ const TestButton: React.FC<Props> = () => {
         setOpenLogPanel,
         setLogDetail,
         setLogDetailLoading,
-    } = useLogStore(
+    } = useFlowStore(
         useStoreShallow([
             'runLogs',
             'testLogs',
@@ -64,19 +65,20 @@ const TestButton: React.FC<Props> = () => {
             const log = {
                 id: '1',
                 start_time: Date.now(),
-                status: 'success',
+                time_cost: 500,
+                status: 'Success',
             };
             const data = new Array(100).fill(0).map((_, index) => ({
                 ...log,
                 id: index + 1,
-                status: Math.floor(Math.random() * 10) % 2 === 0 ? 'success' : 'error',
+                status: Math.floor(Math.random() * 10) % 2 === 0 ? 'Success' : 'Error',
             }));
 
             await new Promise(resolve => {
                 setTimeout(resolve, 1000);
             });
 
-            setRunLogs(data);
+            setRunLogs(data as LogListProps['data']);
         },
         {
             manual: true,
@@ -160,7 +162,7 @@ const TestButton: React.FC<Props> = () => {
 
     return (
         <>
-            <ButtonGroup className="ms-workflow-test-button">
+            <ButtonGroup className="ms-workflow-test-button" disabled={disabled}>
                 <Button
                     variant="outlined"
                     disabled={logDetailLoading || !nodes?.length}

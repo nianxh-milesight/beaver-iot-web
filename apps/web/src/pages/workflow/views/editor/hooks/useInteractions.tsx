@@ -8,6 +8,8 @@ import {
 } from '@xyflow/react';
 import { useSize } from 'ahooks';
 import { cloneDeep, maxBy } from 'lodash-es';
+import { useI18n } from '@milesight/shared/src/hooks';
+import { useConfirm } from '@/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
 import { genUuid } from '../helper';
 import {
@@ -60,6 +62,7 @@ const useInteractions = () => {
     } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const { checkParallelLimit, checkNestedParallelLimit } = useWorkflow();
     const { width: bodyWidth, height: bodyHeight } = useSize(document.querySelector('body')) || {};
+    const { getIntlText } = useI18n();
 
     // Handle nodes connect
     const handleConnect = useCallback<OnConnect>(
@@ -75,6 +78,7 @@ const useInteractions = () => {
     );
 
     // Check before node delete
+    const confirm = useConfirm();
     const handleBeforeDelete = useCallback<NonNullable<RFProps['onBeforeDelete']>>(
         async ({ nodes }) => {
             const hasEntryNode = nodes.some(
@@ -83,9 +87,23 @@ const useInteractions = () => {
             );
 
             if (hasEntryNode) return false;
+
+            if (nodes.length) {
+                let result = false;
+                await confirm({
+                    title: getIntlText('workflow.editor.node_delete_confirm_title'),
+                    description: getIntlText('workflow.editor.node_delete_confirm_desc'),
+                    onConfirm: async () => {
+                        result = true;
+                    },
+                });
+
+                return result;
+            }
+
             return true;
         },
-        [],
+        [confirm, getIntlText],
     );
 
     // Handle edge mouse enter

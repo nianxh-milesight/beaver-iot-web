@@ -55,7 +55,7 @@ export type ConfirmOptions = GlobalOptions & {
 
 export type FinalOptions = Partial<GlobalOptions & ConfirmOptions>;
 
-export type HandleConfirm = (options?: ConfirmOptions) => void;
+export type HandleConfirm = (options?: ConfirmOptions) => void | Promise<void>;
 
 export type DialogProps = {
     show: boolean;

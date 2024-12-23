@@ -112,7 +112,13 @@ const useWorkflow = () => {
             const { parallelList, hasAbnormalEdges } = getParallelInfo(nodes, edges, parentNodeId);
 
             // console.log({ parallelList, hasAbnormalEdges });
-            if (hasAbnormalEdges) return false;
+            if (hasAbnormalEdges) {
+                toast.error({
+                    key: 'abnormal-edge',
+                    content: getIntlText('workflow.label.abnormal_edge_tip'),
+                });
+                return false;
+            }
 
             const isGtLimit = parallelList.some(item => item.depth > PARALLEL_DEPTH_LIMIT);
 
@@ -212,7 +218,7 @@ const useWorkflow = () => {
             // TODO: get the correct nodes params
             const result: NodeParamType[] = incomeNodes.map(node => ({
                 nodeId: node.id,
-                nodeName: node.data?.name,
+                nodeName: node.data?.nodeName,
                 nodeType: node.type as WorkflowNodeType,
                 outputs: [
                     {

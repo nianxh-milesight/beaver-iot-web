@@ -69,8 +69,8 @@ const ConfigPanel = () => {
             formDataInit.current = false;
             return;
         }
-        const { name, remark, parameters } = selectedNode.data || {};
-        const data: Record<string, any> = { name, remark, ...parameters };
+        const { nodeName, nodeRemark, parameters } = selectedNode.data || {};
+        const data: Record<string, any> = { nodeName, nodeRemark, ...parameters };
 
         reset();
         /**
@@ -89,9 +89,10 @@ const ConfigPanel = () => {
     useDebounceEffect(
         () => {
             if (!openPanel || !formDataInit.current) return;
-            const { name, remark, ...formData } = latestFormData || {};
+            const { nodeName, nodeRemark, ...formData } = latestFormData || {};
 
-            updateNodeData(selectedNode.id, { name, remark, parameters: formData });
+            // console.log({ formData });
+            updateNodeData(selectedNode.id, { nodeName, nodeRemark, parameters: formData });
         },
         [openPanel, selectedNode, latestFormData, updateNodeData],
         { wait: 300 },

@@ -1,8 +1,12 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { type WorkflowAPISchema } from '@/services/http';
+import { basicNodeConfigs, type NodeConfigItemType } from '../../config';
 
-interface LogStore {
+interface FlowStore {
+    /** Workflow Node Configs */
+    nodeConfigs: Record<WorkflowNodeType, NodeConfigItemType>;
+
     /**
      * Log Panel Mode
      *
@@ -21,49 +25,59 @@ interface LogStore {
     /**
      * Test Log List
      */
-    testLogs?: WorkflowAPISchema['getLogList']['response'];
+    testLogs?: WorkflowAPISchema['getLogList']['response']['content'];
 
     /**
      * Run Log List
      */
-    runLogs?: WorkflowAPISchema['getLogList']['response'];
+    runLogs?: WorkflowAPISchema['getLogList']['response']['content'];
 
     logDetail?: WorkflowAPISchema['getLogDetail']['response'];
 
     logDetailLoading?: boolean;
 
-    setLogPanelMode: (logPanelMode: LogStore['logPanelMode']) => void;
+    setNodeConfigs: (nodeConfigs: WorkflowAPISchema['getFlowNodes']['response']) => void;
 
-    setOpenLogPanel: (open: LogStore['openLogPanel']) => void;
+    setLogPanelMode: (logPanelMode: FlowStore['logPanelMode']) => void;
 
-    setTestLogs: (testLogs: LogStore['testLogs']) => void;
+    setOpenLogPanel: (open: FlowStore['openLogPanel']) => void;
 
-    setRunLogs: (runLogs: LogStore['runLogs']) => void;
+    setTestLogs: (testLogs: FlowStore['testLogs']) => void;
 
-    setLogDetail: (detail?: LogStore['logDetail']) => void;
+    setRunLogs: (runLogs: FlowStore['runLogs']) => void;
 
-    setLogDetailLoading: (loading: LogStore['logDetailLoading']) => void;
+    setLogDetail: (detail?: FlowStore['logDetail']) => void;
+
+    setLogDetailLoading: (loading: FlowStore['logDetailLoading']) => void;
 }
 
-const useLogStore = create(
-    immer<LogStore>(set => ({
+const useFlowStore = create(
+    immer<FlowStore>(set => ({
+        nodeConfigs: basicNodeConfigs,
+
         testLogs: [
             {
                 id: '1',
                 start_time: 1733809691235,
-                status: 'success',
+                time_cost: 1000,
+                status: 'Success',
             },
             {
                 id: '2',
                 start_time: 1733809691235,
-                status: 'error',
+                time_cost: 1000,
+                status: 'Error',
             },
             {
                 id: '3',
                 start_time: 1733809691235,
-                status: 'success',
+                time_cost: 1000,
+                status: 'Success',
             },
         ],
+        setNodeConfigs: nodeConfigs => {
+            console.log({ nodeConfigs });
+        },
         setLogPanelMode: logPanelMode => set({ logPanelMode }),
         setOpenLogPanel: open => set({ openLogPanel: open }),
         setTestLogs: testLogs => set({ testLogs }),
@@ -73,4 +87,4 @@ const useLogStore = create(
     })),
 );
 
-export default useLogStore;
+export default useFlowStore;
