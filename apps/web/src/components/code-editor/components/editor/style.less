@@ -2,8 +2,12 @@
     flex: 1;
     overflow: hidden;
 
+    .cm-scroller {
+        outline: none;
+    }
+
     .cm-editor {
-        height: 100%;
+        height: var(--code-mirror-height);
         outline: none;
 
         .cm-gutters {

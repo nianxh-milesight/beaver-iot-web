@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
 import { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { undo as undoCommand, redo as redoCommand } from '@codemirror/commands';
-import type { EditorHandlers } from '../types';
+import type { EditorHandlers, EditorProps } from '../types';
 
-interface IProps {
+interface IProps extends Pick<EditorProps, 'editable' | 'readOnly'> {
     editorInstanceRef: React.RefObject<ReactCodeMirrorRef>;
 }
-export const useEditorCommand = ({ editorInstanceRef }: IProps) => {
+export const useEditorCommand = ({ editorInstanceRef, readOnly, editable }: IProps) => {
     /** Function to get the current EditorView instance */
     const getEditorView = useCallback(() => {
         return editorInstanceRef.current?.view;
@@ -21,17 +21,19 @@ export const useEditorCommand = ({ editorInstanceRef }: IProps) => {
     const undo = useCallback(() => {
         const editorView = getEditorView();
         if (!editorView) return;
+        if (readOnly || !editable) return;
 
         undoCommand(editorView);
-    }, [getEditorView]);
+    }, [editable, getEditorView, readOnly]);
 
     /** Function to perform redo operation */
     const redo = useCallback(() => {
         const editorView = getEditorView();
         if (!editorView) return;
+        if (readOnly || !editable) return;
 
         redoCommand(editorView);
-    }, [getEditorView]);
+    }, [editable, getEditorView, readOnly]);
 
     /** Function to insert text at the current cursor position */
     const insert = useCallback(
@@ -40,6 +42,7 @@ export const useEditorCommand = ({ editorInstanceRef }: IProps) => {
             const editorState = getEditorState();
             const editorView = getEditorView();
             if (!editorState || !editorView) return;
+            if (readOnly || !editable) return;
 
             // insert text at the current cursor position
             const { main } = editorView?.state?.selection || {};
@@ -60,7 +63,7 @@ export const useEditorCommand = ({ editorInstanceRef }: IProps) => {
             // Ensure the editor gains focus
             editorView.focus();
         },
-        [getEditorState, getEditorView],
+        [editable, getEditorState, getEditorView, readOnly],
     );
 
     const handlers = useMemo<EditorHandlers>(() => {

@@ -21,6 +21,9 @@ interface IProps extends EditorContentProps {
     editorValue: string;
     setEditorValue: (value: string) => void;
 }
+/**
+ * @docs https://github.com/uiwjs/react-codemirror
+ */
 export const CodeEditorContent = forwardRef<ReactCodeMirrorRef, IProps>((props, ref) => {
     const {
         showLineNumber = true,
