@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { IconButton, Popover } from '@mui/material';
 import { useI18n, useCopy } from '@milesight/shared/src/hooks';
 import { MoreHorizIcon, ContentCopyIcon } from '@milesight/shared/src/components';
@@ -52,4 +52,4 @@ const MoreMenu = () => {
     );
 };
 
-export default MoreMenu;
+export default memo(MoreMenu);
