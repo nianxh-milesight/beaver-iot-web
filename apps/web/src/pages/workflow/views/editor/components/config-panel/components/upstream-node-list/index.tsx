@@ -58,7 +58,14 @@ const UpstreamNodeList: React.FC<UpstreamNodeListProps> = props => {
 
     const renderList = () => {
         if (isEmpty(upstreamNodes) || isEmpty(flattenUpstreamNodes)) {
-            return <Empty type="nodata" text={getIntlText('common.label.empty')} />;
+            return (
+                <Empty
+                    className="ms-upstream-node-list__empty"
+                    size="small"
+                    type="nodata"
+                    text={getIntlText('common.label.empty')}
+                />
+            );
         }
 
         return <MenuList>{renderedUpstreamNodes}</MenuList>;
