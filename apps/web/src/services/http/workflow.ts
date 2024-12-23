@@ -1,42 +1,55 @@
 import { client, attachAPI, API_PREFIX } from './client';
 
-export type WorkflowStatus = 'enabled' | 'disabled';
+export type FlowStatus = 'enable' | 'disable';
+
+export type FlowRunningStatus = 'Error' | 'Success';
+
+export type FlowNodeTraceInfo = {
+    /** Node ID */
+    node_id: ApiKey;
+    /** Node Name */
+    node_label: string;
+    /** Running status */
+    status: FlowRunningStatus;
+    /** Start Time */
+    start_time: number;
+    /** Cost Time */
+    time_cost: number;
+    /** Input (JSON string) */
+    input?: string;
+    /** Output (JSON string) */
+    output?: string;
+    /** Message ID */
+    message_id?: string;
+    /** Error Message */
+    error_message?: string;
+};
 
 export interface WorkflowAPISchema extends APISchema {
     /** Get workflow list */
     getList: {
         request: {
             name?: string;
-            status?: WorkflowStatus;
+            status?: FlowStatus;
         };
-        response: {
-            /** ID */
-            id: ApiKey;
-            /** Name */
-            name: string;
-            /** Reamrk */
-            description: string;
-            /** Create Time */
-            created_at: number;
-            /** Update Time */
-            updated_at: number;
-            /** Enabled */
-            enabled: boolean;
-            /** User Email */
-            user_email: string;
-        };
-    };
-
-    /** Add a workflow */
-    addFlow: {
-        request: {
-            name: string;
-            remark?: string;
-        };
-        response: {
-            /** ID */
-            id: ApiKey;
-        };
+        response: SearchResponseType<
+            {
+                /** ID */
+                id: ApiKey;
+                /** Name */
+                name: string;
+                /** Remark */
+                remark?: string;
+                /** Enabled */
+                enabled: boolean;
+                /** Create Time */
+                created_at: number;
+                /** Update Time */
+                updated_at: number;
+                /** User Nickname */
+                user_nickname: string;
+            }[]
+        >;
     };
 
     /** Update a workflow */
@@ -52,10 +65,10 @@ export interface WorkflowAPISchema extends APISchema {
         };
     };
 
-    /** Delete a workflow */
-    deleteFlow: {
+    /** Delete workflow */
+    deleteFlows: {
         request: {
-            id: ApiKey[];
+            workflow_id_list: ApiKey[];
         };
         response: {
             /** ID */
@@ -89,7 +102,7 @@ export interface WorkflowAPISchema extends APISchema {
     enableFlow: {
         request: {
             id: ApiKey;
-            status: WorkflowStatus;
+            status: FlowStatus;
         };
         response: {
             /** ID */
@@ -100,17 +113,20 @@ export interface WorkflowAPISchema extends APISchema {
     /** Get workflow log list */
     getLogList: {
         request: void | {
-            // TODO: use workflow log status enum
-            status?: string;
+            status?: FlowRunningStatus;
         };
-        response: {
-            /** ID */
-            id: ApiKey;
-            /** Start Time */
-            start_time: number;
-            /** Running status */
-            status: string;
-        }[];
+        response: SearchResponseType<
+            {
+                /** ID */
+                id: ApiKey;
+                /** Start Time */
+                start_time: number;
+                /** Run Time (ms) */
+                time_cost: number;
+                /** Running status */
+                status: FlowRunningStatus;
+            }[]
+        >;
     };
 
     /** Get workflow log detail */
@@ -119,25 +135,15 @@ export interface WorkflowAPISchema extends APISchema {
             id: ApiKey;
         };
         response: {
-            /** Node ID */
-            node_id: ApiKey;
-            /** Node Name */
-            node_name: string;
-            /** Running status */
-            status: string;
-            /** Cost Time */
-            cost: number;
-            // TODO
-            input: Record<string, any>;
-            // TODO
-            output: Record<string, any>;
-        }[];
+            trace_info: FlowNodeTraceInfo[];
+        };
     };
 
     /** Get workflow Design */
     getFlowDesign: {
         request: {
             id: ApiKey;
+            version?: string;
         };
         response: {
             /** ID */
@@ -146,23 +152,20 @@ export interface WorkflowAPISchema extends APISchema {
             name: string;
             /** Remark */
             remark?: string;
-            /** Created At */
-            created_at: number;
-            /** Updated At */
-            updated_at: number;
             /** Enabled */
             enabled: boolean;
-            /** User Email */
-            user_email: string;
-            /** Workflow DSL */
-            dsl?: string;
+            /** Flow Version */
+            version?: string;
+            /** Design Data (JSON string) */
+            design_data: string;
         };
     };
 
     /** Check workflow Design */
     checkFlowDesign: {
         request: {
-            dsl: string;
+            /** Flow Data (JSON string) */
+            design_data: string;
         };
         response: {
             /** ID */
@@ -173,49 +176,54 @@ export interface WorkflowAPISchema extends APISchema {
     /** Save workflow Design */
     saveFlowDesign: {
         request: {
-            id: ApiKey;
-            dsl: string;
+            /** Flow ID (Empty means to create) */
+            id?: ApiKey;
+            /** Flow Version */
+            version?: string;
+            /** Flow Name */
+            name: string;
+            /** Flow Remark */
+            remark?: string;
+            /** Flow Design Data (JSON string) */
+            design_data: string;
         };
         response: {
             /** ID */
             id: ApiKey;
+            /** Flow Version */
+            version: string;
         };
     };
 
-    /** Run workflow */
-    runFlow: {
+    /** Test workflow */
+    testFlow: {
         request: {
-            // TODO: use workflow data type
-            dsl: any;
+            /** Input Parameters */
+            input?: Record<string, any>;
+            /** Flow Design Data (JSON string) */
+            design_data: any;
         };
         response: {
-            // TODO: use workflow log status enum
-            status: string;
-            trace_infos: {
-                node_id: ApiKey;
-                node_name: string;
-                status: string;
-                cost: number;
-                input: Record<string, any>;
-                output: Record<string, any>;
-            }[];
+            /** Running Status */
+            status: FlowRunningStatus;
+            /** Flow ID */
+            flow_id: ApiKey;
+            /** Start Time */
+            start_time: number;
+            /** Run Time */
+            time_cost: number;
+            trace_infos: FlowNodeTraceInfo[];
         };
     };
 
-    /** Run single node */
-    runSingleNode: {
+    /** Test single node */
+    testSingleNode: {
         request: {
-            node_config: Record<string, any>;
             input: Record<string, any>;
+            /** Node Config (JSON string) */
+            node_config: string;
         };
-        response: {
-            node_id: ApiKey;
-            node_name: string;
-            status: string;
-            const: number;
-            input: Record<string, any>;
-            output: Record<string, any>;
-        };
+        response: FlowNodeTraceInfo;
     };
 
     /** Get workflow nodes info */
@@ -224,8 +232,8 @@ export interface WorkflowAPISchema extends APISchema {
         response: Record<
             WorkflowNodeCategoryType,
             {
-                componentId: string;
-                componentName: string;
+                name: string;
+                title: string;
             }[]
         >;
     };
@@ -233,9 +241,19 @@ export interface WorkflowAPISchema extends APISchema {
     /** Get node form schema */
     getNodeForm: {
         request: {
-            id: ApiKey;
+            /** The Backend Node Name */
+            name: string;
         };
         response: unknown;
+    };
+
+    /** Get code langs */
+    getCodeLangs: {
+        request: void;
+        response: {
+            code: string[];
+            expression: string[];
+        };
     };
 }
 
@@ -245,20 +263,20 @@ export interface WorkflowAPISchema extends APISchema {
 export default attachAPI<WorkflowAPISchema>(client, {
     apis: {
         getList: `POST ${API_PREFIX}/workflow/flows/search`,
-        addFlow: `POST ${API_PREFIX}/workflow/flows`,
         updateFlow: `PUT ${API_PREFIX}/workflow/flows/:id`,
-        deleteFlow: `DELETE ${API_PREFIX}/workflow/flows/:id`,
+        deleteFlows: `POST ${API_PREFIX}/workflow/flows/batch-delete`,
         importFlow: `POST ${API_PREFIX}/workflow/flows/import`,
         exportFlow: `GET ${API_PREFIX}/workflow/flows/:id/export`,
         enableFlow: `GET ${API_PREFIX}/workflow/flows/:id/:status`,
         getLogList: `POST ${API_PREFIX}/workflow/flows/:id/logs/search`,
         getLogDetail: `GET ${API_PREFIX}/workflow/flows/logs/:id`,
-        getFlowDesign: `GET ${API_PREFIX}/workflow/flows/:id/design`,
-        checkFlowDesign: `POST ${API_PREFIX}/workflow/flows/:id/design/validate`,
-        saveFlowDesign: `POST ${API_PREFIX}/workflow/flows/:id/design`,
-        runFlow: `POST ${API_PREFIX}/workflow/flows/:id/test`,
-        runSingleNode: `POST ${API_PREFIX}/workflow/flows/node/test`,
+        getFlowDesign: `GET ${API_PREFIX}/workflow/flows/:id/design?version=:version`,
+        checkFlowDesign: `POST ${API_PREFIX}/workflow/flows/design/validate`,
+        saveFlowDesign: `POST ${API_PREFIX}/workflow/flows/design`,
+        testFlow: `POST ${API_PREFIX}/workflow/flows/test`,
+        testSingleNode: `POST ${API_PREFIX}/workflow/flows/node/test`,
         getFlowNodes: `GET ${API_PREFIX}/workflow/components`,
         getNodeForm: `GET ${API_PREFIX}/workflow/components/:id`,
+        getCodeLangs: `GET ${API_PREFIX}/workflow/components/languages`,
     },
 });
