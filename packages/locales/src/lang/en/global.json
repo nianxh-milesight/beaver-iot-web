@@ -164,6 +164,7 @@
     "common.label.target": "Target",
     "common.label.ms": "ms",
     "common.label.week": "Week",
+    "common.label.content": "Content",
     "common.label.input": "Input",
     "common.label.output": "Output"
 }

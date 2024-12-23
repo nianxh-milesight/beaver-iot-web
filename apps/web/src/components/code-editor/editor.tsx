@@ -8,6 +8,7 @@ import './style.less';
 
 export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) => {
     const {
+        title,
         Header: CustomHeader,
         readOnly = false,
         editable = true,
@@ -41,6 +42,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         <div className="ms-code-editor" style={cssVariable}>
             {CustomHeader !== null && (
                 <EditorHeaderComponent
+                    title={title}
                     editorHandlers={handlers}
                     editorLang={editorLang}
                     editorValue={editorValue}

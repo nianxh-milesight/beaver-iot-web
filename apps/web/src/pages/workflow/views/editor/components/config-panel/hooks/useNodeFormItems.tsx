@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+
 import { type ControllerProps } from 'react-hook-form';
 import { TextField } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
@@ -9,18 +10,24 @@ import {
     EntityAssignSelect,
     EntityFilterSelect,
     EntitySelect,
-    MarkdownEditor,
     ParamAssignInput,
     // ParamInputSelect,
     TimerInput,
+    EmailContent,
     ParamInput,
     ServiceParamAssignInput,
+    EmailSendSource,
 } from '../components';
 
 type NodeFormGroupType = {
     groupName?: string;
     helperText?: string;
-    children?: ControllerProps<NodeFormDataProps>[];
+    children?: (ControllerProps<NodeFormDataProps> & {
+        /**
+         * To Control whether the current component is rendered
+         */
+        shouldRender?: (data: NodeFormDataProps) => boolean;
+    })[];
 };
 
 /**
@@ -191,32 +198,9 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Email Sending Source',
                     children: [
                         {
-                            name: 'emailType',
+                            name: 'config',
                             render({ field: { onChange, value } }) {
-                                return (
-                                    <TextField
-                                        fullWidth
-                                        autoComplete="off"
-                                        label="Email Type"
-                                        value={value}
-                                        onChange={onChange}
-                                    />
-                                );
-                            },
-                        },
-                        {
-                            name: 'emailApiKey',
-                            render({ field: { onChange, value } }) {
-                                return (
-                                    <TextField
-                                        fullWidth
-                                        autoComplete="new-password"
-                                        label="SerpApi API Key"
-                                        type="password"
-                                        value={value}
-                                        onChange={onChange}
-                                    />
-                                );
+                                return <EmailSendSource value={value} onChange={onChange} />;
                             },
                         },
                     ],
@@ -225,13 +209,15 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Email Content',
                     children: [
                         {
-                            name: 'emailRecipient',
+                            name: 'recipient',
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
+                                        required
                                         fullWidth
                                         autoComplete="off"
                                         label="Email Recipient"
+                                        helperText='Multiple recipients need to use ";" separate'
                                         value={value}
                                         onChange={onChange}
                                     />
@@ -241,7 +227,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                         {
                             name: 'content',
                             render({ field: { onChange, value } }) {
-                                return <MarkdownEditor value={value} onChange={onChange} />;
+                                return <EmailContent value={value} onChange={onChange} />;
                             },
                         },
                     ],

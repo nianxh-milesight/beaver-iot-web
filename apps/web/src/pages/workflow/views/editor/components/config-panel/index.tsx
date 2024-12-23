@@ -1,4 +1,4 @@
-import { useMemo, useLayoutEffect, useEffect, useRef } from 'react';
+import { useMemo, useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { Panel, useReactFlow } from '@xyflow/react';
 import cls from 'classnames';
 import { isEqual } from 'lodash-es';
@@ -16,6 +16,7 @@ import {
     type NodeFormDataProps,
 } from './hooks';
 import useConfigPanelStore from './store';
+import { MoreMenu, TestDrawer } from './components';
 import './style.less';
 
 type FormDataProps = CommonFormDataProps & NodeFormDataProps;
@@ -96,6 +97,9 @@ const ConfigPanel = () => {
         { wait: 300 },
     );
 
+    // ---------- Show Test Drawer ----------
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
     return (
         <Panel
             position="top-right"
@@ -115,12 +119,16 @@ const ConfigPanel = () => {
                     </Stack>
                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         {nodeConfig?.testable && (
-                            <IconButton
-                                onClick={() => console.log('execute testing or popup test panel')}
-                            >
+                            <IconButton onClick={() => setDrawerOpen(true)}>
                                 <PlayArrowIcon />
                             </IconButton>
                         )}
+                        <MoreMenu />
+                        <Divider
+                            flexItem
+                            orientation="vertical"
+                            sx={{ height: 20, alignSelf: 'center' }}
+                        />
                         <IconButton
                             onClick={() => {
                                 if (!selectedNode) return;
@@ -152,18 +160,34 @@ const ConfigPanel = () => {
                                     <div className="ms-node-form-group-title">{groupName}</div>
                                 )}
                                 <div className="ms-node-form-group-item">
-                                    {formItems?.map(props => (
-                                        <Controller<NodeFormDataProps>
-                                            {...props}
-                                            key={props.name}
-                                            control={control}
-                                        />
-                                    ))}
+                                    {formItems?.map(props => {
+                                        const { shouldRender, ...restProps } = props;
+
+                                        /**
+                                         * Whether render current form item
+                                         */
+                                        if (
+                                            shouldRender &&
+                                            typeof shouldRender === 'function' &&
+                                            !shouldRender(allFormData)
+                                        ) {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <Controller<NodeFormDataProps>
+                                                {...restProps}
+                                                key={restProps.name}
+                                                control={control}
+                                            />
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
+                <TestDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
             </div>
         </Panel>
     );

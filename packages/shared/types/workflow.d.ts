@@ -4,7 +4,10 @@
 declare type ReactFlowNode<
     D extends Record<string, unknown> = Record<string, unknown>,
     T extends string = string,
-> = import('@xyflow/react').Node<D, T>;
+> = import('@xyflow/react').Node<D, T> & {
+    /** Backend Node Type */
+    componentName: string;
+};
 
 /**
  * ReactFlow 边模型
@@ -68,17 +71,15 @@ declare type WorkflowNodeStatus = 'error' | 'success' | 'loading';
  * 节点基础数据类型（以 $ 开头的均为前端私有属性）
  */
 declare type BaseNodeDataType<T extends Record<string, any> = Record<string, any>> = {
-    /** 名称 */
+    /** Node Name */
     name: string;
-    /** 描述 */
+    /** Node Remark */
     remark?: string;
-    /** 后端组件 ID */
-    componentId?: string;
-    /** 状态 */
+    /** Status */
     $status?: WorkflowNodeStatus;
-    /** 错误信息 */
+    /** Error Message */
     $errMsg?: React.ReactNode;
-    /** 流程参数 */
+    /** Flow Parameters */
     parameters?: T;
 };
 

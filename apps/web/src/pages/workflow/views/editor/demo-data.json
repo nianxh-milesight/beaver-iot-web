@@ -95,21 +95,21 @@
             "source": "2",
             "target": "3",
             "type": "addable",
-            "sourceHandle": "case-1"
+            "sourceHandle": "$temp:if"
         },
         {
             "id": "2-4",
             "source": "2",
             "target": "4",
             "type": "addable",
-            "sourceHandle": "case-2"
+            "sourceHandle": "$temp:else"
         },
         {
             "id": "2-5",
             "source": "2",
             "target": "5",
             "type": "addable",
-            "sourceHandle": "case-else"
+            "sourceHandle": "$temp:else"
         },
         {
             "id": "3-6",

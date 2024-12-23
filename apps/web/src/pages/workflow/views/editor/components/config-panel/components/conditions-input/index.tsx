@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import cls from 'classnames';
-import { isEqual, cloneDeep, merge } from 'lodash-es';
+import { isEqual, cloneDeep, merge, isString } from 'lodash-es';
 import { useDynamicList, useControllableValue } from 'ahooks';
 import {
     ToggleButtonGroup,

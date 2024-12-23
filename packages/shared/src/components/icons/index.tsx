@@ -95,6 +95,7 @@ export {
     KeyboardArrowUp as KeyboardArrowUpIcon,
     KeyboardArrowDown as KeyboardArrowDownIcon,
     Sync as SyncIcon,
+    MoreHoriz as MoreHorizIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';

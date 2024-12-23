@@ -7,11 +7,13 @@ import { type WorkflowAPISchema } from '@/services/http';
 
 type OperationType = 'detail' | 'delete' | 'edit';
 
-export type TableRowDataType = ObjectToCamelCase<WorkflowAPISchema['getList']['response']>;
+export type TableRowDataType = ObjectToCamelCase<
+    WorkflowAPISchema['getList']['response']['content'][0]
+>;
 
 export interface UseColumnsProps<T> {
     /**
-     * 操作 Button 点击回调
+     * Button Click Callback
      */
     onButtonClick: (type: OperationType, record: T) => void;
 }

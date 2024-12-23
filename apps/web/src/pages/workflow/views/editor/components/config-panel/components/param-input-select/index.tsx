@@ -41,25 +41,10 @@ export interface ParamInputSelectProps {
     onChange?: (value: ParamInputSelectValueType) => void;
 }
 
-const demoOutputs = [
-    {
-        name: 'output11',
-        type: 'string',
-        key: '1132e3123132',
-    },
-    {
-        name: 'output22',
-        type: 'number',
-        key: '11eyu3123132',
-    },
-];
-
 /**
  * Param Input Select Component
  *
  * Note: This is a basic component., use in CodeNode, ServiceNode, EntityAssignmentNode
- *
- * TODO: render nodes params
  */
 const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
     label,
@@ -160,9 +145,11 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                 autoComplete="off"
                 label={label || getIntlText('common.label.value')}
                 required={required}
-                // disabled={!!selectValue}
                 placeholder={
-                    selectValue ? '' : getIntlText('workflow.editor.form_param_select_placeholder')
+                    selectValue
+                        ? ''
+                        : placeholder ||
+                          getIntlText('workflow.editor.form_param_select_placeholder')
                 }
                 slotProps={{
                     input: {
