@@ -160,13 +160,28 @@ const ConfigPanel = () => {
                                     <div className="ms-node-form-group-title">{groupName}</div>
                                 )}
                                 <div className="ms-node-form-group-item">
-                                    {formItems?.map(props => (
-                                        <Controller<NodeFormDataProps>
-                                            {...props}
-                                            key={props.name}
-                                            control={control}
-                                        />
-                                    ))}
+                                    {formItems?.map(props => {
+                                        const { shouldRender, ...restProps } = props;
+
+                                        /**
+                                         * Whether render current form item
+                                         */
+                                        if (
+                                            shouldRender &&
+                                            typeof shouldRender === 'function' &&
+                                            !shouldRender(allFormData)
+                                        ) {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <Controller<NodeFormDataProps>
+                                                {...restProps}
+                                                key={restProps.name}
+                                                control={control}
+                                            />
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}

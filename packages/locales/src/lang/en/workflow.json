@@ -55,6 +55,7 @@
     "workflow.editor.form_param_timer_period_sunday": "Sunday",
     "workflow.label.parallel_limit_tip": "并行分支限制为 {1} 个",
     "workflow.label.entry_node_number_limit_tip": "工作流中必须且仅允许有 {1} 个入口节点",
+    "workflow.label.node_email_type": "Email Type",
     "workflow.label.logic_keyword_if": "IF",
     "workflow.label.logic_keyword_else": "ELSE",
     "workflow.label.logic_keyword_elseif": "ELIF",
@@ -72,6 +73,14 @@
     "workflow.label.condition_operator_is_not_empty": "Is Not Empty",
     "workflow.node.config_panel_lable_arguments": "Arguments",
     "workflow.message.import_dsl_error": "The DSL file contains errors. Please update the file and try again.",
+    "workflow.email.label_gmail_config_api_key": "SerpApi Api Key",
+    "workflow.email.label_smtp_config_service_host": "SMTP Service Path",
+    "workflow.email.label_smtp_config_service_port": "SMTP Port",
+    "workflow.email.label_smtp_config_username": "SMTP Username",
+    "workflow.email.label_smtp_config_password": "SMTP Password",
+    "workflow.email.label_smtp_config_encryption_method": "Encryption Method",
+    "workflow.email.label_smtp_config_encryption_none": "None",
+    "workflow.email.label_smtp_config_encryption_start_tls": "StartTLS",
     "workflow.editor.valid.condition_not_setup": "Condition not setup",
     "workflow.label.node_id": "Node ID"
 }

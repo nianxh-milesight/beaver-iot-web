@@ -5,6 +5,7 @@ import {
     ListSubheader,
     MenuItem,
     FormControl,
+    FormControlProps as MuiFormControlProps,
     InputLabel,
 } from '@mui/material';
 
@@ -18,12 +19,16 @@ type Props<T extends ApiKey> = {
      * @returns 返回自定义下拉选项内容
      */
     renderOptions?: (options: (OptionsProps<T> & { description?: string })[]) => any[];
+    /**
+     * Form control props
+     */
+    formControlProps?: MuiFormControlProps;
 };
 
 export type SelectProps<T extends ApiKey> = Props<T> & MuiSelectProps<T>;
 
 const Select = <T extends ApiKey = ApiKey>(props: SelectProps<T>) => {
-    const { options, renderOptions, style, label, ...rest } = props;
+    const { options, renderOptions, style, label, formControlProps, ...rest } = props;
 
     // 转换下拉选项数据
     const getMenuItems = useMemo(() => {
@@ -45,7 +50,7 @@ const Select = <T extends ApiKey = ApiKey>(props: SelectProps<T>) => {
     }, [options]);
 
     return (
-        <FormControl sx={{ ...style }}>
+        <FormControl sx={{ ...style }} {...(formControlProps || {})}>
             {!!label && (
                 <InputLabel size={rest?.size as any} id="select-label">
                     {label}
