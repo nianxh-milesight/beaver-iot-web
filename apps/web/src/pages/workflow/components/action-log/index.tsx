@@ -1,6 +1,6 @@
 import { Fragment } from 'react/jsx-runtime';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { AccordionCard, AccordionHeader, AccordionTree } from './components';
+import { AccordionCard, AccordionHeader, AccordionTree, ActionCodeEditor } from './components';
 import { useNestedData } from './hooks';
 import { ALPHABET_LIST } from './constant';
 import type { ActionLogProps, WorkflowNestNode } from './types';
@@ -39,6 +39,7 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
 
         return treeData.map(data => {
             const { children, attrs, ...item } = data || {};
+            const { input, output } = attrs || {};
 
             // If there are child nodes, increment the index
             if ((children?.length || 0) > 1) {
@@ -56,11 +57,24 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
             const branchText = getIntlText('workflow.label.branch', {
                 1: `-${parallelLabel}-${getAlphabetIndex(multiBranchInParallelIndex)}`,
             });
+
             return (
                 <Fragment key={item.id}>
                     <AccordionCard header={<AccordionHeader data={attrs} />}>
-                        {/* // TODO */}
-                        <div>input</div>
+                        {input && (
+                            <div className="ms-action-log__input">
+                                <ActionCodeEditor
+                                    value={JSON.stringify(input, null, 2)}
+                                    title={getIntlText('common.label.input')}
+                                />
+                            </div>
+                        )}
+                        {output && (
+                            <ActionCodeEditor
+                                value={JSON.stringify(output, null, 2)}
+                                title={getIntlText('common.label.output')}
+                            />
+                        )}
                     </AccordionCard>
                     {!!children?.length && (
                         <AccordionTree header={parallelText}>
