@@ -25,10 +25,9 @@ export interface EditorContentProps extends ReactCodeMirrorProps {
 }
 
 /** Props for the code editor component. */
-export interface EditorProps extends EditorContentProps {
-    /** The title displayed in the editor header. */
-    title?: string;
-
+export interface EditorProps
+    extends EditorContentProps,
+        Pick<EditorToolbarProps, 'title' | 'icon'> {
     /** Default editor language. */
     defaultEditorLang?: EditorSupportLang;
     /** The programming language used in the editor. */

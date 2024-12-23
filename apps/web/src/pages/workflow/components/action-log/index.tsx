@@ -1,5 +1,7 @@
 import { Fragment } from 'react/jsx-runtime';
+import { Alert } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
+import { Tooltip } from '@/components';
 import { AccordionCard, AccordionHeader, AccordionTree, ActionCodeEditor } from './components';
 import { useNestedData } from './hooks';
 import { ALPHABET_LIST } from './constant';
@@ -39,7 +41,7 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
 
         return treeData.map(data => {
             const { children, attrs, ...item } = data || {};
-            const { input, output } = attrs || {};
+            const { input, output, errorMsg } = attrs || {};
 
             // If there are child nodes, increment the index
             if ((children?.length || 0) > 1) {
@@ -61,6 +63,13 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
             return (
                 <Fragment key={item.id}>
                     <AccordionCard header={<AccordionHeader data={attrs} />}>
+                        {errorMsg && (
+                            <div className="ms-action-log__alert">
+                                <Alert severity="error" icon={false}>
+                                    <Tooltip autoEllipsis title={errorMsg} />
+                                </Alert>
+                            </div>
+                        )}
                         {input && (
                             <div className="ms-action-log__input">
                                 <ActionCodeEditor

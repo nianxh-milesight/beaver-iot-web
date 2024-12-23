@@ -1,4 +1,6 @@
 .ms-action-log {
+    margin-bottom: @margin-sm;
+
     .ms-log-branch {
         color: var(--text-color-secondary);
         .text-size(@font-size-sm);
@@ -6,5 +8,18 @@
 
     &__input {
         margin-bottom: @margin-sm;
+    }
+
+    &__alert {
+        margin-bottom: @margin-sm;
+
+        .MuiPaper-root {
+            padding: 0 @padding-md;
+
+            .MuiAlert-message {
+                //
+                .text-size(@font-size-sm);
+            }
+        }
     }
 }

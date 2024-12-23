@@ -33,11 +33,15 @@ export interface AccordionLog {
     /**
      * TODO Input
      */
-    input: Record<string, any>;
+    input?: Record<string, any>;
     /**
      * TODO Output
      */
-    output: Record<string, any>;
+    output?: Record<string, any>;
+    /**
+     * error message
+     */
+    errorMsg?: string;
     /**
      * Children
      */

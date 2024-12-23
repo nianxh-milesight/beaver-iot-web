@@ -9,6 +9,7 @@ import './style.less';
 export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) => {
     const {
         title,
+        icon,
         Header: CustomHeader,
         readOnly = false,
         editable = true,
@@ -43,6 +44,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
             {CustomHeader !== null && (
                 <EditorHeaderComponent
                     title={title}
+                    icon={icon}
                     editorHandlers={handlers}
                     editorLang={editorLang}
                     editorValue={editorValue}
