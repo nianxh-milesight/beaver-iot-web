@@ -26,14 +26,6 @@ export default React.memo(({ data, isActive, onClick }: IProps) => {
                 <p className="ms-log-title">
                     <Tooltip title={title} autoEllipsis />
                 </p>
-                {/* <p className="ms-log-timestamp">
-                    <Tooltip
-                        title={
-                            timestamp ? getTimeFormat(timestamp, 'fullDateTimeSecondFormat') : ''
-                        }
-                        autoEllipsis
-                    />
-                </p> */}
             </div>
         </div>
     );

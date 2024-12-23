@@ -7,8 +7,9 @@ export const useSourceData = () => {
     const generateList = useCallback((limit: number): LogListPageType['content'] => {
         return Array.from({ length: limit }).map(() => ({
             id: generateUUID(),
-            status: Math.random() > 0.5 ? 'SUCCESS' : 'ERROR',
+            status: Math.random() > 0.5 ? 'Success' : 'Error',
             start_time: Date.now(),
+            time_cost: Math.floor(Math.random() * 1000),
         }));
     }, []);
     // TODO

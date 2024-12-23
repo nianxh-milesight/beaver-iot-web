@@ -32,13 +32,13 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
         const nestNode = cloneDeep(node) as WorkflowNestNode;
         const { id, type, data } = nestNode || {};
         const { name } = data || {};
-        const { status, input, output, time_cost: timeCost } = traceMap[id] || {};
+        const { status, input, output, timeCost } = objectToCamelCase(traceMap[id] || {});
 
         nestNode.attrs = {
             $$token: generateUUID(),
             name: name || '',
             type: type!,
-            status: status === 'SUCCESS' ? 'success' : 'failed',
+            status,
             timeCost,
             input,
             output,

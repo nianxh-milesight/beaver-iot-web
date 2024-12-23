@@ -1,11 +1,14 @@
 import { type ReactFlowJsonObject } from '@xyflow/react';
 import { type WorkflowAPISchema } from '@/services/http';
-import type { LogStatus } from '../../config';
+import { type FlowNodeTraceInfo } from '@/services/http/workflow';
 
 /**
  * Action Log Type
  */
-export interface AccordionLog {
+export interface AccordionLog
+    extends ObjectToCamelCase<
+        Pick<FlowNodeTraceInfo, 'input' | 'output' | 'time_cost' | 'status'>
+    > {
     /**
      * Unique ID of web usage
      */
@@ -22,22 +25,6 @@ export interface AccordionLog {
      * Custom header render config
      */
     config?: CustomConfigItemType;
-    /**
-     * Node status
-     */
-    status: LogStatus;
-    /**
-     * Node time cost
-     */
-    timeCost: number;
-    /**
-     * TODO Input
-     */
-    input?: Record<string, any>;
-    /**
-     * TODO Output
-     */
-    output?: Record<string, any>;
     /**
      * error message
      */
@@ -67,7 +54,7 @@ export type CustomConfigItemType = {
 };
 
 /**  Workflow Trace Type */
-export type WorkflowTraceType = WorkflowAPISchema['getLogDetail']['response'][number];
+export type WorkflowTraceType = WorkflowAPISchema['getLogDetail']['response']['trace_info'][number];
 
 /**  Workflow Data Type */
 export type WorkflowDataType = ReactFlowJsonObject<WorkflowNode, WorkflowEdge>;

@@ -30,7 +30,7 @@ export const useRenderList = ({ getLogList, containerRef, listRef }: IProps) => 
                 const { start_time: startTime, status, id } = item || {};
                 return {
                     id,
-                    status: status === 'ERROR' ? 'failed' : 'success',
+                    status,
                     title: startTime ? getTimeFormat(startTime, 'fullDateTimeSecondFormat') : '',
                 };
             });
