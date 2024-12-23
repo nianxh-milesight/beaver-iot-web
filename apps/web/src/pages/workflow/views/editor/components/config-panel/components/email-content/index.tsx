@@ -29,7 +29,7 @@ const EmailContent: React.FC<EmailContentProps> = props => {
             <CodeEditor
                 editorLang="markdown"
                 value={content}
-                Header={ContentHeader}
+                renderHeader={ContentHeader}
                 onChange={setContent}
             />
         </div>
