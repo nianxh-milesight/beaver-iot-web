@@ -72,9 +72,9 @@ declare type WorkflowNodeStatus = 'error' | 'success' | 'loading';
  */
 declare type BaseNodeDataType<T extends Record<string, any> = Record<string, any>> = {
     /** Node Name */
-    name: string;
+    nodeName: string;
     /** Node Remark */
-    remark?: string;
+    nodeRemark?: string;
     /** Status */
     $status?: WorkflowNodeStatus;
     /** Error Message */
@@ -170,7 +170,7 @@ declare type WorkflowFilterOperator =
  * 注意：实际节点渲染时需默认增加一个 else 分支
  */
 declare type IfElseNodeDataType = BaseNodeDataType<{
-    settings: {
+    choice: {
         when: {
             id: ApiKey;
             logicOperator: WorkflowLogicOperator;

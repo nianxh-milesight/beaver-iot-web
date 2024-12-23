@@ -6,7 +6,7 @@ import { useRequest } from 'ahooks';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon } from '@milesight/shared/src/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
-import useLogStore from '../../log-store';
+import useFlowStore from '../../store';
 import './style.less';
 
 /**
@@ -23,7 +23,7 @@ const LogPanel = () => {
         setOpenLogPanel,
         setLogDetail,
         setLogDetailLoading,
-    } = useLogStore(
+    } = useFlowStore(
         useStoreShallow([
             'openLogPanel',
             'logPanelMode',

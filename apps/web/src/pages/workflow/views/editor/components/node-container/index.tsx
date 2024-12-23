@@ -165,8 +165,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
             {handles?.map((handle, index) => <Fragment key={index}>{handle}</Fragment>)}
             <div
                 className={cls('ms-workflow-node', `ms-workflow-node-${type}`, {
-                    error: status === 'error',
-                    success: status === 'success',
+                    [status]: status,
                 })}
                 onContextMenu={handleContextMenu}
             >
@@ -195,7 +194,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                             {getIntlText('workflow.context_menu.title_change_node')}
                         </MenuItem>
                     )}
-                    {!entryNodeTypes.includes(nodeProps.type) && (
+                    {!entryNodeTypes.includes(nodeProps.type as WorkflowNodeType) && (
                         <MenuItem onClick={e => handleMenuItemClick(e, { type: 'delete' })}>
                             {getIntlText('common.label.delete')}
                         </MenuItem>
@@ -242,7 +241,9 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                     </span>
                     <span className="ms-workflow-node-title">{title}</span>
                     {!!status && (
-                        <span className="ms-workflow-node-status">{statusMap[status].icon}</span>
+                        <span className={cls('ms-workflow-node-status', { [status]: status })}>
+                            {statusMap[status].icon}
+                        </span>
                     )}
                 </div>
                 {children && <div className="ms-workflow-node-body">{children}</div>}

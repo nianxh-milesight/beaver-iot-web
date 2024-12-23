@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { type AxiosError } from 'axios';
+import { isEqual } from 'lodash-es';
 import { Button, IconButton, Grid2, Switch, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { ArrowBackIcon, EditIcon, toast } from '@milesight/shared/src/components';
+import { ArrowBackIcon, EditIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
-import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { EditModal, type EditModalProps } from '@/pages/workflow/components';
 import './style.less';
 
@@ -14,11 +13,14 @@ import './style.less';
  */
 export type DesignMode = 'canvas' | 'advanced';
 
-interface Props {
+export interface TopbarProps {
+    /* Is Data Loading */
+    loading?: boolean;
+
     /** Workflow Detail Data */
     data?: {
-        id: ApiKey;
-        name: string;
+        id?: ApiKey;
+        name?: string;
         remark?: string;
         enabled?: boolean;
     };
@@ -29,77 +31,72 @@ interface Props {
     /** Right Slot */
     rightSlot?: React.ReactNode;
 
-    /** Edit Error Callback */
-    onEditError?: (error: AxiosError | null) => void;
-
-    /** Edit Success Callback */
-    onEditSuccess?: () => void;
-
     /** Design Mode Change Callback */
     onDesignModeChange: (mode: DesignMode) => void;
+
+    /** Data Change Callback */
+    onDataChange?: (data: TopbarProps['data']) => void;
+
+    /** Button Click Callback */
+    // onButtonClick?: (type: 'back' | 'save', data?: TopbarProps['data']) => void;
 }
 
 /**
  * Workflow Editor Topbar
  */
-const Topbar: React.FC<Props> = ({
+const Topbar: React.FC<TopbarProps> = ({
     data,
+    loading,
     mode = 'canvas',
     rightSlot,
-    onEditError,
-    onEditSuccess,
+    onDataChange,
     onDesignModeChange,
 }) => {
     const navigate = useNavigate();
     const { getIntlText } = useI18n();
+    // const isEdit = !!data?.id;
 
     // ---------- Workflow Name/Remark/Status Edit ----------
-    const [flowData, setFlowData] = useState<Props['data']>();
+    const [flowData, setFlowData] = useState<TopbarProps['data']>();
     const [openEditModal, setOpenEditModal] = useState(false);
 
     const handleEditConfirm: EditModalProps['onConfirm'] = async params => {
-        console.log({ params });
-        if (!flowData?.id) return;
-        // const [error, resp] = await awaitWrap(
-        //     workflowAPI.updateFlow({ id: flowData.id, ...params }),
-        // );
-
-        // if (error || !isRequestSuccess(resp)) {
-        //     onEditError?.(error);
-        //     return;
-        // }
-        // TODO: Replace with real data
-        await new Promise(resolve => {
-            setTimeout(resolve, 1000);
-        });
-
         setOpenEditModal(false);
-        setFlowData(data => ({ ...data!, ...params }));
-        toast.success(getIntlText('common.message.operation_success'));
+        setFlowData(data => {
+            const result = { ...data, ...params };
+
+            onDataChange?.(result);
+            return result;
+        });
     };
 
     const handleSwitchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!flowData?.id) return;
         const { checked } = e.target;
+        setFlowData(data => {
+            const result = { ...data, enabled: checked };
 
-        // const [error, resp] = await awaitWrap(
-        //     workflowAPI.enableFlow({ id: flowData.id, status: checked ? 'enabled' : 'disabled' }),
-        // );
-
-        // if (error || !isRequestSuccess(resp)) {
-        //     onEditError?.(error);
-        //     return;
-        // }
-        // TODO: Replace with real data
-        await new Promise(resolve => {
-            setTimeout(resolve, 1000);
+            onDataChange?.(result);
+            return result;
         });
-
-        setFlowData(data => ({ ...data!, enabled: checked }));
-        toast.success(getIntlText('common.message.operation_success'));
     };
 
-    useEffect(() => setFlowData(data), [data]);
+    useEffect(() => {
+        if (data?.id) {
+            setFlowData(data);
+            return;
+        }
+
+        const result = {
+            name: `${getIntlText('common.label.workflow')}${Date.now()}`,
+            enabled: true,
+            ...data,
+        };
+
+        if (isEqual(data, result)) return;
+
+        setFlowData(result);
+        onDataChange?.(result);
+    }, [data, getIntlText, onDataChange]);
 
     return (
         <div className="ms-workflow-topbar">
@@ -113,12 +110,14 @@ const Topbar: React.FC<Props> = ({
                     >
                         {getIntlText('common.label.back')}
                     </Button>
-                    <div className="title">
-                        <Tooltip autoEllipsis title="Workflow Name" />
-                        <IconButton onClick={() => setOpenEditModal(true)}>
-                            <EditIcon />
-                        </IconButton>
-                    </div>
+                    {(flowData?.name || loading === false) && (
+                        <div className="title">
+                            <Tooltip autoEllipsis title={flowData?.name} />
+                            <IconButton onClick={() => setOpenEditModal(true)}>
+                                <EditIcon />
+                            </IconButton>
+                        </div>
+                    )}
                 </Grid2>
                 <Grid2 className="ms-workflow-topbar-center" size={4}>
                     <ToggleButtonGroup
@@ -162,4 +161,4 @@ const Topbar: React.FC<Props> = ({
     );
 };
 
-export default Topbar;
+export default React.memo(Topbar);

@@ -166,5 +166,6 @@
     "common.label.week": "Week",
     "common.label.content": "Content",
     "common.label.input": "Input",
-    "common.label.output": "Output"
+    "common.label.output": "Output",
+    "common.message.json_format_error": "JSON 格式错误"
 }

@@ -17,7 +17,7 @@ const useCommonFormItems = () => {
 
         result.push(
             {
-                name: 'name',
+                name: 'nodeName',
                 rules: {
                     validate: { checkRequired: checkRequired() },
                 },
@@ -38,7 +38,7 @@ const useCommonFormItems = () => {
                 },
             },
             {
-                name: 'remark',
+                name: 'nodeRemark',
                 defaultValue: '',
                 render({ field: { onChange, value }, fieldState: { error } }) {
                     return (
