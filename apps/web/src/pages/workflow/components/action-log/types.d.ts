@@ -84,12 +84,6 @@ export interface ParallelNodeResult {
     incomers: WorkflowNestNode[];
     usableIncome: WorkflowNestNode;
 }
-/** level struct type */
-export type LevelStructType = {
-    label: string;
-    value: number;
-    parentValue?: number;
-};
 
 /** action log props */
 export interface ActionLogProps {
