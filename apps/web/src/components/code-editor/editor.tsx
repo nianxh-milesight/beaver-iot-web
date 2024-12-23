@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { useControllableValue } from 'ahooks';
 import { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { EditorHeaderComponent, EditorComponent } from './components';
@@ -11,6 +11,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         Header: CustomHeader,
         readOnly = false,
         editable = true,
+        height,
         renderHeader,
         ...rest
     } = props;
@@ -31,8 +32,13 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
     /** Methods exposed to external components */
     useImperativeHandle(ref, () => handlers);
 
+    const cssVariable = useMemo(() => {
+        return {
+            '--code-mirror-height': height ?? '100%',
+        } as React.CSSProperties;
+    }, [height]);
     return (
-        <div className="ms-code-editor">
+        <div className="ms-code-editor" style={cssVariable}>
             {CustomHeader !== null && (
                 <EditorHeaderComponent
                     editorHandlers={handlers}
@@ -52,6 +58,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
                 setEditorValue={setEditorValue}
                 readOnly={readOnly}
                 editable={editable}
+                height={height}
             />
         </div>
     );

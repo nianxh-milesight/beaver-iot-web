@@ -12,11 +12,11 @@ export default React.memo(({ title, value }: IProps) => {
     );
     return (
         <CodeEditor
+            height="200px"
+            editorLang="json"
             editable={false}
             value={value}
             renderHeader={renderHeader}
-            minHeight="200px"
-            editorLang="json"
         />
     );
 });
