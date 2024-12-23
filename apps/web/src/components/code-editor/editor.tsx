@@ -1,13 +1,19 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useControllableValue } from 'ahooks';
 import { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import { EditorComponent, EditorHeader } from './components';
+import { EditorHeaderComponent, EditorComponent } from './components';
 import { useEditorCommand } from './hooks';
 import type { EditorSupportLang, EditorProps, EditorHandlers } from './types';
 import './style.less';
 
 export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) => {
-    const { Header: CustomHeader, ...rest } = props;
+    const {
+        Header: CustomHeader,
+        readOnly = false,
+        editable = true,
+        renderHeader,
+        ...rest
+    } = props;
     const editorInstanceRef = useRef<ReactCodeMirrorRef>(null);
 
     const [editorLang, setEditorLang] = useControllableValue<EditorSupportLang>(props, {
@@ -21,11 +27,10 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         trigger: 'onChange',
     });
 
-    const { handlers } = useEditorCommand({ editorInstanceRef });
+    const { handlers } = useEditorCommand({ editorInstanceRef, readOnly, editable });
     /** Methods exposed to external components */
     useImperativeHandle(ref, () => handlers);
 
-    const EditorHeaderComponent = CustomHeader === void 0 ? EditorHeader : CustomHeader!;
     return (
         <div className="ms-code-editor">
             {CustomHeader !== null && (
@@ -34,6 +39,9 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
                     editorLang={editorLang}
                     editorValue={editorValue}
                     setEditorLang={setEditorLang}
+                    readOnly={readOnly}
+                    editable={editable}
+                    renderHeader={renderHeader}
                 />
             )}
             <EditorComponent
@@ -42,6 +50,8 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
                 editorLang={editorLang}
                 editorValue={editorValue}
                 setEditorValue={setEditorValue}
+                readOnly={readOnly}
+                editable={editable}
             />
         </div>
     );
