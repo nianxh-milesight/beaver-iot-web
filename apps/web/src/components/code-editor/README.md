@@ -75,6 +75,16 @@ const App = () => {
     return <CodeEditor renderHeader={renderHeader} />;
 };
 ```
+OR
+```jsx
+import { CheckCircleIcon } from '@milesight/shared/src/components';
+import { CodeEditor } from '@/components';
+
+const App = () => {
+    return <CodeEditor icon={<CheckCircleIcon />} title="xxxx" />;
+};
+```
+
 
 - Custom layout, but using some components like `CodeEditorSelect`
 ```jsx

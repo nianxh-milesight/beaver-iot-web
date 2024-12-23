@@ -12,6 +12,7 @@ export default React.memo(
         setEditorLang,
         icon,
         title,
+        style,
         renderOptions,
     }: EditorToolbarProps) => {
         const { handleCopy } = useCopy();
@@ -22,7 +23,7 @@ export default React.memo(
         }, [editorValue, handleCopy]);
 
         return (
-            <div className="ms-code-editor-header">
+            <div className="ms-code-editor-header" style={style}>
                 <div className="ms-code-editor-header__title">
                     {title === void 0 ? (
                         <EditorSelect

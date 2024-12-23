@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ReactCodeMirrorProps, EditorView, EditorState } from '@uiw/react-codemirror';
+import { vscodeDarkInit } from '@uiw/codemirror-theme-vscode';
 import type { SelectChangeEvent } from '@mui/material';
 import { type SelectProps } from '@milesight/shared/src/components';
 
@@ -20,14 +21,14 @@ export interface EditorContentProps extends ReactCodeMirrorProps {
     showLineNumber?: boolean;
     /** Whether to enable code folding in the editor. */
     showFold?: boolean;
-    /** The font size used in the editor. */
-    fontSize?: number;
 }
 
 /** Props for the code editor component. */
 export interface EditorProps
     extends EditorContentProps,
         Pick<EditorToolbarProps, 'title' | 'icon'> {
+    /** The font size used in the editor. */
+    fontSize?: number;
     /** Default editor language. */
     defaultEditorLang?: EditorSupportLang;
     /** The programming language used in the editor. */
@@ -55,6 +56,9 @@ export interface EditorProps
     Header?: React.FC<EditorToolbarProps> | null;
     /** Custom editor toolbar header. */
     renderHeader?: (props: EditorToolbarProps) => React.ReactNode;
+
+    /** theme configure */
+    themeConfigure?: Parameters<typeof vscodeDarkInit>[number];
 }
 
 /** Interface for editor language options. */
@@ -102,6 +106,8 @@ export interface EditorToolbarProps
     icon?: React.ReactNode;
     /** Interface for handling various editor operations. */
     editorHandlers: EditorHandlers;
+    /** The style to use for the toolbar. */
+    style?: React.CSSProperties;
 }
 
 /**

@@ -9,9 +9,12 @@ import './style.less';
  */
 const CodeEditor: React.FC<EditorProps> = ({ value, onChange }) => {
     return (
-        <div className="ms-code-editor-config">
-            <CodeMirror value={value} onChange={onChange} defaultEditorLang="javascript" />
-        </div>
+        <CodeMirror
+            value={value}
+            onChange={onChange}
+            height="200px"
+            defaultEditorLang="javascript"
+        />
     );
 };
 
