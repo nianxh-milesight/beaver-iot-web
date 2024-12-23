@@ -1,6 +1,7 @@
 import { memo, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
+import { omitBy } from 'lodash-es';
 import {
     ReactFlow,
     Background,
@@ -12,8 +13,10 @@ import {
     type NodeChange,
 } from '@xyflow/react';
 import { Button } from '@mui/material';
+import { checkPrivateProperty } from '@milesight/shared/src/utils/tools';
 import { useI18n, useTheme } from '@milesight/shared/src/hooks';
 import { CheckIcon } from '@milesight/shared/src/components';
+import { CodeEditor } from '@/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { MIN_ZOOM, MAX_ZOOM } from './constants';
 import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
@@ -138,17 +141,36 @@ const WorkflowEditor = () => {
 
     // ---------- Design Mode Change ----------
     const [designMode, setDesignMode] = useState<DesignMode>('canvas');
+    const [editorFlowData, setEditorFlowData] = useState<string>();
     const handleDesignModeChange = useCallback(
         (mode: DesignMode) => {
             if (!checkWorkflowValid()) return;
 
+            if (mode === 'advanced') {
+                const { nodes, edges } = toObject();
+                const newNodes = nodes.map(node => {
+                    const data = omitBy(node, (_, key) => checkPrivateProperty(key));
+                    return data;
+                });
+                setEditorFlowData(JSON.stringify({ nodes: newNodes, edges }, null, 2));
+            } else if (mode === 'canvas') {
+                // TODO: json validate, data validate
+                const { nodes, edges } = JSON.parse(editorFlowData || '{}') as Pick<
+                    WorkflowSchema,
+                    'nodes' | 'edges'
+                >;
+
+                console.log(123123123, { editorFlowData, nodes });
+                setNodes(nodes);
+                setEdges(edges);
+            }
             const data = toObject();
             // TODO: check the nodes json data is valid
             console.log('workflow data', data);
 
             setDesignMode(mode);
         },
-        [toObject, checkWorkflowValid],
+        [editorFlowData, toObject, setEdges, setNodes, checkWorkflowValid],
     );
 
     // ---------- Save Workflow ----------
@@ -215,13 +237,22 @@ const WorkflowEditor = () => {
                     </ReactFlow>
                     {designMode === 'advanced' && (
                         <div className="ms-workflow-advance">
-                            <div
+                            {/* <div
                                 className="ms-workflow-advance-editor"
                                 contentEditable
                                 suppressContentEditableWarning
                             >
                                 {JSON.stringify(toObject(), null, 4)}
-                            </div>
+                            </div> */}
+                            <CodeEditor
+                                editorLang="json"
+                                Header={null}
+                                value={editorFlowData}
+                                onChange={value => {
+                                    console.log(value);
+                                    setEditorFlowData(value);
+                                }}
+                            />
                         </div>
                     )}
                 </div>

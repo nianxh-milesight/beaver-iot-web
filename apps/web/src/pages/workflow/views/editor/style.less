@@ -101,11 +101,12 @@
         position: absolute;
         inset: 0;
         z-index: 1000;
-        padding: @padding-md;
         overflow: auto;
-        font-family: @font-family-code;
-        white-space: pre-wrap;
         background-color: var(--component-background);
-        .text-size(@font-size-sm);
+
+        .@{prefix}-code-editor {
+            background-color: var(--component-background);
+            border: none;
+        }
     }
 }
