@@ -12,7 +12,6 @@ import { markdown } from '@codemirror/lang-markdown';
 import { StreamLanguage } from '@codemirror/language';
 import { groovy } from '@codemirror/legacy-modes/mode/groovy';
 
-import { useEditorTheme } from '../../hooks';
 import type { EditorContentProps, EditorSupportLang } from '../../types';
 import './style.less';
 
@@ -32,11 +31,10 @@ export const CodeEditorContent = forwardRef<ReactCodeMirrorRef, IProps>((props, 
         readOnly = false,
         editorLang,
         editorValue,
-        fontSize,
+        theme,
         setEditorValue,
         ...rest
     } = props;
-    const { editorTheme } = useEditorTheme({ fontSize });
 
     /** editor input change callback */
     const onInputChange = useCallback(
@@ -81,7 +79,7 @@ export const CodeEditorContent = forwardRef<ReactCodeMirrorRef, IProps>((props, 
             value={editorValue}
             extensions={extensions}
             onChange={onInputChange}
-            theme={editorTheme}
+            theme={theme}
             readOnly={readOnly}
             editable={editable}
         />

@@ -41,7 +41,7 @@ const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
     const { getIntlText } = useI18n();
 
     // ---------- Render Handles ----------
-    const { when, otherwise } = props.data.parameters?.settings || {};
+    const { when, otherwise } = props.data.parameters?.choice || {};
     const whenList = useMemo(
         () =>
             when ||
@@ -125,26 +125,29 @@ const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
             if (handleIds.includes(edge.sourceHandle!)) return true;
             return false;
         });
-        const tempIfEdgeIndex = edges.findIndex(
-            edge => edge.source === nodeId && edge.sourceHandle === DEFAULT_IF_SOURCE_HANDLE_ID,
-        );
-        const tempElseEdgeIndex = edges.findIndex(
-            edge => edge.source === nodeId && edge.sourceHandle === DEFAULT_ELSE_SOURCE_HANDLE_ID,
-        );
 
-        if (tempIfEdgeIndex >= 0) {
-            edges[tempIfEdgeIndex] = {
-                ...edges[tempIfEdgeIndex],
-                sourceHandle: `${when[0].id || DEFAULT_IF_SOURCE_HANDLE_ID}`,
-            };
-        }
+        edges.map(edge => {
+            let { sourceHandle } = edge;
 
-        if (tempElseEdgeIndex >= 0) {
-            edges[tempElseEdgeIndex] = {
-                ...edges[tempElseEdgeIndex],
-                sourceHandle: `${otherwise.id || DEFAULT_ELSE_SOURCE_HANDLE_ID}`,
-            };
-        }
+            if (edge.source !== nodeId) return edge;
+            switch (edge.sourceHandle) {
+                case DEFAULT_IF_SOURCE_HANDLE_ID: {
+                    sourceHandle = `${when[0].id || DEFAULT_IF_SOURCE_HANDLE_ID}`;
+                    break;
+                }
+                case DEFAULT_ELSE_SOURCE_HANDLE_ID: {
+                    sourceHandle = `${otherwise.id || DEFAULT_ELSE_SOURCE_HANDLE_ID}`;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+
+            edge.sourceHandle = sourceHandle;
+
+            return edge;
+        });
 
         setEdges(edges);
         updateNodeInternals(nodeId);

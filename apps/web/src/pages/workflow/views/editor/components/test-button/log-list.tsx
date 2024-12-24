@@ -10,7 +10,7 @@ export type LogType = 'test' | 'run';
 export interface LogListProps {
     type: LogType;
 
-    data?: WorkflowAPISchema['getLogList']['response'];
+    data?: WorkflowAPISchema['getLogList']['response']['content'];
 
     loading?: boolean;
 
@@ -58,7 +58,7 @@ const LogList: React.FC<LogListProps> = ({ type, data = [], loading, onSelect })
                             }}
                         >
                             <div className="ms-workflow-com-log-list-item__left">
-                                {record.status === 'success' ? (
+                                {record.status === 'Success' ? (
                                     <CheckCircleIcon color="success" />
                                 ) : (
                                     <ErrorIcon color="error" />

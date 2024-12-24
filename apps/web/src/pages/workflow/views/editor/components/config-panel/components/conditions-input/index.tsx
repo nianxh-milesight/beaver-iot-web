@@ -1,6 +1,6 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect } from 'react';
 import cls from 'classnames';
-import { isEqual, cloneDeep, merge, isString } from 'lodash-es';
+import { isEqual, cloneDeep, merge } from 'lodash-es';
 import { useDynamicList, useControllableValue } from 'ahooks';
 import {
     ToggleButtonGroup,
@@ -26,7 +26,7 @@ import { logicOperatorMap, conditionOperatorMap } from '../../../../constants';
 import ParamSelect from '../param-select';
 import './style.less';
 
-export type ConditionsInputValueType = NonNullable<IfElseNodeDataType['parameters']>['settings'];
+export type ConditionsInputValueType = NonNullable<IfElseNodeDataType['parameters']>['choice'];
 
 type ConditionBlockValueType = ConditionsInputValueType['when'][number];
 
@@ -378,4 +378,4 @@ const ConditionsInput: React.FC<ConditionsInputProps> = props => {
     );
 };
 
-export default ConditionsInput;
+export default React.memo(ConditionsInput);

@@ -11,14 +11,16 @@ import {
     useReactFlow,
     ReactFlowProvider,
     type NodeChange,
+    type EdgeChange,
 } from '@xyflow/react';
 import { Button } from '@mui/material';
 import { checkPrivateProperty } from '@milesight/shared/src/utils/tools';
-import { useI18n, useTheme } from '@milesight/shared/src/hooks';
-import { CheckIcon } from '@milesight/shared/src/components';
-import { CodeEditor } from '@/components';
+import { useI18n, useTheme, useStoreShallow, usePreventLeave } from '@milesight/shared/src/hooks';
+import { CheckIcon, toast } from '@milesight/shared/src/components';
+import { CodeEditor, useConfirm } from '@/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
-import { MIN_ZOOM, MAX_ZOOM } from './constants';
+import { MIN_ZOOM, MAX_ZOOM, FROZEN_NODE_PROPERTY_KEYS } from './constants';
+import useFlowStore from './store';
 import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
 import {
     Topbar,
@@ -31,6 +33,7 @@ import {
     LogPanel,
     TestButton,
     type DesignMode,
+    type TopbarProps,
 } from './components';
 import demoData from './demo-data.json';
 
@@ -76,42 +79,31 @@ const WorkflowEditor = () => {
         checkParallelLimit,
     ]);
 
-    // ---------- Fetch Data ----------
-    const [searchParams] = useSearchParams();
-    const wid = searchParams.get('wid');
-    const {
-        loading,
-        data: flowData,
-        run: getFlowDesign,
-    } = useRequest(
-        async () => {
-            if (!wid) return;
-            // TODO: Call workflow detail API
-            // const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: wid }));
+    // ---------- Prevent Leave ----------
+    const confirm = useConfirm();
+    const [isPreventLeave, setIsPreventLeave] = useState(false);
+    const handleEdgesChange = useCallback(
+        (changes: EdgeChange<WorkflowEdge>[]) => {
+            if (changes.some(({ type }) => ['add', 'remove'].includes(type))) {
+                setIsPreventLeave(true);
+            }
 
-            // if (error || !isRequestSuccess(resp)) return;
-            // const data = getResponseData(resp);
-            // console.log(data);
-
-            await new Promise(resolve => {
-                setTimeout(resolve, 500);
-            });
-            setNodes(demoData.nodes as WorkflowNode[]);
-            setEdges(demoData.edges as WorkflowEdge[]);
-
-            return { id: 'xxx', name: 'Workflow Name', remark: 'Workflow Remark', enabled: false };
+            onEdgesChange(changes);
         },
-        {
-            debounceWait: 300,
-            refreshDeps: [wid],
-        },
+        [onEdgesChange],
     );
+
+    usePreventLeave({ isPreventLeave, confirm });
 
     // ---------- Show Helper Lines when node change ----------
     const [helperLineHorizontal, setHelperLineHorizontal] = useState<number | undefined>(undefined);
     const [helperLineVertical, setHelperLineVertical] = useState<number | undefined>(undefined);
     const handleNodesChange = useCallback(
         (changes: NodeChange<WorkflowNode>[]) => {
+            if (changes.some(({ type }) => ['add', 'remove', 'position'].includes(type))) {
+                setIsPreventLeave(true);
+            }
+
             // reset the helper lines (clear existing lines, if any)
             setHelperLineHorizontal(undefined);
             setHelperLineVertical(undefined);
@@ -139,6 +131,67 @@ const WorkflowEditor = () => {
         [nodes, onNodesChange],
     );
 
+    // ---------- Fetch Nodes Config ----------
+    const { setNodeConfigs } = useFlowStore(useStoreShallow(['setNodeConfigs']));
+    const { loading: configLoading } = useRequest(
+        async () => {
+            const [error, resp] = await awaitWrap(workflowAPI.getFlowNodes());
+            const data = getResponseData(resp);
+
+            if (error || !data || !isRequestSuccess(resp)) return;
+            setNodeConfigs(data);
+        },
+        { debounceWait: 300 },
+    );
+
+    // ---------- Fetch Flow Data ----------
+    const [searchParams] = useSearchParams();
+    const wid = searchParams.get('wid');
+    const [basicData, setBasicData] = useState<TopbarProps['data']>(() => {
+        if (wid) return { id: wid };
+    });
+    const [flowDataLoading, setFlowDataLoading] = useState<boolean>();
+    const {
+        // loading,
+        // data: flowData,
+        run: getFlowDesign,
+    } = useRequest(
+        async () => {
+            if (!wid) return;
+            setFlowDataLoading(true);
+            // TODO: Call workflow detail API
+            // const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: wid }));
+
+            // if (error || !isRequestSuccess(resp)) return;
+            // const data = getResponseData(resp);
+            // console.log(data);
+
+            await new Promise(resolve => {
+                setTimeout(resolve, 500);
+            });
+
+            setFlowDataLoading(false);
+            setNodes(demoData.nodes as WorkflowNode[]);
+            setEdges(demoData.edges as WorkflowEdge[]);
+            setBasicData({
+                id: 'xxx',
+                name: 'Workflow Name',
+                remark: 'Workflow Remark',
+                enabled: false,
+            });
+
+            return { id: 'xxx', name: 'Workflow Name', remark: 'Workflow Remark', enabled: false };
+        },
+        {
+            debounceWait: 300,
+            refreshDeps: [wid],
+        },
+    );
+    const handleFlowDataChange = useCallback<NonNullable<TopbarProps['onDataChange']>>(data => {
+        setBasicData(data);
+        setIsPreventLeave(true);
+    }, []);
+
     // ---------- Design Mode Change ----------
     const [designMode, setDesignMode] = useState<DesignMode>('canvas');
     const [editorFlowData, setEditorFlowData] = useState<string>();
@@ -149,18 +202,26 @@ const WorkflowEditor = () => {
             if (mode === 'advanced') {
                 const { nodes, edges } = toObject();
                 const newNodes = nodes.map(node => {
-                    const data = omitBy(node, (_, key) => checkPrivateProperty(key));
-                    return data;
+                    const result = omitBy(node, (_, key) =>
+                        FROZEN_NODE_PROPERTY_KEYS.includes(key),
+                    );
+                    result.data = omitBy(node.data, (_, key) => checkPrivateProperty(key));
+                    return result;
                 });
+
                 setEditorFlowData(JSON.stringify({ nodes: newNodes, edges }, null, 2));
             } else if (mode === 'canvas') {
-                // TODO: json validate, data validate
-                const { nodes, edges } = JSON.parse(editorFlowData || '{}') as Pick<
-                    WorkflowSchema,
-                    'nodes' | 'edges'
-                >;
+                let data: Pick<WorkflowSchema, 'nodes' | 'edges'>;
 
-                console.log(123123123, { editorFlowData, nodes });
+                // TODO: json validate, data validate
+                try {
+                    data = JSON.parse(editorFlowData || '{}');
+                } catch (e) {
+                    toast.error({ content: getIntlText('common.message.json_format_error') });
+                    return;
+                }
+                const { nodes, edges } = data;
+
                 setNodes(nodes);
                 setEdges(edges);
             }
@@ -170,7 +231,7 @@ const WorkflowEditor = () => {
 
             setDesignMode(mode);
         },
-        [editorFlowData, toObject, setEdges, setNodes, checkWorkflowValid],
+        [editorFlowData, toObject, setEdges, setNodes, checkWorkflowValid, getIntlText],
     );
 
     // ---------- Save Workflow ----------
@@ -186,11 +247,16 @@ const WorkflowEditor = () => {
     return (
         <div className="ms-main">
             <Topbar
-                data={flowData}
+                data={basicData}
+                loading={flowDataLoading}
                 mode={designMode}
+                onDataChange={handleFlowDataChange}
                 onDesignModeChange={handleDesignModeChange}
                 rightSlot={[
-                    <TestButton key="test-button" />,
+                    <TestButton
+                        key="test-button"
+                        disabled={designMode === 'advanced' || !nodes.length}
+                    />,
                     <Button
                         key="save-button"
                         variant="contained"
@@ -220,7 +286,7 @@ const WorkflowEditor = () => {
                         edges={edges}
                         onBeforeDelete={handleBeforeDelete}
                         onNodesChange={handleNodesChange}
-                        onEdgesChange={onEdgesChange}
+                        onEdgesChange={handleEdgesChange}
                         onConnect={handleConnect}
                         onEdgeMouseEnter={handleEdgeMouseEnter}
                         onEdgeMouseLeave={handleEdgeMouseLeave}
@@ -233,23 +299,16 @@ const WorkflowEditor = () => {
                         />
                         <LogPanel />
                         <ConfigPanel />
-                        <EntryPanel loading={!!wid || loading} />
+                        <EntryPanel loading={!!wid || flowDataLoading} />
                     </ReactFlow>
                     {designMode === 'advanced' && (
                         <div className="ms-workflow-advance">
-                            {/* <div
-                                className="ms-workflow-advance-editor"
-                                contentEditable
-                                suppressContentEditableWarning
-                            >
-                                {JSON.stringify(toObject(), null, 4)}
-                            </div> */}
                             <CodeEditor
                                 editorLang="json"
-                                Header={null}
+                                renderHeader={() => null}
                                 value={editorFlowData}
                                 onChange={value => {
-                                    console.log(value);
+                                    setIsPreventLeave(true);
                                     setEditorFlowData(value);
                                 }}
                             />

@@ -85,7 +85,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                 {
                     children: [
                         {
-                            name: 'settings',
+                            name: 'choice',
                             render({ field: { onChange, value } }) {
                                 return <ConditionsInput value={value} onChange={onChange} />;
                             },

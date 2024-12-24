@@ -1,8 +1,8 @@
-import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useControllableValue } from 'ahooks';
 import { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { EditorHeaderComponent, EditorComponent } from './components';
-import { useEditorCommand } from './hooks';
+import { useCssVariable, useEditorCommand, useEditorTheme } from './hooks';
 import type { EditorSupportLang, EditorProps, EditorHandlers } from './types';
 import './style.less';
 
@@ -13,11 +13,20 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         Header: CustomHeader,
         readOnly = false,
         editable = true,
-        height,
+        height = '100%',
         renderHeader,
+        onBlur,
+        onFocus,
+        theme,
+        fontSize,
         ...rest
     } = props;
     const editorInstanceRef = useRef<ReactCodeMirrorRef>(null);
+    const { handleBlur, handleFocus, themeBgColor } = useCssVariable({
+        onBlur,
+        onFocus,
+    });
+    const { editorTheme } = useEditorTheme({ fontSize });
 
     const [editorLang, setEditorLang] = useControllableValue<EditorSupportLang>(props, {
         defaultValuePropName: 'defaultEditorLang',
@@ -34,13 +43,8 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
     /** Methods exposed to external components */
     useImperativeHandle(ref, () => handlers);
 
-    const cssVariable = useMemo(() => {
-        return {
-            '--code-mirror-height': height ?? '100%',
-        } as React.CSSProperties;
-    }, [height]);
     return (
-        <div className="ms-code-editor" style={cssVariable}>
+        <div className="ms-code-editor">
             {CustomHeader !== null && (
                 <EditorHeaderComponent
                     title={title}
@@ -52,10 +56,12 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
                     readOnly={readOnly}
                     editable={editable}
                     renderHeader={renderHeader}
+                    style={themeBgColor}
                 />
             )}
             <EditorComponent
                 {...rest}
+                theme={theme || editorTheme}
                 ref={editorInstanceRef}
                 editorLang={editorLang}
                 editorValue={editorValue}
@@ -63,6 +69,8 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
                 readOnly={readOnly}
                 editable={editable}
                 height={height}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
             />
         </div>
     );

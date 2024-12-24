@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { useTheme } from '@milesight/shared/src/hooks';
 import { vscodeDarkInit, vscodeLightInit } from '@uiw/codemirror-theme-vscode';
+import { THEME_MAIN_BG_COLOR } from '../constant';
+import { getCssVariable } from '../helper';
 import { type EditorProps } from '../types';
 
 export const useEditorTheme = ({ fontSize = 18 }: Pick<EditorProps, 'fontSize'>) => {
-    const { theme, getCSSVariableValue } = useTheme();
+    const { theme } = useTheme();
 
     /** editor theme */
     const editorTheme = useMemo(() => {
@@ -12,14 +14,15 @@ export const useEditorTheme = ({ fontSize = 18 }: Pick<EditorProps, 'fontSize'>)
 
         return vscodeThemeInit({
             settings: {
-                gutterBorder: getCSSVariableValue('--component-background-gray'),
-                gutterBackground: getCSSVariableValue('--component-background-gray'),
-                background: getCSSVariableValue('--component-background-gray'),
-                gutterForeground: getCSSVariableValue('--text-color-tertiary'),
+                gutterBorder: getCssVariable(THEME_MAIN_BG_COLOR),
+                gutterBackground: getCssVariable(THEME_MAIN_BG_COLOR),
+                background: getCssVariable(THEME_MAIN_BG_COLOR),
+                gutterForeground: 'var(--text-color-tertiary)',
+                lineHighlight: 'transparent',
                 fontSize: `${fontSize}`,
             },
         });
-    }, [theme, getCSSVariableValue, fontSize]);
+    }, [theme, fontSize]);
 
     return {
         editorTheme,

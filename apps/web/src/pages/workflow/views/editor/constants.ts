@@ -101,3 +101,8 @@ export const conditionOperatorMap: Partial<
         labelIntlKey: 'workflow.label.condition_operator_is_not_empty',
     },
 };
+
+/**
+ * The node property keys that cannot be modified ni advance mode
+ */
+export const FROZEN_NODE_PROPERTY_KEYS: readonly string[] = ['selected', 'dragging', 'measured'];
