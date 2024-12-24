@@ -18,7 +18,7 @@ type ServiceParamAssignInputProps = {
     disabled?: boolean;
     serviceKey?: ApiKey;
     value?: ServiceParamAssignInputValueType;
-    defaultValue?: any;
+    defaultValue?: ServiceParamAssignInputValueType;
     onChange?: (value: ServiceParamAssignInputValueType) => void;
 };
 type EntityItem = {
