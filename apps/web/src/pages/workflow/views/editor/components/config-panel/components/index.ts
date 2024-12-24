@@ -12,9 +12,9 @@ export { default as ParamSelect } from './param-select';
 export { default as ParamInputSelect } from './param-input-select';
 export { default as TimerInput } from './timer-input';
 export {
-    default as EntityFilterSelect,
-    type EntityFilterSelectValueType,
-} from './entity-filter-select';
+    default as EntityMultipleSelect,
+    type EntityMultipleSelectValueType,
+} from './entity-multiple-select';
 export { default as ParamAssignInput, type ParamAssignInputValueType } from './param-assign-input';
 export { default as EmailSendSource, EMAIL_TYPE } from './email-send-source';
 export { default as EmailContent } from './email-content';

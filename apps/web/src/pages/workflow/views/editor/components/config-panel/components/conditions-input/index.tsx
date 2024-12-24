@@ -11,6 +11,7 @@ import {
     Select,
     MenuItem,
     TextField,
+    Tooltip,
 } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import {
@@ -62,7 +63,7 @@ const MAX_CONDITION_BLOCKS_NUMBER = 5;
  * Note: use in IfelseNode
  */
 const ConditionsInput: React.FC<ConditionsInputProps> = props => {
-    const { getIntlText } = useI18n();
+    const { getIntlText, getIntlHtml } = useI18n();
     const [data, setData] = useControllableValue<ConditionsInputValueType>(props);
     // const otherwiseId = useRef<string>('');
     const {
@@ -159,6 +160,10 @@ const ConditionsInput: React.FC<ConditionsInputProps> = props => {
             {blockList.map((block, blockIndex) => {
                 const { conditions, logicOperator, expressionType } = block;
                 const isMultipleConditions = conditions?.length > 1;
+                const tipKeyword =
+                    logicOperator === 'OR'
+                        ? getIntlText(logicOperatorMap.AND?.labelIntlKey || '')
+                        : getIntlText(logicOperatorMap.OR?.labelIntlKey || '');
 
                 return (
                     <div className="ms-conditions-input-item" key={getBlockKey(blockIndex)}>
@@ -233,22 +238,31 @@ const ConditionsInput: React.FC<ConditionsInputProps> = props => {
                             >
                                 {isMultipleConditions && (
                                     <div className="logic-operator">
-                                        <Chip
-                                            size="small"
-                                            variant="outlined"
-                                            label={
-                                                <>
-                                                    {getIntlText(
-                                                        logicOperatorMap[logicOperator]
-                                                            ?.labelIntlKey || '',
-                                                    )}
-                                                    <SyncIcon />
-                                                </>
-                                            }
-                                            onClick={() =>
-                                                handleLogicOperatorChange(block, blockIndex)
-                                            }
-                                        />
+                                        <Tooltip
+                                            enterDelay={300}
+                                            enterNextDelay={300}
+                                            title={getIntlHtml(
+                                                'workflow.editor.form_logic_operator_switch_tip',
+                                                { 1: tipKeyword },
+                                            )}
+                                        >
+                                            <Chip
+                                                size="small"
+                                                variant="outlined"
+                                                label={
+                                                    <>
+                                                        {getIntlText(
+                                                            logicOperatorMap[logicOperator]
+                                                                ?.labelIntlKey || '',
+                                                        )}
+                                                        <SyncIcon />
+                                                    </>
+                                                }
+                                                onClick={() =>
+                                                    handleLogicOperatorChange(block, blockIndex)
+                                                }
+                                            />
+                                        </Tooltip>
                                     </div>
                                 )}
                                 {conditions.map((condition, index) => {

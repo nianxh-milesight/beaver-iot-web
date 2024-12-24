@@ -195,11 +195,22 @@ const IfElseNode: React.FC<NodeProps<IfElseNode>> = props => {
                                 const logicOperatorText = getIntlText(
                                     logicOperatorMap[block.logicOperator]?.labelIntlKey || '',
                                 );
-                                const isEmpty = isString(expressionValue)
-                                    ? !expressionValue || !expressionDescription
-                                    : !expressionValue?.key ||
-                                      !expressionValue?.operator ||
-                                      !expressionValue?.value;
+
+                                let isEmpty = true;
+                                if (isString(expressionValue)) {
+                                    isEmpty = !expressionValue || !expressionDescription;
+                                } else {
+                                    const operator = expressionValue?.operator;
+                                    if (operator === 'IS_EMPTY' || operator === 'IS_NOT_EMPTY') {
+                                        isEmpty =
+                                            !expressionValue?.key || !expressionValue?.operator;
+                                    } else {
+                                        isEmpty =
+                                            !expressionValue?.key ||
+                                            !expressionValue?.operator ||
+                                            !expressionValue?.value;
+                                    }
+                                }
 
                                 return (
                                     <div className="ms-condition-item" key={condition.id}>

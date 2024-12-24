@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { type WorkflowAPISchema } from '@/services/http';
-import { basicNodeConfigs, type NodeConfigItemType } from '../../config';
+import { basicNodeConfigs } from '../../config';
+import type { NodeConfigItem } from './typings';
 
 interface FlowStore {
     /** Workflow Node Configs */
-    nodeConfigs: Record<WorkflowNodeType, NodeConfigItemType>;
+    nodeConfigs: Record<WorkflowNodeType, NodeConfigItem>;
 
     /**
      * Log Panel Mode
@@ -75,8 +76,38 @@ const useFlowStore = create(
                 status: 'Success',
             },
         ],
+
         setNodeConfigs: nodeConfigs => {
-            console.log({ nodeConfigs });
+            const configs = Object.entries(nodeConfigs).reduce((acc, [cat, configs]) => {
+                const result = configs.map(config => {
+                    const schema =
+                        typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
+                    const basicConfig = Object.values(basicNodeConfigs).find(
+                        item => item.componentName === config.name,
+                    );
+
+                    return {
+                        type: config.name,
+                        label: config.title,
+                        ...basicConfig,
+                        category: cat,
+                        testable: schema?.component?.testable,
+                        schema,
+                    } as NodeConfigItem;
+                });
+
+                acc = acc.concat(result);
+                return acc;
+            }, [] as NodeConfigItem[]);
+            const result = configs.reduce(
+                (acc, config) => {
+                    acc[config.type] = config;
+                    return acc;
+                },
+                {} as FlowStore['nodeConfigs'],
+            );
+
+            set({ nodeConfigs: result });
         },
         setLogPanelMode: logPanelMode => set({ logPanelMode }),
         setOpenLogPanel: open => set({ openLogPanel: open }),

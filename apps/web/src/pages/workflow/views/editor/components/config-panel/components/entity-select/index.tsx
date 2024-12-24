@@ -40,6 +40,8 @@ export interface EntitySelectProps {
 
     disabled?: boolean;
 
+    placeholder?: string;
+
     /**
      * API Filter Model
      */
@@ -102,6 +104,7 @@ const EntitySelect: React.FC<EntitySelectProps> = ({
     label,
     required,
     disabled,
+    placeholder,
     filterModel,
     ...props
 }) => {
@@ -165,11 +168,12 @@ const EntitySelect: React.FC<EntitySelectProps> = ({
                 <TextField
                     {...params}
                     required={required}
-                    label={label || getIntlText('common.label.entity')}
+                    label={label !== undefined ? label : getIntlText('common.label.entity')}
+                    placeholder={placeholder}
                 />
             );
         },
-        [label, required, getIntlText],
+        [label, required, placeholder, getIntlText],
     );
 
     const renderOption = useCallback<

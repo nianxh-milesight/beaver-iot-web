@@ -234,6 +234,8 @@ export interface WorkflowAPISchema extends APISchema {
             {
                 name: string;
                 title: string;
+                /** Form Schema (JSON string) */
+                data?: string;
             }[]
         >;
     };

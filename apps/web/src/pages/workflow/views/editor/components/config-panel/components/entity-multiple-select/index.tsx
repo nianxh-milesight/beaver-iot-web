@@ -1,28 +1,13 @@
 import { memo, useLayoutEffect } from 'react';
-import {
-    Select,
-    Button,
-    IconButton,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    type SelectProps,
-} from '@mui/material';
+import { Button, IconButton, type SelectProps } from '@mui/material';
 import { isEqual } from 'lodash-es';
 import { useDynamicList, useControllableValue } from 'ahooks';
 import { useI18n } from '@milesight/shared/src/hooks';
-import {
-    DeleteOutlineIcon,
-    AddIcon,
-    KeyboardArrowDownIcon,
-} from '@milesight/shared/src/components';
+import { DeleteOutlineIcon, AddIcon } from '@milesight/shared/src/components';
 import EntitySelect, { type EntitySelectProps } from '../entity-select';
 import './style.less';
 
-export type EntityFilterSelectValueType = {
-    entityType?: EntityType;
-    entityKey?: ApiKey;
-};
+export type EntityMultipleSelectValueType = ApiKey;
 
 export interface EntityFilterSelectProps {
     required?: boolean;
@@ -30,25 +15,18 @@ export interface EntityFilterSelectProps {
     multiple?: boolean;
     error?: boolean;
     helperText?: React.ReactNode;
-    value?: EntityFilterSelectValueType[];
-    onChange?: (value: EntityFilterSelectValueType[]) => void;
+    value?: EntityMultipleSelectValueType[];
+    onChange?: (value: EntityMultipleSelectValueType[]) => void;
     typeSelectProps?: SelectProps;
     entitySelectProps?: EntitySelectProps;
 }
 
-// const DEFAULT_EMPTY_VALUE: EntityFilterSelectValueType = {
-//     label: '',
-//     value: '',
-// };
-
 const MAX_VALUE_LENGTH = 10;
-
-const entityTypes: EntityType[] = ['PROPERTY', 'EVENT', 'SERVICE'];
 
 /**
  * Entity Filter Select Component
  */
-const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
+const EntityMultipleSelect: React.FC<EntityFilterSelectProps> = ({
     required,
     disabled,
     multiple = true,
@@ -59,27 +37,30 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
     ...props
 }) => {
     const { getIntlText } = useI18n();
-    const [innerValue, setInnerValue] = useControllableValue<EntityFilterSelectValueType[]>(props, {
-        defaultValue: [],
-    });
+    const [innerValue, setInnerValue] = useControllableValue<EntityMultipleSelectValueType[]>(
+        props,
+        {
+            defaultValue: [],
+        },
+    );
     const { list, remove, getKey, insert, replace, resetList } =
-        useDynamicList<EntityFilterSelectValueType>(innerValue || []);
+        useDynamicList<EntityMultipleSelectValueType>(innerValue || []);
 
     useLayoutEffect(() => {
         if (isEqual(innerValue, list)) return;
-        resetList(innerValue || []);
+        resetList(innerValue || ['']);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [innerValue, resetList]);
 
     useLayoutEffect(() => {
-        setInnerValue?.(list);
+        setInnerValue?.(list || ['']);
     }, [list, setInnerValue]);
 
     return (
         <div className="ms-entity-filter-select">
             {list.map((item, index) => (
                 <div className="ms-entity-filter-select-item" key={getKey(index)}>
-                    <FormControl required={required} disabled={disabled}>
+                    {/* <FormControl required={required} disabled={disabled}>
                         <InputLabel id="entity-filter-select-type-label">
                             {typeSelectProps?.label || getIntlText('common.label.type')}
                         </InputLabel>
@@ -102,20 +83,15 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                                 </MenuItem>
                             ))}
                         </Select>
-                    </FormControl>
+                    </FormControl> */}
                     <EntitySelect
-                        label={entitySelectProps?.label || getIntlText('common.label.target')}
+                        label=""
+                        placeholder={getIntlText('common.label.entity')}
                         required={required}
                         disabled={disabled}
-                        value={item.entityKey}
-                        filterModel={{
-                            type: item.entityType,
-                        }}
+                        value={item}
                         onChange={value => {
-                            replace(index, {
-                                ...item,
-                                entityKey: value,
-                            });
+                            replace(index, value);
                         }}
                     />
                     {list.length > 1 && (
@@ -134,7 +110,7 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
                     disabled={list.length >= MAX_VALUE_LENGTH}
                     onClick={() => {
                         if (list.length >= MAX_VALUE_LENGTH) return;
-                        insert(list.length, {});
+                        insert(list.length, '');
                     }}
                 >
                     {getIntlText('common.label.add')}
@@ -144,4 +120,4 @@ const EntityFilterSelect: React.FC<EntityFilterSelectProps> = ({
     );
 };
 
-export default memo(EntityFilterSelect);
+export default memo(EntityMultipleSelect);

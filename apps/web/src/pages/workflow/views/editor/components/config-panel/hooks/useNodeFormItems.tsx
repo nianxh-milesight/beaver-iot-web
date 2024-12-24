@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react';
-
 import { type ControllerProps } from 'react-hook-form';
+import { isEmpty } from 'lodash-es';
 import { TextField } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { checkRequired } from '@milesight/shared/src/utils/validators';
+import useFlowStore from '../../../store';
 import {
     CodeEditor,
     ConditionsInput,
     EntityAssignSelect,
-    EntityFilterSelect,
+    EntityMultipleSelect,
     EntitySelect,
     ParamAssignInput,
     // ParamInputSelect,
@@ -37,9 +38,44 @@ type NodeFormGroupType = {
 export type NodeFormDataProps = Record<string, any>;
 
 const useNodeFormItems = (node?: WorkflowNode) => {
+    const nodeConfigs = useFlowStore(state => state.nodeConfigs);
     // const { getIntlText } = useI18n();
     const [serviceKey, setServiceKey] = useState<ApiKey>();
+
     const formConfigs = useMemo(() => {
+        if (!Object.keys(nodeConfigs).length) return {};
+        console.log({ nodeConfigs });
+        // const result2: Partial<Record<WorkflowNodeType, NodeFormGroupType[]>> = {};
+
+        // Object.entries(nodeConfigs).forEach(([nodeType, nodeConfig]) => {
+        //     const { properties = {}, outputProperties = {} } = nodeConfig.schema || {};
+        //     const formConfigs = Object.values(properties)
+        //         .filter(item => !item.autowired)
+        //         .sort((a, b) => (a.index || 0) - (b.index || 0))
+        //         .concat(
+        //             Object.values(outputProperties)
+        //                 .filter(item => !item.autowired)
+        //                 .sort((a, b) => (a.index || 0) - (b.index || 0)),
+        //         );
+
+        //     formConfigs.forEach(
+        //         ({
+        //             name,
+        //             type,
+        //             secret,
+        //             required,
+        //             enum: enums,
+        //             defaultValue,
+        //             displayName,
+        //             description,
+        //             uiComponent,
+        //             uiComponentGroup,
+        //         }) => {
+        //             const groupName = uiComponentGroup || name;
+        //         },
+        //     );
+        // });
+
         const result: Partial<Record<WorkflowNodeType, NodeFormGroupType[]>> = {
             trigger: [
                 {
@@ -76,7 +112,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                         {
                             name: 'entities',
                             render({ field: { onChange, value } }) {
-                                return <EntityFilterSelect value={value} onChange={onChange} />;
+                                return <EntityMultipleSelect value={value} onChange={onChange} />;
                             },
                         },
                     ],
@@ -99,7 +135,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Input Variables',
                     children: [
                         {
-                            name: 'input_vars',
+                            name: 'inputArguments',
                             render({ field: { onChange, value } }) {
                                 return <ParamAssignInput value={value} onChange={onChange} />;
                             },
@@ -109,7 +145,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                 {
                     children: [
                         {
-                            name: 'code',
+                            name: 'expression',
                             render({ field: { onChange, value } }) {
                                 return <CodeEditor value={value} onChange={onChange} />;
                             },
@@ -120,7 +156,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Output Variables',
                     children: [
                         {
-                            name: 'output_vars',
+                            name: 'payload',
                             render({ field: { onChange, value } }) {
                                 return <ParamInput showSwitch value={value} onChange={onChange} />;
                             },
@@ -133,7 +169,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Service Setting',
                     children: [
                         {
-                            name: 'service',
+                            name: 'serviceParams',
                             render({ field: { onChange, value } }) {
                                 return (
                                     <EntitySelect
@@ -154,7 +190,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     helperText: 'Please select the service you want to call first.',
                     children: [
                         {
-                            name: 'paramList',
+                            name: 'serviceParams',
                             render({ field: { onChange, value } }) {
                                 return (
                                     <ServiceParamAssignInput
@@ -173,7 +209,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Assignment Setting',
                     children: [
                         {
-                            name: 'assignments',
+                            name: 'exchangePayload',
                             render({ field: { onChange, value } }) {
                                 return <EntityAssignSelect value={value} onChange={onChange} />;
                             },
@@ -188,7 +224,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                         {
                             name: 'entitySelect',
                             render({ field: { onChange, value } }) {
-                                return <EntityFilterSelect value={value} onChange={onChange} />;
+                                return <EntityMultipleSelect value={value} onChange={onChange} />;
                             },
                         },
                     ],
@@ -287,7 +323,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
         };
 
         return result;
-    }, [serviceKey]);
+    }, [serviceKey, nodeConfigs]);
 
     return !node?.type ? [] : formConfigs[node.type as WorkflowNodeType] || [];
 };

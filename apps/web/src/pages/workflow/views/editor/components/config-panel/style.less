@@ -71,9 +71,16 @@
             }
 
             &-title {
+                display: flex;
+                gap: @margin-xxs;
+                align-items: center;
                 margin-bottom: @margin-md;
                 font-weight: @font-weight-bold;
                 .text-size(@font-size-lg);
+
+                .@{prefix}ButtonBase-root {
+                    padding: @padding-xxs;
+                }
             }
         }
     }

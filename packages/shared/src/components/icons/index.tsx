@@ -96,6 +96,7 @@ export {
     KeyboardArrowDown as KeyboardArrowDownIcon,
     Sync as SyncIcon,
     MoreHoriz as MoreHorizIcon,
+    Help as HelpIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';

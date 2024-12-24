@@ -114,7 +114,6 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <CallSplitIcon sx={{ transform: 'rotate(90deg)' }} />,
         iconBgColor: '#F57C00',
         category: 'control',
-        testable: true,
     },
     // end: {
     //     type: 'end',
@@ -130,11 +129,10 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <SettingsEthernetIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
-        testable: true,
     },
     assigner: {
         type: 'assigner',
-        componentName: 'variableAssigner',
+        componentName: 'entityAssigner',
         labelIntlKey: 'workflow.label.assigner_node_name',
         icon: <EntityIcon />,
         iconBgColor: '#26A69A',
@@ -147,7 +145,6 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <RoomServiceIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
-        testable: true,
     },
     select: {
         type: 'select',
@@ -156,7 +153,6 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <FactCheckIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
-        testable: true,
     },
     email: {
         type: 'email',
@@ -165,7 +161,6 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <EmailIcon />,
         iconBgColor: '#7E57C2',
         category: 'external',
-        testable: true,
     },
     webhook: {
         type: 'webhook',
@@ -174,7 +169,6 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <WebhookIcon />,
         iconBgColor: '#7E57C2',
         category: 'external',
-        testable: true,
     },
 };
 

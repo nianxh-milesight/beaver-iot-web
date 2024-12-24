@@ -3,11 +3,11 @@ import { Panel, useReactFlow } from '@xyflow/react';
 import cls from 'classnames';
 import { isEqual } from 'lodash-es';
 import { useDebounceEffect } from 'ahooks';
-import { Stack, IconButton, Divider } from '@mui/material';
+import { Stack, IconButton, Divider, Tooltip } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { CloseIcon, PlayArrowIcon } from '@milesight/shared/src/components';
-import { basicNodeConfigs } from '@/pages/workflow/config';
+import { CloseIcon, PlayArrowIcon, HelpIcon } from '@milesight/shared/src/components';
+import useFlowStore from '../../store';
 import useWorkflow from '../../hooks/useWorkflow';
 import {
     useCommonFormItems,
@@ -31,12 +31,13 @@ const ConfigPanel = () => {
     // ---------- Handle Node-related logic ----------
     const { getSelectedNode } = useWorkflow();
     const selectedNode = useMemo(() => getSelectedNode(), [getSelectedNode]);
+    const nodeConfigs = useFlowStore(state => state.nodeConfigs);
     const openPanel = !!selectedNode;
     const nodeConfig = useMemo(() => {
         if (!selectedNode) return;
 
-        return basicNodeConfigs[selectedNode.type as WorkflowNodeType];
-    }, [selectedNode]);
+        return nodeConfigs[selectedNode.type as WorkflowNodeType];
+    }, [selectedNode, nodeConfigs]);
 
     // ---------- Entity List Data Init ----------
     const getEntityList = useConfigPanelStore(state => state.getEntityList);
@@ -154,38 +155,56 @@ const ConfigPanel = () => {
                     </div>
                     <Divider className="ms-divider" />
                     <div className="ms-node-form-items">
-                        {nodeFormGroups.map(({ groupName, children: formItems }, index) => (
-                            // eslint-disable-next-line react/no-array-index-key
-                            <div className="ms-node-form-group" key={`${groupName || ''}-${index}`}>
-                                {!!groupName && (
-                                    <div className="ms-node-form-group-title">{groupName}</div>
-                                )}
-                                <div className="ms-node-form-group-item">
-                                    {formItems?.map(props => {
-                                        const { shouldRender, ...restProps } = props;
+                        {nodeFormGroups.map(
+                            ({ groupName, helperText, children: formItems }, index) => (
+                                <div
+                                    className="ms-node-form-group"
+                                    // eslint-disable-next-line react/no-array-index-key
+                                    key={`${groupName || ''}-${index}`}
+                                >
+                                    {!!groupName && (
+                                        <div className="ms-node-form-group-title">
+                                            {groupName}
+                                            {helperText && (
+                                                <Tooltip
+                                                    enterDelay={300}
+                                                    enterNextDelay={300}
+                                                    title={helperText}
+                                                >
+                                                    <IconButton size="small">
+                                                        <HelpIcon sx={{ fontSize: 16 }} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )}
+                                        </div>
+                                    )}
+                                    <div className="ms-node-form-group-item">
+                                        {formItems?.map(props => {
+                                            const { shouldRender, ...restProps } = props;
 
-                                        /**
-                                         * Whether render current form item
-                                         */
-                                        if (
-                                            shouldRender &&
-                                            typeof shouldRender === 'function' &&
-                                            !shouldRender(allFormData)
-                                        ) {
-                                            return null;
-                                        }
+                                            /**
+                                             * Whether render current form item
+                                             */
+                                            if (
+                                                shouldRender &&
+                                                typeof shouldRender === 'function' &&
+                                                !shouldRender(allFormData)
+                                            ) {
+                                                return null;
+                                            }
 
-                                        return (
-                                            <Controller<NodeFormDataProps>
-                                                {...restProps}
-                                                key={restProps.name}
-                                                control={control}
-                                            />
-                                        );
-                                    })}
+                                            return (
+                                                <Controller<NodeFormDataProps>
+                                                    {...restProps}
+                                                    key={restProps.name}
+                                                    control={control}
+                                                />
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ),
+                        )}
                     </div>
                 </div>
                 <TestDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />

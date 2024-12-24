@@ -47,12 +47,12 @@ const EntityAssignSelect: React.FC<EntityAssignSelectProps> = ({
 
     useLayoutEffect(() => {
         if (isEqual(data, list)) return;
-        resetList(data || []);
+        resetList(data || [{}]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, resetList]);
 
     useLayoutEffect(() => {
-        setData?.(list);
+        setData?.(list || [{}]);
     }, [list, setData]);
 
     return (
