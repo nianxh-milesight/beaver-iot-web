@@ -17,6 +17,7 @@ import {
     ParamInput,
     ServiceParamAssignInput,
     EmailSendSource,
+    EmailRecipients,
 } from '../components';
 
 type NodeFormGroupType = {
@@ -209,19 +210,24 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                     groupName: 'Email Content',
                     children: [
                         {
-                            name: 'recipient',
+                            name: 'subject',
                             render({ field: { onChange, value } }) {
                                 return (
                                     <TextField
                                         required
                                         fullWidth
                                         autoComplete="off"
-                                        label="Email Recipient"
-                                        helperText='Multiple recipients need to use ";" separate'
+                                        label="Subject"
                                         value={value}
                                         onChange={onChange}
                                     />
                                 );
+                            },
+                        },
+                        {
+                            name: 'recipient',
+                            render({ field: { value, onChange } }) {
+                                return <EmailRecipients value={value} onChange={onChange} />;
                             },
                         },
                         {

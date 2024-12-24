@@ -89,5 +89,7 @@
     "workflow.label.node_id": "Node ID",
     "workflow.label.abnormal_edge_tip": "节点嵌套错误，请检查重试",
     "workflow.editor.node_delete_confirm_title": "删除节点",
-    "workflow.editor.node_delete_confirm_desc": "确定删除此节点？"
+    "workflow.editor.node_delete_confirm_desc": "确定删除此节点？",
+    "workflow.email.label_content_recipients": "Recipients",
+    "workflow.email.label_content_recipients_tip": "Multiple recipients need to use ';' separate"
 }
