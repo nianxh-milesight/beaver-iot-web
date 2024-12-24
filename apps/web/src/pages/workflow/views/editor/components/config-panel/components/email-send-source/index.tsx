@@ -19,10 +19,11 @@ export const EmailTypeOptions = [
         label: 'SMTP',
         value: EMAIL_TYPE.SMTP,
     },
-    {
-        label: 'Gmail',
-        value: EMAIL_TYPE.GMAIL,
-    },
+    /** Temporary remove Gmail */
+    // {
+    //     label: 'Gmail',
+    //     value: EMAIL_TYPE.GMAIL,
+    // },
 ];
 
 export interface EmailConfigProps {
@@ -48,7 +49,10 @@ const EmailSendSource: React.FC<EmailSendSourceProps> = props => {
     const { getIntlText } = useI18n();
 
     const [state, setState] = useControllableValue<EmailConfigProps>({
-        value: value || {},
+        value: value || {
+            provider: EMAIL_TYPE.SMTP,
+            smtpConfig: defaultSmtpValue,
+        },
         onChange,
     });
 
