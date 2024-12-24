@@ -44,7 +44,7 @@ const DEFAULT_EMPTY_VALUE: ParamInputValueType = {
     arg: '',
     type: '',
 };
-const typeOptions = ['STRING', 'LONG', 'DOUBLE', 'BOOLEAN', 'BINARY'];
+const typeOptions = ['INT', 'FLOAT', 'BOOLEAN', 'STRING'];
 
 const ParamInput: React.FC<ParamInputProps> = ({
     required,
