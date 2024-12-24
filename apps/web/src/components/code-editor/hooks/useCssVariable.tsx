@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { THEME_MAIN_BG_COLOR } from '../constant';
 import { getCssVariable } from '../helper';
 import { type EditorProps } from '../types';
@@ -26,6 +26,12 @@ export const useCssVariable = ({ onFocus, onBlur }: IProps) => {
         },
         [onBlur, updateCssVariable],
     );
+
+    useEffect(() => {
+        return () => {
+            updateCssVariable('var(--component-background-gray)');
+        };
+    }, []);
 
     const themeBgColor = useMemo(() => {
         return { backgroundColor: getCssVariable(THEME_MAIN_BG_COLOR) };

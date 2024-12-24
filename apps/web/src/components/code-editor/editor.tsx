@@ -13,7 +13,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         Header: CustomHeader,
         readOnly = false,
         editable = true,
-        height,
+        height = '100%',
         renderHeader,
         onBlur,
         onFocus,
