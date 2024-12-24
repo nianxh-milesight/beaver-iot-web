@@ -41,3 +41,5 @@ export const editorLangOptions: {
 
 /** Common editor header class name  */
 export const COMMON_EDITOR_HEADER_CLASS = 'ms-code-editor-header';
+
+export const THEME_MAIN_BG_COLOR = '--editor-main-bg-color';

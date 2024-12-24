@@ -26,7 +26,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
         onBlur,
         onFocus,
     });
-    const { editorTheme } = useEditorTheme({ fontSize, themeBgColor });
+    const { editorTheme } = useEditorTheme({ fontSize });
 
     const [editorLang, setEditorLang] = useControllableValue<EditorSupportLang>(props, {
         defaultValuePropName: 'defaultEditorLang',
@@ -56,7 +56,7 @@ export const CodeEditor = forwardRef<EditorHandlers, EditorProps>((props, ref) =
                     readOnly={readOnly}
                     editable={editable}
                     renderHeader={renderHeader}
-                    style={{ backgroundColor: themeBgColor }}
+                    style={themeBgColor}
                 />
             )}
             <EditorComponent
