@@ -27,7 +27,7 @@ const EmailContent: React.FC<EmailContentProps> = props => {
     return (
         <div className={styles['email-content']}>
             <CodeEditor
-                editorLang="markdown"
+                editorLang="text"
                 value={content}
                 renderHeader={ContentHeader}
                 onChange={setContent}
