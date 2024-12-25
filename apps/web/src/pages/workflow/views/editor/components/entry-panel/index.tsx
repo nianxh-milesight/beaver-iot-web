@@ -3,18 +3,21 @@ import { Panel, useNodes } from '@xyflow/react';
 import cls from 'classnames';
 import { Button, CircularProgress } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
+import { Empty } from '@/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
 import useInteractions from '../../hooks/useInteractions';
 import './style.less';
 
 interface Props {
+    /** Is Editing */
+    isEditing?: boolean;
     /** Is Data Loading */
     loading?: boolean;
 }
 
 const entryNodeConfigs = Object.values(basicNodeConfigs).filter(node => node.category === 'entry');
 
-const EntryModal: React.FC<Props> = ({ loading }) => {
+const EntryModal: React.FC<Props> = ({ isEditing, loading }) => {
     const { getIntlText } = useI18n();
     const nodes = useNodes();
     const { addNode } = useInteractions();
@@ -29,6 +32,8 @@ const EntryModal: React.FC<Props> = ({ loading }) => {
         <Panel position="top-center" className="ms-workflow-panel-entry-root">
             {loading ? (
                 <CircularProgress />
+            ) : isEditing ? (
+                <Empty />
             ) : (
                 <div className="ms-workflow-panel-entry">
                     <div className="ms-workflow-panel-entry-header">

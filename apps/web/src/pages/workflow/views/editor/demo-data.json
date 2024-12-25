@@ -3,57 +3,62 @@
         {
             "id": "1",
             "data": {
-                "name": "Hello"
+                "nodeName": "Hello"
             },
             "position": {
                 "x": 0,
                 "y": 0
             },
-            "type": "timer"
+            "type": "trigger",
+            "componentName": "trigger"
         },
         {
             "id": "2",
             "data": {
-                "name": "World"
+                "nodeName": "World"
             },
             "position": {
                 "x": 300,
                 "y": 100
             },
-            "type": "ifelse"
+            "type": "ifelse",
+            "componentName": "choice"
         },
         {
             "id": "3",
             "data": {
-                "name": "Code"
+                "nodeName": "Code"
             },
             "position": {
                 "x": 600,
                 "y": 0
             },
-            "type": "code"
+            "type": "code",
+            "componentName": "simpleTimer"
         },
         {
             "id": "4",
             "data": {
-                "name": "Service"
+                "nodeName": "Service"
             },
             "position": {
                 "x": 600,
                 "y": 100
             },
-            "type": "service"
+            "type": "service",
+            "componentName": "serviceInvocation"
         },
         {
             "id": "5",
             "data": {
-                "name": "Select"
+                "nodeName": "Select"
             },
             "position": {
                 "x": 600,
                 "y": 200
             },
-            "type": "select"
+            "type": "select",
+            "componentName": "entitySelector"
         },
         {
             "id": "6",
@@ -62,25 +67,33 @@
                 "x": 900,
                 "y": 0
             },
-            "type": "assigner"
+            "type": "assigner",
+            "componentName": "entityAssigner"
         },
         {
             "id": "7",
-            "data": {},
+            "data": {
+                "nodeName": "Email"
+            },
             "position": {
                 "x": 900,
                 "y": 100
             },
-            "type": "email"
+            "type": "email",
+            "componentName": "email"
         },
         {
             "id": "8",
-            "data": {},
+            "data": {
+                "nodeName": "Webhook",
+                "nodeRemark": "This a Webhook node"
+            },
             "position": {
                 "x": 900,
                 "y": 200
             },
-            "type": "webhook"
+            "type": "webhook",
+            "componentName": "simpleTimer"
         }
     ],
     "edges": [

@@ -1,4 +1,5 @@
-import React, { Fragment, useState, useMemo } from 'react';
+import React, { Fragment, useState, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useReactFlow, Position, type NodeProps } from '@xyflow/react';
 import cls from 'classnames';
 import { Menu, MenuItem } from '@mui/material';
@@ -88,31 +89,41 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     const status = nodeProps?.data?.$status as WorkflowNodeStatus;
 
     // ---------- ContextMenu ----------
+    const [searchParams] = useSearchParams();
+    const isEditing = !!searchParams.get('wid');
     const [contextMenu, setContextMenu] = useState<{
         mouseX: number;
         mouseY: number;
     } | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>();
-    const isEntryNode = basicNodeConfigs[nodeProps.type as WorkflowNodeType]?.category === 'entry';
+    const nodeId = nodeProps?.id;
+    const nodeType = nodeProps?.type as WorkflowNodeType;
+    const isEntryNode = basicNodeConfigs[nodeType]?.category === 'entry';
 
     /**
      * Collection of modifiable node menus
      *
      * Note: The entry node can not be deleted.
      */
-    const nodeMenus = useMemo(() => {
+    const entryNodeConfigs = useMemo(() => {
         const result = Object.values(basicNodeConfigs).filter(item => {
-            return item.category === 'entry' && item.type !== nodeProps.type;
+            return item.category === 'entry' && item.type !== nodeType;
         });
 
         return result;
-    }, [nodeProps]);
+    }, [nodeType]);
 
     /**
      * Set Context Menu Position
      */
     const handleContextMenu = (event: React.MouseEvent) => {
         event.preventDefault();
+
+        if (!menuItems.length) {
+            setContextMenu(null);
+            return;
+        }
+
         setContextMenu(
             contextMenu === null
                 ? {
@@ -127,37 +138,67 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
      * Menu Item click callback
      */
     const { updateNode, deleteElements } = useReactFlow();
-    const handleMenuItemClick = async (
-        e: React.MouseEvent<HTMLLIElement, MouseEvent>,
-        {
-            type,
-            targetNodeType,
-        }: {
-            type: 'change' | 'delete';
-            targetNodeType?: WorkflowNodeType;
-        },
-    ) => {
-        e.stopPropagation();
-        setAnchorEl(null);
-        setContextMenu(null);
+    const handleMenuItemClick = useCallback(
+        async (
+            e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+            {
+                type,
+                targetNodeType,
+            }: {
+                type: 'change' | 'delete';
+                targetNodeType?: WorkflowNodeType;
+            },
+        ) => {
+            e.stopPropagation();
+            setAnchorEl(null);
+            setContextMenu(null);
 
-        switch (type) {
-            case 'change': {
-                updateNode(nodeProps.id, {
-                    type: targetNodeType,
-                    data: {},
-                });
-                break;
+            switch (type) {
+                case 'change': {
+                    updateNode(nodeId, {
+                        type: targetNodeType,
+                        data: {},
+                    });
+                    break;
+                }
+                case 'delete': {
+                    await deleteElements({ nodes: [{ id: nodeId }] });
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
-            case 'delete': {
-                await deleteElements({ nodes: [nodeProps] });
-                break;
-            }
-            default: {
-                break;
-            }
+        },
+        [nodeId, updateNode, deleteElements],
+    );
+
+    const menuItems = useMemo(() => {
+        const result: React.ReactNode[] = [];
+
+        if (isEntryNode && !isEditing) {
+            result.push(
+                <MenuItem
+                    onClick={e => {
+                        e.stopPropagation();
+                        setAnchorEl(e.currentTarget);
+                    }}
+                >
+                    {getIntlText('workflow.context_menu.title_change_node')}
+                </MenuItem>,
+            );
         }
-    };
+
+        if (!entryNodeTypes.includes(nodeType)) {
+            result.push(
+                <MenuItem onClick={e => handleMenuItemClick(e, { type: 'delete' })}>
+                    {getIntlText('common.label.delete')}
+                </MenuItem>,
+            );
+        }
+
+        return result;
+    }, [isEditing, isEntryNode, nodeType, getIntlText, handleMenuItemClick]);
 
     return (
         <>
@@ -215,7 +256,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                         setContextMenu(null);
                     }}
                 >
-                    {nodeMenus.map(node => (
+                    {entryNodeConfigs.map(node => (
                         <MenuItem
                             key={node.type}
                             onClick={e =>
@@ -252,4 +293,4 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     );
 };
 
-export default NodeContainer;
+export default React.memo(NodeContainer);

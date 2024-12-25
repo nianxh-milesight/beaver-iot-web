@@ -19,6 +19,11 @@ export const PARALLEL_LIMIT = 10;
 export const PARALLEL_DEPTH_LIMIT = 3;
 
 /**
+ * Node minimum number limit
+ */
+export const NODE_MIN_NUMBER_LIMIT = 2;
+
+/**
  * Entry node number limit
  */
 export const ENTRY_NODE_NUMBER_LIMIT = 1;

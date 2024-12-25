@@ -16,7 +16,9 @@ import { useI18n, useTime } from '@milesight/shared/src/hooks';
 import { AddIcon, DeleteOutlineIcon } from '@milesight/shared/src/components';
 import './style.less';
 
-export type TimerInputValueType = Partial<NonNullable<TimerNodeDataType['parameters']>>;
+export type TimerInputValueType = Partial<
+    NonNullable<TimerNodeDataType['parameters']>['timerSettings']
+>;
 
 export interface TimerInputProps {
     // label?: string;
@@ -44,7 +46,7 @@ const timerTypeConfigs: Record<
     ONCE: {
         labelIntlKey: 'workflow.editor.form_param_timer_type_once',
     },
-    CYCLE: {
+    SCHEDULE: {
         labelIntlKey: 'workflow.editor.form_param_timer_type_cycle',
     },
 };
@@ -58,25 +60,25 @@ const periodConfigs: Record<
     EVERYDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_everyday',
     },
-    Monday: {
+    MONDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_monday',
     },
-    Tuesday: {
+    TUESDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_tuesday',
     },
-    Wednesday: {
+    WEDNESDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_wednesday',
     },
-    Thursday: {
+    THURSDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_thursday',
     },
-    Friday: {
+    FRIDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_friday',
     },
-    Saturday: {
+    SATURDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_saturday',
     },
-    Sunday: {
+    SUNDAY: {
         labelIntlKey: 'workflow.editor.form_param_timer_period_sunday',
     },
 };
@@ -90,11 +92,11 @@ const MAX_VALUE_LENGTH = 10;
  */
 const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
     const { getIntlText } = useI18n();
-    const { getTime } = useTime();
+    const { timezone, getTime } = useTime();
     const [data, setData] = useControllableValue<TimerInputValueType | undefined>(props);
     const { list, remove, getKey, insert, replace, resetList } = useDynamicList<
-        Partial<NonNullable<TimerInputValueType['settings']>[number]>
-    >(data?.settings);
+        Partial<NonNullable<TimerInputValueType['rules']>[number]>
+    >(data?.rules);
     const typeOptions = useMemo(() => {
         return Object.entries(timerTypeConfigs).map(([type, config]) => (
             <MenuItem key={type} value={type}>
@@ -111,15 +113,15 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
     }, [getIntlText]);
 
     useLayoutEffect(() => {
-        if (data?.type === 'ONCE' || isEqual(data?.settings, list)) return;
-        resetList(data?.settings || []);
+        if (data?.type === 'ONCE' || isEqual(data?.rules, list)) return;
+        resetList(data?.rules || []);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, resetList]);
 
     useLayoutEffect(() => {
         setData(d => ({
             ...d,
-            settings: list || [],
+            rules: list || [],
         }));
     }, [list, setData]);
 
@@ -136,7 +138,7 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
                     value={data?.type || ''}
                     onChange={e => {
                         const type = e.target.value as TimerInputValueType['type'];
-                        setData({ type, settings: type === 'CYCLE' ? [{}] : undefined });
+                        setData({ type, timezone, rules: type === 'SCHEDULE' ? [{}] : undefined });
                     }}
                 >
                     {typeOptions}
@@ -146,19 +148,19 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
                 <DateTimePicker
                     ampm={false}
                     label={getIntlText('workflow.editor.form_param_execution_time')}
-                    value={data.executionTime ? getTime(data.executionTime) : null}
+                    value={data.executionEpochSecond ? getTime(data.executionEpochSecond) : null}
                     sx={{ width: '100%' }}
                     onChange={time => {
                         setData({
                             ...data,
-                            expireTime: undefined,
-                            settings: undefined,
-                            executionTime: getTime(time, true).valueOf(),
+                            executionEpochSecond: getTime(time, true).valueOf(),
+                            rules: undefined,
+                            expirationEpochSecond: undefined,
                         });
                     }}
                 />
             )}
-            {data?.type === 'CYCLE' && (
+            {data?.type === 'SCHEDULE' && (
                 <>
                     <div className="ms-timer-input-exec-queue">
                         <span className="label">
@@ -174,11 +176,11 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
                                         notched
                                         labelId="time-input-period-label"
                                         label={getIntlText('workflow.editor.form_param_timer_type')}
-                                        value={item.period || ''}
+                                        value={item.daysOfWeek?.[0] || ''}
                                         onChange={e => {
                                             replace(index, {
                                                 ...item,
-                                                period: e.target.value as TimePeriodType,
+                                                daysOfWeek: [e.target.value as TimePeriodType],
                                             });
                                         }}
                                     >
@@ -189,11 +191,19 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
                                     ampm={false}
                                     sx={{ width: '100%' }}
                                     label={getIntlText('common.label.time')}
-                                    value={item.time ? getTime(item.time) : null}
+                                    value={
+                                        item.hour && item.minute
+                                            ? getTime(Date.now())
+                                                  .hour(item.hour)
+                                                  .minute(item.minute)
+                                            : null
+                                    }
                                     onChange={time => {
+                                        const date = getTime(time, true);
                                         replace(index, {
                                             ...item,
-                                            time: getTime(time, true).valueOf(),
+                                            hour: date.hour(),
+                                            minute: date.minute(),
                                         });
                                     }}
                                 />
@@ -221,13 +231,15 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
                     <DateTimePicker
                         ampm={false}
                         label={getIntlText('workflow.editor.form_param_expire_time')}
-                        value={data.expireTime ? getTime(data.expireTime) : null}
+                        value={
+                            data.expirationEpochSecond ? getTime(data.expirationEpochSecond) : null
+                        }
                         sx={{ width: '100%' }}
                         onChange={time => {
                             setData({
                                 ...data,
-                                executionTime: undefined,
-                                expireTime: getTime(time, true).valueOf(),
+                                executionEpochSecond: undefined,
+                                expirationEpochSecond: getTime(time, true).valueOf(),
                             });
                         }}
                     />

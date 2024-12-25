@@ -1,6 +1,14 @@
 import { type NodeConfigItemType } from '../../config';
 
-export type NodeFormItemValueType = 'string' | 'array' | 'object' | 'number' | 'boolean';
+export type NodeFormItemValueType =
+    | 'string'
+    | 'int'
+    | 'boolean'
+    | 'enum'
+    | 'array'
+    | 'map'
+    | 'duration'
+    | 'object';
 
 export type NodeFormItemConfig = {
     name: string;
@@ -11,10 +19,11 @@ export type NodeFormItemConfig = {
     defaultValue: string;
     description: string;
     index: number;
-    enum: string[];
-    required: boolean;
-    secret: boolean;
-    autowired: boolean;
+    enum?: string[];
+    required?: boolean;
+    secret?: boolean;
+    autowired?: boolean;
+    editable?: boolean;
     uiComponent?: string;
     // uiComponentTags: string;
     uiComponentGroup?: string;

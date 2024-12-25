@@ -97,18 +97,30 @@ declare type TriggerNodeDataType = BaseNodeDataType<{
 
 declare type TimePeriodType =
     | 'EVERYDAY'
-    | 'Monday'
-    | 'Tuesday'
-    | 'Wednesday'
-    | 'Thursday'
-    | 'Friday'
-    | 'Saturday'
-    | 'Sunday';
+    | 'MONDAY'
+    | 'TUESDAY'
+    | 'WEDNESDAY'
+    | 'THURSDAY'
+    | 'FRIDAY'
+    | 'SATURDAY'
+    | 'SUNDAY';
 
 /**
  * 定时器节点参数类型
  */
 declare type TimerNodeDataType = BaseNodeDataType<{
+    timerSettings: {
+        type: 'ONCE' | 'SCHEDULE';
+        timezone: string;
+        executionEpochSecond?: number;
+        rules?: {
+            hour?: number;
+            minute?: number;
+            daysOfWeek?: TimePeriodType[];
+        }[];
+        expirationEpochSecond?: number;
+    };
+
     /**
      * 执行类型
      * @param ONCE 单次执行

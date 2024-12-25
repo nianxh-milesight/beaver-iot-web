@@ -92,5 +92,7 @@
     "workflow.editor.node_delete_confirm_desc": "确定删除此节点？",
     "workflow.email.label_content_recipients": "Recipients",
     "workflow.email.label_content_recipients_tip": "Multiple recipients need to use ';' separate",
-    "workflow.editor.form_logic_operator_switch_tip": "Click to switch to <b>{1}</b>"
+    "workflow.editor.form_logic_operator_switch_tip": "Click to switch to <b>{1}</b>",
+    "workflow.editor.editor_auto_create_service_entity_tip": "系统会自动根据工作流名称创建一个自定义服务实体，你可以在自定义实体列表中查看该实体。",
+    "workflow.label.node_min_number_limit_tip": "工作流中至少需要有 {1} 个节点"
 }

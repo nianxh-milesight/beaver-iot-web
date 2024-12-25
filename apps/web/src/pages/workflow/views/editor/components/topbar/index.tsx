@@ -17,6 +17,9 @@ export interface TopbarProps {
     /* Is Data Loading */
     loading?: boolean;
 
+    /** Is Buttons Disabled */
+    disabled?: boolean;
+
     /** Workflow Detail Data */
     data?: {
         id?: ApiKey;
@@ -47,6 +50,7 @@ export interface TopbarProps {
 const Topbar: React.FC<TopbarProps> = ({
     data,
     loading,
+    disabled,
     mode = 'canvas',
     rightSlot,
     onDataChange,
@@ -106,6 +110,7 @@ const Topbar: React.FC<TopbarProps> = ({
                         variant="outlined"
                         className="btn-back"
                         startIcon={<ArrowBackIcon />}
+                        disabled={disabled || loading}
                         onClick={() => navigate('/workflow', { replace: true })}
                     >
                         {getIntlText('common.label.back')}
@@ -113,7 +118,10 @@ const Topbar: React.FC<TopbarProps> = ({
                     {(flowData?.name || loading === false) && (
                         <div className="title">
                             <Tooltip autoEllipsis title={flowData?.name} />
-                            <IconButton onClick={() => setOpenEditModal(true)}>
+                            <IconButton
+                                disabled={disabled || loading}
+                                onClick={() => setOpenEditModal(true)}
+                            >
                                 <EditIcon />
                             </IconButton>
                         </div>
@@ -124,6 +132,7 @@ const Topbar: React.FC<TopbarProps> = ({
                         exclusive
                         size="small"
                         className="ms-workflow-mode-buttons"
+                        disabled={disabled || loading}
                         value={mode}
                         onChange={(_, value) => {
                             if (!value) return;
@@ -147,7 +156,11 @@ const Topbar: React.FC<TopbarProps> = ({
                     </ToggleButtonGroup>
                 </Grid2>
                 <Grid2 className="ms-workflow-topbar-right" size={4}>
-                    <Switch checked={!!flowData?.enabled} onChange={handleSwitchChange} />
+                    <Switch
+                        disabled={disabled || loading}
+                        checked={!!flowData?.enabled}
+                        onChange={handleSwitchChange}
+                    />
                     {rightSlot}
                 </Grid2>
             </Grid2>

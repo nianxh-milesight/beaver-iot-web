@@ -167,5 +167,6 @@
     "common.label.content": "Content",
     "common.label.input": "Input",
     "common.label.output": "Output",
-    "common.message.json_format_error": "JSON 格式错误"
+    "common.message.json_format_error": "JSON 格式错误",
+    "common.label.tip": "Tip"
 }

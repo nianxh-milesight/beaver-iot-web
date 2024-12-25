@@ -1,5 +1,5 @@
 import { memo, useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { omitBy } from 'lodash-es';
 import {
@@ -13,10 +13,9 @@ import {
     type NodeChange,
     type EdgeChange,
 } from '@xyflow/react';
-import { Button } from '@mui/material';
 import { checkPrivateProperty } from '@milesight/shared/src/utils/tools';
-import { useI18n, useTheme, useStoreShallow, usePreventLeave } from '@milesight/shared/src/hooks';
-import { CheckIcon, toast } from '@milesight/shared/src/components';
+import { useI18n, useStoreShallow, usePreventLeave } from '@milesight/shared/src/hooks';
+import { CheckIcon, InfoIcon, LoadingButton, toast } from '@milesight/shared/src/components';
 import { CodeEditor, useConfirm } from '@/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { MIN_ZOOM, MAX_ZOOM, FROZEN_NODE_PROPERTY_KEYS } from './constants';
@@ -48,7 +47,6 @@ const edgeTypes: Record<WorkflowEdgeType, React.FC<any>> = {
  * Workflow Editor
  */
 const WorkflowEditor = () => {
-    const { grey } = useTheme();
     const { getIntlText } = useI18n();
     const nodeTypes = useNodeTypes();
     const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
@@ -56,7 +54,7 @@ const WorkflowEditor = () => {
         isValidConnection,
         checkParallelLimit,
         checkNestedParallelLimit,
-        checkEntryNodeNumberLimit,
+        checkNodeNumberLimit,
         checkFreeNodeLimit,
     } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
@@ -65,7 +63,7 @@ const WorkflowEditor = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
     const checkWorkflowValid = useCallback(() => {
         const { nodes, edges } = toObject();
-        if (!checkEntryNodeNumberLimit(nodes)) return false;
+        if (!checkNodeNumberLimit(nodes)) return false;
         if (checkFreeNodeLimit(nodes)) return false;
         if (!checkNestedParallelLimit(nodes, edges)) return false;
         if (nodes.some(node => !checkParallelLimit(node.id, undefined, edges))) return false;
@@ -73,14 +71,14 @@ const WorkflowEditor = () => {
         return true;
     }, [
         toObject,
-        checkEntryNodeNumberLimit,
+        checkNodeNumberLimit,
         checkFreeNodeLimit,
         checkNestedParallelLimit,
         checkParallelLimit,
     ]);
+    const confirm = useConfirm();
 
     // ---------- Prevent Leave ----------
-    const confirm = useConfirm();
     const [isPreventLeave, setIsPreventLeave] = useState(false);
     const handleEdgesChange = useCallback(
         (changes: EdgeChange<WorkflowEdge>[]) => {
@@ -133,7 +131,7 @@ const WorkflowEditor = () => {
 
     // ---------- Fetch Nodes Config ----------
     const { setNodeConfigs } = useFlowStore(useStoreShallow(['setNodeConfigs']));
-    const { loading: configLoading } = useRequest(
+    const { loading: nodeConfigLoading } = useRequest(
         async () => {
             const [error, resp] = await awaitWrap(workflowAPI.getFlowNodes());
             const data = getResponseData(resp);
@@ -147,6 +145,7 @@ const WorkflowEditor = () => {
     // ---------- Fetch Flow Data ----------
     const [searchParams] = useSearchParams();
     const wid = searchParams.get('wid');
+    const version = searchParams.get('version') || '';
     const [basicData, setBasicData] = useState<TopbarProps['data']>(() => {
         if (wid) return { id: wid };
     });
@@ -160,15 +159,15 @@ const WorkflowEditor = () => {
             if (!wid) return;
             setFlowDataLoading(true);
             // TODO: Call workflow detail API
-            // const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: wid }));
+            const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: wid, version }));
+            // await new Promise(resolve => {
+            //     setTimeout(resolve, 500);
+            // });
 
+            setFlowDataLoading(false);
             // if (error || !isRequestSuccess(resp)) return;
             // const data = getResponseData(resp);
             // console.log(data);
-
-            await new Promise(resolve => {
-                setTimeout(resolve, 500);
-            });
 
             setFlowDataLoading(false);
             setNodes(demoData.nodes as WorkflowNode[]);
@@ -184,7 +183,7 @@ const WorkflowEditor = () => {
         },
         {
             debounceWait: 300,
-            refreshDeps: [wid],
+            refreshDeps: [wid, version],
         },
     );
     const handleFlowDataChange = useCallback<NonNullable<TopbarProps['onDataChange']>>(data => {
@@ -226,6 +225,7 @@ const WorkflowEditor = () => {
                 setEdges(edges);
             }
             const data = toObject();
+
             // TODO: check the nodes json data is valid
             console.log('workflow data', data);
 
@@ -235,13 +235,56 @@ const WorkflowEditor = () => {
     );
 
     // ---------- Save Workflow ----------
-    const handleSave = () => {
+    const navigate = useNavigate();
+    const [saveLoading, setSaveLoading] = useState(false);
+    const handleSave = async () => {
         if (!checkWorkflowValid()) return;
+        if (!basicData) {
+            // TODO: data validate
+            return;
+        }
 
         const { nodes, edges, viewport } = toObject();
+        const hasTriggerNode = nodes.find(node => node.type === 'trigger');
+
+        // If has a trigger node and it is the first time to create, show tip
+        if (!wid && hasTriggerNode) {
+            let proceed = false;
+            await confirm({
+                icon: <InfoIcon />,
+                type: 'info',
+                title: getIntlText('common.label.tip'),
+                description: getIntlText('workflow.editor.editor_auto_create_service_entity_tip'),
+                onConfirm() {
+                    proceed = true;
+                },
+            });
+
+            if (!proceed) return;
+        }
+
+        // TODO: referenced warning confirm ?
 
         // TODO: check the nodes data is valid
         console.log('workflow data', { nodes, edges, viewport });
+        setSaveLoading(true);
+        const [error, resp] = await awaitWrap(
+            workflowAPI.saveFlowDesign({
+                name: basicData.name!,
+                remark: basicData.remark!,
+                enabled: basicData.enabled!,
+                design_data: JSON.stringify({ nodes, edges, viewport }),
+            }),
+        );
+
+        console.log({ error, resp });
+        setSaveLoading(false);
+        if (error || !isRequestSuccess(resp)) return;
+        const data = getResponseData(resp);
+
+        console.log(data);
+        toast.success(getIntlText('common.message.operation_success'));
+        // navigate('/workflow');
     };
 
     return (
@@ -249,22 +292,30 @@ const WorkflowEditor = () => {
             <Topbar
                 data={basicData}
                 loading={flowDataLoading}
+                disabled={saveLoading}
                 mode={designMode}
                 onDataChange={handleFlowDataChange}
                 onDesignModeChange={handleDesignModeChange}
                 rightSlot={[
                     <TestButton
                         key="test-button"
-                        disabled={designMode === 'advanced' || !nodes.length}
+                        disabled={
+                            designMode === 'advanced' ||
+                            !nodes.length ||
+                            nodeConfigLoading ||
+                            saveLoading
+                        }
                     />,
-                    <Button
+                    <LoadingButton
                         key="save-button"
                         variant="contained"
-                        startIcon={<CheckIcon />}
+                        disabled={!nodes.length}
+                        loading={saveLoading}
+                        // startIcon={<CheckIcon />}
                         onClick={handleSave}
                     >
                         {getIntlText('common.button.save')}
-                    </Button>,
+                    </LoadingButton>,
                 ]}
             />
             <div className="ms-view ms-view-wf_editor">
@@ -291,7 +342,7 @@ const WorkflowEditor = () => {
                         onEdgeMouseEnter={handleEdgeMouseEnter}
                         onEdgeMouseLeave={handleEdgeMouseLeave}
                     >
-                        <Background style={{ backgroundColor: grey['100'] }} />
+                        <Background />
                         <Controls minZoom={MIN_ZOOM} maxZoom={MAX_ZOOM} />
                         <HelperLines
                             horizontal={helperLineHorizontal}
@@ -299,7 +350,7 @@ const WorkflowEditor = () => {
                         />
                         <LogPanel />
                         <ConfigPanel />
-                        <EntryPanel loading={!!wid || flowDataLoading} />
+                        <EntryPanel isEditing={!!wid} loading={flowDataLoading} />
                     </ReactFlow>
                     {designMode === 'advanced' && (
                         <div className="ms-workflow-advance">

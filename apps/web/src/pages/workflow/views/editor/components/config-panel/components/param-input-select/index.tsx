@@ -4,7 +4,6 @@ import { TextField, Menu, MenuItem, IconButton, Chip, ListSubheader } from '@mui
 import { useI18n } from '@milesight/shared/src/hooks';
 import { SettingsOutlinedIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
-import { genRefParamKey } from '@/pages/workflow/views/editor/helper';
 import useWorkflow from '@/pages/workflow/views/editor/hooks/useWorkflow';
 import './style.less';
 

@@ -11,7 +11,12 @@ import { uniqBy } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
-import { PARALLEL_LIMIT, PARALLEL_DEPTH_LIMIT, ENTRY_NODE_NUMBER_LIMIT } from '../constants';
+import {
+    PARALLEL_LIMIT,
+    PARALLEL_DEPTH_LIMIT,
+    NODE_MIN_NUMBER_LIMIT,
+    ENTRY_NODE_NUMBER_LIMIT,
+} from '../constants';
 import { getParallelInfo } from './utils';
 
 export type NodeParamType = {
@@ -58,10 +63,21 @@ const useWorkflow = () => {
     const selectedNodeId = selectedNode?.id;
     const selectedNodeType = selectedNode?.type;
 
-    // Check entry node number limit
-    const checkEntryNodeNumberLimit = useCallback(
+    // Check node number limit
+    const checkNodeNumberLimit = useCallback(
         (nodes?: WorkflowNode[]) => {
             nodes = nodes || getNodes();
+
+            if (nodes.length < NODE_MIN_NUMBER_LIMIT) {
+                toast.error({
+                    key: 'node-min-number-limit',
+                    content: getIntlText('workflow.label.node_min_number_limit_tip', {
+                        1: NODE_MIN_NUMBER_LIMIT,
+                    }),
+                });
+                return false;
+            }
+
             const entryNodes = nodes.filter(node =>
                 entryNodeTypes.includes(node.type as WorkflowNodeType),
             );
@@ -287,7 +303,7 @@ const useWorkflow = () => {
         isValidConnection,
         checkParallelLimit,
         checkNestedParallelLimit,
-        checkEntryNodeNumberLimit,
+        checkNodeNumberLimit,
         checkFreeNodeLimit,
         getSelectedNode,
         getUpstreamNodes,
