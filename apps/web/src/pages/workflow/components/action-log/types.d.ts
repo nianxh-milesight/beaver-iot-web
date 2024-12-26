@@ -54,10 +54,16 @@ export type CustomConfigItemType = {
 };
 
 /**  Workflow Trace Type */
-export type WorkflowTraceType = WorkflowAPISchema['getLogDetail']['response']['trace_info'][number];
+export type WorkflowTraceType = PartialOptional<
+    WorkflowAPISchema['getLogDetail']['response']['trace_info'][number],
+    'start_time' | 'time_cost'
+>;
 
 /**  Workflow Data Type */
-export type WorkflowDataType = ReactFlowJsonObject<WorkflowNode, WorkflowEdge>;
+export type WorkflowDataType = PartialOptional<
+    ReactFlowJsonObject<WorkflowNode, WorkflowEdge>,
+    'viewport'
+>;
 
 /** Workflow Custom Node Type */
 export type WorkflowNestNode<T extends WorkflowNodeType = WorkflowNodeType> = WorkflowNode<T> & {

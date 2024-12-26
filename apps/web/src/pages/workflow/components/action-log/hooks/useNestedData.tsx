@@ -31,15 +31,15 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
     const wrapperNode = useMemoizedFn((node: WorkflowNode): WorkflowNestNode => {
         const nestNode = cloneDeep(node) as WorkflowNestNode;
         const { id, type, data } = nestNode || {};
-        const { name } = data || {};
+        const { nodeName } = data || {};
         const { status, input, output, timeCost } = objectToCamelCase(traceMap[id] || {});
 
         nestNode.attrs = {
             $$token: generateUUID(),
-            name: name || '',
+            name: nodeName || '',
             type: type!,
             status,
-            timeCost,
+            timeCost: timeCost!,
             input,
             output,
         };
