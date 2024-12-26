@@ -2,15 +2,13 @@ import { client, attachAPI, API_PREFIX } from './client';
 
 export type FlowStatus = 'enable' | 'disable';
 
-export type FlowRunningStatus = 'Error' | 'Success';
-
 export type FlowNodeTraceInfo = {
     /** Node ID */
     node_id: ApiKey;
     /** Node Name */
     node_label: string;
     /** Running status */
-    status: FlowRunningStatus;
+    status: WorkflowNodeStatus;
     /** Start Time */
     start_time: number;
     /** Cost Time */
@@ -113,7 +111,7 @@ export interface WorkflowAPISchema extends APISchema {
     /** Get workflow log list */
     getLogList: {
         request: void | {
-            status?: FlowRunningStatus;
+            status?: WorkflowNodeStatus;
         };
         response: SearchResponseType<
             {
@@ -124,7 +122,7 @@ export interface WorkflowAPISchema extends APISchema {
                 /** Run Time (ms) */
                 time_cost: number;
                 /** Running status */
-                status: FlowRunningStatus;
+                status: WorkflowNodeStatus;
             }[]
         >;
     };
@@ -207,7 +205,7 @@ export interface WorkflowAPISchema extends APISchema {
         };
         response: {
             /** Running Status */
-            status: FlowRunningStatus;
+            status: WorkflowNodeStatus;
             /** Flow ID */
             flow_id: ApiKey;
             /** Start Time */
