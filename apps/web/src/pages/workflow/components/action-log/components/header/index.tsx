@@ -17,7 +17,7 @@ export default React.memo(({ data }: IProps) => {
         icon,
         iconBgColor,
         name,
-        status = 'Success',
+        status = 'SUCCESS',
         timeCost,
     } = useMemo(() => {
         const { type, config, status, name, timeCost } = data || {};

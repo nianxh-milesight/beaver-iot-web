@@ -1,5 +1,4 @@
 import { type WorkflowAPISchema } from '@/services/http';
-import type { FlowRunningStatus } from '@/services/http/workflow';
 
 export interface LogItemProps {
     /**
@@ -9,7 +8,7 @@ export interface LogItemProps {
     /**
      * Node status
      */
-    status: FlowRunningStatus;
+    status: WorkflowNodeStatus;
     /**
      * Title
      */

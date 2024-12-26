@@ -40,8 +40,8 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
         let multiBranchInParallelIndex = -1;
 
         return treeData.map(data => {
-            const { children, attrs, ...item } = data || {};
-            const { input, output, errorMessage } = attrs || {};
+            const { children, attrs } = data || {};
+            const { input, output, errorMessage, $$token } = attrs || {};
 
             // If there are child nodes, increment the index
             if ((children?.length || 0) > 1) {
@@ -61,7 +61,7 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
             });
 
             return (
-                <Fragment key={item.id}>
+                <Fragment key={$$token}>
                     <AccordionCard header={<AccordionHeader data={attrs} />}>
                         {errorMessage && (
                             <div className="ms-action-log__alert">

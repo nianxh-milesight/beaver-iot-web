@@ -1,3 +1,4 @@
+import { CircularProgress } from '@mui/material';
 import {
     SettingsEthernetIcon,
     EntityIcon,
@@ -175,7 +176,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
  * Status Render Map
  */
 export const LogStatusMap: Record<
-    WorkflowNodeStatus,
+    WorkflowNodeStatus | 'LOADING',
     { className: string; icon: React.ReactNode }
 > = {
     SUCCESS: {
@@ -185,5 +186,9 @@ export const LogStatusMap: Record<
     ERROR: {
         className: 'ms-log-status__error',
         icon: <ErrorIcon />,
+    },
+    LOADING: {
+        className: 'ms-log-status__loading',
+        icon: <CircularProgress size={16} />,
     },
 };

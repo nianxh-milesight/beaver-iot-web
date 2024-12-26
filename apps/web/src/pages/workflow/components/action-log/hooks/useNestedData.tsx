@@ -69,9 +69,11 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
         },
     );
 
+    // when `workflowData` or `traceData` change, re-render the tree
     const workflowNestData = useMemo(
         () => wrapperWorkflowData(workflowData),
-        [workflowData, wrapperWorkflowData],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [workflowData, traceData, wrapperWorkflowData],
     );
 
     /** Convert flat data to tree */
