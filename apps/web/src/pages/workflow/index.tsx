@@ -12,7 +12,7 @@ import {
     toast,
 } from '@milesight/shared/src/components';
 import { Breadcrumbs, TablePro, useConfirm } from '@/components';
-import { awaitWrap, isRequestSuccess, workflowAPI } from '@/services/http';
+import { awaitWrap, getResponseData, isRequestSuccess, workflowAPI } from '@/services/http';
 import { type FormDataProps as ImportFormDataProps } from '@/pages/workflow/components/import-modal/hook/useImportFormItems';
 import { ImportModal, LogModal } from '@/pages/workflow/components';
 import { useColumns, type UseColumnsProps, type TableRowDataType } from './hooks';
@@ -32,23 +32,24 @@ const Workflow = () => {
         data: workflowList,
         loading,
         run: getWorkflowList,
+        mutate: updateWorkworkflowList,
     } = useRequest(
         async () => {
             // const { page, pageSize } = paginationModel;
-            // const [error, resp] = await awaitWrap(
-            //     deviceAPI.getList({
-            //         name: keyword,
-            //         page_size: pageSize,
-            //         page_number: page + 1,
-            //     }),
-            // );
-            // const data = getResponseData(resp);
+            const [error, resp] = await awaitWrap(
+                workflowAPI.getList({
+                    name: keyword || '',
+                    // page_size: pageSize,
+                    // page_number: page + 1,
+                }),
+            );
+            const data = getResponseData(resp);
 
-            // // console.log({ error, resp });
-            // if (error || !data || !isRequestSuccess(resp)) return;
+            // console.log({ error, resp });
+            if (error || !data || !isRequestSuccess(resp)) return;
 
-            // return objectToCamelCase(data);
-            return {};
+            console.log('data ? ', data);
+            return objectToCamelCase(data);
         },
         {
             debounceWait: 300,
@@ -154,12 +155,16 @@ const Workflow = () => {
                     handleDeleteConfirm([record.id]);
                     break;
                 }
+                case 'enable': {
+                    handleSwitchChange(record);
+                    break;
+                }
                 default: {
                     break;
                 }
             }
         },
-        [navigate, handleDeleteConfirm],
+        [workflowList, navigate, handleDeleteConfirm],
     );
     const columns = useColumns<TableRowDataType>({ onButtonClick: handleTableBtnClick });
     const handleCloseLogModal = useCallback(() => setLogModalVisible(false), []);
@@ -168,6 +173,33 @@ const Workflow = () => {
             return !row.enabled;
         },
         [columns],
+    );
+    const handleSwitchChange = useCallback(
+        async (row: TableRowDataType) => {
+            if (!workflowList?.content) {
+                return;
+            }
+            const { enabled } = row;
+            const [error, res] = await awaitWrap(
+                workflowAPI.enableFlow({
+                    id: row.id,
+                    status: enabled ? 'disable' : 'enable',
+                }),
+            );
+            updateWorkworkflowList({
+                ...workflowList,
+                content: workflowList?.content.map(item =>
+                    item.id === row.id
+                        ? {
+                              ...item,
+                              enabled:
+                                  error || !isRequestSuccess(res) ? item.enabled : !item.enabled,
+                          }
+                        : item,
+                ),
+            });
+        },
+        [workflowList],
     );
     return (
         <div className="ms-main">
@@ -178,8 +210,8 @@ const Workflow = () => {
                         checkboxSelection
                         loading={loading}
                         columns={columns}
-                        // rows={deviceData?.content}
-                        // rowCount={workflowList?.total || 0}
+                        rows={workflowList?.content}
+                        rowCount={workflowList?.total || 0}
                         paginationModel={paginationModel}
                         rowSelectionModel={selectedIds}
                         isRowSelectable={isRowSelectable}

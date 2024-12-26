@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { Stack, IconButton } from '@mui/material';
+import { Stack, IconButton, Switch } from '@mui/material';
 import { useI18n, useTime } from '@milesight/shared/src/hooks';
 import { ListAltIcon, DeleteOutlineIcon, EditIcon } from '@milesight/shared/src/components';
 import { Tooltip, type ColumnType } from '@/components';
-import { type WorkflowAPISchema } from '@/services/http';
+import { workflowAPI, type WorkflowAPISchema } from '@/services/http';
 
-type OperationType = 'detail' | 'delete' | 'edit';
+type OperationType = 'detail' | 'delete' | 'edit' | 'enable';
 
 export type TableRowDataType = ObjectToCamelCase<
     WorkflowAPISchema['getList']['response']['content'][0]
@@ -61,11 +61,19 @@ const useColumns = <T extends TableRowDataType>({ onButtonClick }: UseColumnsPro
                 },
             },
             {
-                field: 'status',
+                field: 'enabled',
                 headerName: getIntlText('common.label.enable_status'),
-                ellipsis: true,
+                // ellipsis: true,
                 flex: 2,
                 minWidth: 200,
+                renderCell({ row }) {
+                    return (
+                        <Switch
+                            checked={row.enabled}
+                            onChange={() => onButtonClick('enable', row)}
+                        />
+                    );
+                },
             },
             {
                 field: '$operation',
