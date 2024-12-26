@@ -7,7 +7,7 @@ import {
     getOutgoers,
     type IsValidConnection,
 } from '@xyflow/react';
-import { uniqBy } from 'lodash-es';
+import { uniqBy, omit, cloneDeep } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
@@ -44,7 +44,7 @@ const entryNodeTypes = Object.values(basicNodeConfigs)
     .map(item => item.type);
 
 const useWorkflow = () => {
-    const { getNodes, getEdges } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { getNodes, getEdges, setNodes } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const nodes = useNodes<WorkflowNode>();
     const edges = useEdges<WorkflowEdge>();
     const { getIntlText } = useI18n();
@@ -297,6 +297,33 @@ const useWorkflow = () => {
         [getNodes, getUpstreamNodes, getIntlText],
     );
 
+    // Update node status
+    const updateNodesStatus = useCallback(
+        (data: Record<string, WorkflowNodeStatus> | null, nodes?: WorkflowNode[]) => {
+            nodes = cloneDeep(nodes || getNodes());
+
+            if (!data) {
+                nodes.forEach(node => {
+                    node.data = omit(node.data, ['$status', '$errMsg']);
+                });
+            } else {
+                nodes.forEach(node => {
+                    let status: WorkflowNodeStatus = data[node.id];
+                    if (!status) {
+                        status = 'SUCCESS';
+                    }
+                    node.data = {
+                        ...node.data,
+                        $status: status,
+                    };
+                });
+            }
+
+            setNodes(nodes);
+        },
+        [getNodes, setNodes],
+    );
+
     return {
         nodes,
         edges,
@@ -308,6 +335,7 @@ const useWorkflow = () => {
         getSelectedNode,
         getUpstreamNodes,
         getUpstreamNodeParams,
+        updateNodesStatus,
     };
 };
 

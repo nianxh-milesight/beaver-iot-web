@@ -65,7 +65,7 @@ declare type WorkflowNodeCategoryType = 'entry' | 'control' | 'action' | 'extern
 /**
  * Node Status Type
  */
-declare type WorkflowNodeStatus = 'error' | 'success' | 'loading';
+declare type WorkflowNodeStatus = 'ERROR' | 'SUCCESS';
 
 /**
  * 节点基础数据类型（以 $ 开头的均为前端私有属性）
@@ -233,7 +233,7 @@ declare type SelectNodeDataType = BaseNodeDataType<{
 /**
  * 邮件节点参数类型
  */
-declare type EmailNodeDataType = BaseNodeDataType & {
+declare type EmailNodeDataType = BaseNodeDataType<{
     emailConfig: {
         provider: 'SMTP' | 'google';
         smtpConfig: {
@@ -247,12 +247,12 @@ declare type EmailNodeDataType = BaseNodeDataType & {
     subject: string;
     recipients: string[];
     content: string;
-};
+}>;
 
 /**
  * Webhook 节点参数类型
  */
-declare type WebhookNodeDataType = BaseNodeDataType & {
+declare type WebhookNodeDataType = BaseNodeDataType<{
     /** Custom Data */
     inputArguments?: {
         key: ApiKey;
@@ -262,7 +262,7 @@ declare type WebhookNodeDataType = BaseNodeDataType & {
     webhookUrl: string;
     /** Webhook Secret */
     secretKey?: string;
-};
+}>;
 
 /**
  * 工作流节点模型

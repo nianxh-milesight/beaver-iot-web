@@ -7,7 +7,7 @@ import {
     isRangeValue,
     isMinLength,
     isMaxLength,
-    checkMaxLength,
+    isURL,
 } from '@milesight/shared/src/utils/validators';
 import useFlowStore from '../store';
 
@@ -20,12 +20,25 @@ type CheckOptions = {
     validateFirst?: boolean;
 };
 
+export type NodesDataValidResult = Record<
+    string,
+    {
+        type: WorkflowNodeType;
+        label?: string;
+        name?: string;
+        status: WorkflowNodeStatus;
+        errMsgs: string[];
+    }
+>;
+
 enum ErrorIntlKey {
     required = 'workflow.valid.required',
     rangeLength = 'workflow.valid.range_length',
     minLength = 'workflow.valid.min_length',
     maxLength = 'workflow.valid.max_length',
 }
+
+export const NODE_VALIDATE_TOAST_KEY = 'node-validate';
 
 const useValidate = () => {
     const { getIntlText } = useI18n();
@@ -89,7 +102,10 @@ const useValidate = () => {
             },
             // Check code.inputArguments and webhook.inputArguments
             inputArguments: {
-                checkMaxLength() {
+                checkMaxLength(
+                    value: NonNullable<CodeNodeDataType['parameters']>['inputArguments'],
+                    fieldName,
+                ) {
                     return true;
                 },
             },
@@ -145,18 +161,38 @@ const useValidate = () => {
                     return message;
                 },
             },
-            'ifelse.choice': {},
-            'code.expression': {
-                checkRequired,
+            'ifelse.choice': {
+                checkRequired(
+                    value: NonNullable<IfElseNodeDataType['parameters']>['choice'],
+                    fieldName,
+                ) {
+                    return true;
+                },
             },
-            'code.Payload': {},
+            'code.expression': {
+                // checkRequired() {},
+            },
+            'code.Payload': {
+                checkMaxLength(
+                    value: NonNullable<CodeNodeDataType['parameters']>['Payload'],
+                    fieldName,
+                ) {
+                    return true;
+                },
+            },
             'service.serviceInvocationSetting': {},
             'assigner.exchangePayload': {},
             'email.emailConfig': {
-                checkRequired(value: NonNullable<EmailNodeDataType['parameters']>, fieldName) {
+                checkRequired(
+                    value: NonNullable<EmailNodeDataType['parameters']>['emailConfig'],
+                    fieldName,
+                ) {
                     return true;
                 },
-                checkMaxLength(value: NonNullable<EmailNodeDataType['parameters']>, fieldName) {
+                checkMaxLength(
+                    value: NonNullable<EmailNodeDataType['parameters']>['emailConfig'],
+                    fieldName,
+                ) {
                     return true;
                 },
             },
@@ -173,10 +209,11 @@ const useValidate = () => {
             },
             'webhook.webhookUrl': {
                 checkRequired,
+                checkUrl(value: string, fieldName) {
+                    return true;
+                },
             },
-            'webhook.secretKey': {
-                // checkRequired,
-            },
+            // 'webhook.secretKey': {},
         };
         return result;
     }, [getIntlText]);
@@ -190,7 +227,7 @@ const useValidate = () => {
     const checkNodesData = useCallback(
         (nodes?: WorkflowNode[], options?: CheckOptions) => {
             nodes = nodes || getNodes();
-            const result: Record<string, { type: WorkflowNodeType; errMsgs: string[] }> = {};
+            const result: NodesDataValidResult = {};
 
             for (let i = 0; i < nodes.length; i++) {
                 const { id, type, data } = nodes[i];
@@ -204,7 +241,13 @@ const useValidate = () => {
                 }
 
                 if (!tempResult) {
-                    tempResult = { type: type as WorkflowNodeType, errMsgs: [] };
+                    tempResult = {
+                        type: type as WorkflowNodeType,
+                        label: getIntlText(config.labelIntlKey),
+                        name: nodeName,
+                        status: 'SUCCESS',
+                        errMsgs: [],
+                    };
                     result[id] = tempResult;
                 }
 
@@ -222,13 +265,14 @@ const useValidate = () => {
                     }
                 });
 
+                // console.log({ id, type, parameters });
                 if (!parameters || !Object.keys(parameters).length) {
                     tempResult.errMsgs.push(
                         getIntlText('workflow.valid.parameter_required', {
-                            1: getIntlText(config.labelIntlKey),
+                            1: `${getIntlText(config.labelIntlKey)} (ID: ${id})`,
                         }),
                     );
-                    return;
+                    continue;
                 }
 
                 Object.entries(parameters).forEach(([key, value]) => {
@@ -243,6 +287,14 @@ const useValidate = () => {
                     });
                 });
             }
+
+            Object.entries(result).forEach(([id, data]) => {
+                if (!data.errMsgs.length) {
+                    delete result[id];
+                } else {
+                    data.status = 'ERROR';
+                }
+            });
 
             return Object.values(result).some(item => item.errMsgs.length) ? result : true;
         },

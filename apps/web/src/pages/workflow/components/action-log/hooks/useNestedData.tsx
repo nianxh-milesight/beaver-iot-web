@@ -41,7 +41,7 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
             name: nodeName || '',
             type: type!,
             status,
-            timeCost,
+            timeCost: timeCost!,
             input,
             output,
             errorMessage,

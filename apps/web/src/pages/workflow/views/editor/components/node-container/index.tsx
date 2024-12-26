@@ -50,18 +50,18 @@ export type NodeContainerProps = {
  * Node Status Map
  */
 const statusMap: Record<
-    WorkflowNodeStatus,
+    WorkflowNodeStatus | 'LOADING',
     {
         icon: React.ReactNode;
     }
 > = {
-    error: {
+    ERROR: {
         icon: <ErrorIcon />,
     },
-    success: {
+    SUCCESS: {
         icon: <CheckCircleIcon />,
     },
-    loading: {
+    LOADING: {
         icon: <LoopIcon />,
     },
 };
@@ -206,7 +206,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
             {handles?.map((handle, index) => <Fragment key={index}>{handle}</Fragment>)}
             <div
                 className={cls('ms-workflow-node', `ms-workflow-node-${type}`, {
-                    [status]: status,
+                    [status?.toLocaleLowerCase()]: status,
                 })}
                 onContextMenu={handleContextMenu}
             >
@@ -282,7 +282,11 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                     </span>
                     <span className="ms-workflow-node-title">{title}</span>
                     {!!status && (
-                        <span className={cls('ms-workflow-node-status', { [status]: status })}>
+                        <span
+                            className={cls('ms-workflow-node-status', {
+                                [status?.toLocaleLowerCase()]: status,
+                            })}
+                        >
                             {statusMap[status].icon}
                         </span>
                     )}
