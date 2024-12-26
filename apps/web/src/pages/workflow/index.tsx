@@ -12,7 +12,13 @@ import {
     toast,
 } from '@milesight/shared/src/components';
 import { Breadcrumbs, TablePro, useConfirm } from '@/components';
-import { awaitWrap, getResponseData, isRequestSuccess, workflowAPI } from '@/services/http';
+import {
+    WorkflowAPISchema,
+    awaitWrap,
+    getResponseData,
+    isRequestSuccess,
+    workflowAPI,
+} from '@/services/http';
 import { type FormDataProps as ImportFormDataProps } from '@/pages/workflow/components/import-modal/hook/useImportFormItems';
 import { ImportModal, LogModal } from '@/pages/workflow/components';
 import { useColumns, type UseColumnsProps, type TableRowDataType } from './hooks';
@@ -144,13 +150,44 @@ const Workflow = () => {
         setLogModalVisible(true);
         setWorkflowItem(record);
     }, []);
+    const exportJsonFile = useCallback(
+        (workflowItem: WorkflowAPISchema['getFlowDesign']['response']) => {
+            const { name, design_data: designData } = workflowItem;
+            const blob = new Blob([JSON.stringify(JSON.parse(designData), null, 4)], {
+                type: 'application/json',
+            });
+            const fileName = `${name}.json`;
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        },
+        [workflowList],
+    );
+    const handleExportWorkFlow = useCallback(
+        async (record: TableRowDataType) => {
+            const [error, resp] = await awaitWrap(
+                workflowAPI.getFlowDesign({
+                    id: record.id,
+                    version: record.version,
+                }),
+            );
 
+            if (error || !isRequestSuccess(resp)) return;
+            exportJsonFile(getResponseData(resp) as WorkflowAPISchema['getFlowDesign']['response']);
+        },
+        [workflowList],
+    );
     const handleTableBtnClick: UseColumnsProps<TableRowDataType>['onButtonClick'] = useCallback(
         (type, record) => {
             // console.log(type, record);
             switch (type) {
                 case 'edit': {
-                    navigate(`/workflow/editor?wid=${record.id}`);
+                    navigate(`/workflow/editor?wid=${record.id}&version=${record.version}`);
                     break;
                 }
                 case 'detail': {
@@ -167,7 +204,7 @@ const Workflow = () => {
                     break;
                 }
                 case 'export': {
-                    // handleSwitchChange(record);
+                    handleExportWorkFlow(record);
                     break;
                 }
                 default: {
