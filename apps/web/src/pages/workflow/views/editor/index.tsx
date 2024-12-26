@@ -1,7 +1,7 @@
 import { memo, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import { omitBy, merge, isEmpty } from 'lodash-es';
+import { omitBy, merge, isEmpty, cloneDeep } from 'lodash-es';
 import {
     ReactFlow,
     Background,
@@ -41,7 +41,6 @@ import {
     type DesignMode,
     type TopbarProps,
 } from './components';
-import demoData from './demo-data.json';
 
 import '@xyflow/react/dist/style.css';
 import './style.less';
@@ -71,21 +70,17 @@ const WorkflowEditor = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
     const { checkNodesId, checkNodesType, checkNodesData, checkEdgesId, checkEdgesType } =
         useValidate();
-    const checkWorkflowValid = useCallback(() => {
-        const { nodes, edges } = toObject();
-        if (!checkNodeNumberLimit(nodes)) return false;
-        if (checkFreeNodeLimit(nodes)) return false;
-        if (!checkNestedParallelLimit(nodes, edges)) return false;
-        if (nodes.some(node => !checkParallelLimit(node.id, undefined, edges))) return false;
+    const checkWorkflowValid = useCallback(
+        (nodes: WorkflowNode[], edges: WorkflowEdge[]) => {
+            if (!checkNodeNumberLimit(nodes)) return false;
+            if (checkFreeNodeLimit(nodes, edges)) return false;
+            if (!checkNestedParallelLimit(nodes, edges)) return false;
+            if (nodes.some(node => !checkParallelLimit(node.id, undefined, edges))) return false;
 
-        return true;
-    }, [
-        toObject,
-        checkNodeNumberLimit,
-        checkFreeNodeLimit,
-        checkNestedParallelLimit,
-        checkParallelLimit,
-    ]);
+            return true;
+        },
+        [checkNodeNumberLimit, checkFreeNodeLimit, checkNestedParallelLimit, checkParallelLimit],
+    );
     const confirm = useConfirm();
 
     // ---------- Prevent Leave ----------
@@ -162,36 +157,33 @@ const WorkflowEditor = () => {
         if (wid) return { id: wid };
     });
     const [flowDataLoading, setFlowDataLoading] = useState<boolean>();
-    const {
-        // loading,
-        // data: flowData,
-        run: getFlowDesign,
-    } = useRequest(
+
+    useRequest(
         async () => {
             if (!wid) return;
             setFlowDataLoading(true);
-            // TODO: Call workflow detail API
             const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: wid, version }));
-            // await new Promise(resolve => {
-            //     setTimeout(resolve, 500);
-            // });
 
             setFlowDataLoading(false);
-            // if (error || !isRequestSuccess(resp)) return;
-            // const data = getResponseData(resp);
-            // console.log(data);
+            if (error || !isRequestSuccess(resp)) return;
+            const data = getResponseData(resp);
+            const { design_data: designData, ...basicData } = data || {};
+            let flowData: Pick<WorkflowSchema, 'nodes' | 'edges'>;
 
-            setFlowDataLoading(false);
-            setNodes(demoData.nodes as WorkflowNode[]);
-            setEdges(demoData.edges as WorkflowEdge[]);
-            setBasicData({
-                id: 'xxx',
-                name: 'Workflow Name',
-                remark: 'Workflow Remark',
-                enabled: false,
-            });
+            console.log(data);
+            try {
+                flowData = JSON.parse(designData || '{}');
+            } catch (e) {
+                console.warn(e);
+                toast.error({ content: getIntlText('common.message.json_format_error') });
+                return;
+            }
 
-            return { id: 'xxx', name: 'Workflow Name', remark: 'Workflow Remark', enabled: false };
+            setNodes(flowData?.nodes);
+            setEdges(flowData?.edges);
+            setBasicData(basicData);
+
+            return data;
         },
         {
             debounceWait: 300,
@@ -208,21 +200,21 @@ const WorkflowEditor = () => {
     const [editorFlowData, setEditorFlowData] = useState<string>();
     const handleDesignModeChange = useCallback(
         (mode: DesignMode) => {
-            if (!checkWorkflowValid()) return;
-
             if (mode === 'advanced') {
-                const { nodes, edges } = toObject();
+                const { nodes, edges } = cloneDeep(toObject());
                 const newNodes = nodes.map(node => {
                     const result = omitBy(node, (_, key) =>
                         FROZEN_NODE_PROPERTY_KEYS.includes(key),
                     );
                     result.data = omitBy(node.data, (_, key) => checkPrivateProperty(key));
-                    return result;
+                    return result as WorkflowNode;
                 });
                 const newEdges = edges.map(edge => {
                     edge.data = omitBy(edge.data, (_, key) => checkPrivateProperty(key));
                     return edge;
                 });
+
+                if (!checkWorkflowValid(newNodes, newEdges)) return;
 
                 setEditorFlowData(JSON.stringify({ nodes: newNodes, edges: newEdges }, null, 2));
             } else if (mode === 'canvas') {
@@ -237,6 +229,7 @@ const WorkflowEditor = () => {
                 }
                 const { nodes, edges } = data;
 
+                if (!checkWorkflowValid(nodes, edges)) return;
                 if (
                     checkNodesId(nodes, { validateFirst: true }) ||
                     checkNodesType(nodes, { validateFirst: true }) ||
@@ -270,8 +263,7 @@ const WorkflowEditor = () => {
     const navigate = useNavigate();
     const [saveLoading, setSaveLoading] = useState(false);
     const handleSave = async () => {
-        if (!checkWorkflowValid()) return;
-        const flowData = toObject();
+        const flowData = cloneDeep(toObject());
         const isAdvanceMode = designMode === 'advanced';
 
         if (isAdvanceMode) {
@@ -290,6 +282,9 @@ const WorkflowEditor = () => {
         }
 
         const { nodes, edges, viewport } = flowData;
+
+        console.log({ nodes, edges });
+        if (!checkWorkflowValid(nodes, edges)) return;
 
         const edgesCheckResult = merge(
             checkEdgesId(edges, nodes, { validateFirst: isAdvanceMode }),
@@ -310,6 +305,7 @@ const WorkflowEditor = () => {
         );
         console.log({ nodesCheckResult });
         if (!isEmpty(nodesCheckResult)) {
+            if (isAdvanceMode) return;
             const statusData = Object.entries(nodesCheckResult).reduce(
                 (acc, [id, item]) => {
                     acc[id] = item.status;
@@ -319,16 +315,13 @@ const WorkflowEditor = () => {
             );
 
             setNodesDataValidResult(nodesCheckResult);
-            updateNodesStatus(statusData, nodes);
+            updateNodesStatus(statusData);
             return;
         }
         updateNodesStatus(null);
         setNodesDataValidResult(null);
 
-        if (!basicData) {
-            // TODO: data validate
-            return;
-        }
+        if (!basicData?.name) return;
 
         const hasTriggerNode = nodes.find(node => node.type === 'trigger');
 
@@ -348,15 +341,25 @@ const WorkflowEditor = () => {
             if (!proceed) return;
         }
 
+        // remove private property
+        nodes.forEach(node => {
+            node.data = omitBy(node.data, (_, key) => checkPrivateProperty(key));
+        });
+        edges.forEach(edge => {
+            edge.data = omitBy(edge.data, (_, key) => checkPrivateProperty(key));
+        });
+
         // TODO: referenced warning confirm ?
 
         setSaveLoading(true);
         const [error, resp] = await awaitWrap(
             workflowAPI.saveFlowDesign({
+                id: wid || undefined,
+                version,
                 name: basicData.name!,
                 remark: basicData.remark!,
                 enabled: basicData.enabled!,
-                design_data: JSON.stringify({ nodes, edges }),
+                design_data: JSON.stringify({ nodes, edges, viewport }),
             }),
         );
 
@@ -367,7 +370,8 @@ const WorkflowEditor = () => {
 
         console.log(data);
         toast.success(getIntlText('common.message.operation_success'));
-        navigate('/workflow');
+        setIsPreventLeave(false);
+        setTimeout(() => navigate('/workflow'), 0);
     };
 
     return (

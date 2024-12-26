@@ -197,8 +197,11 @@ const useWorkflow = () => {
 
     // Get all upstream nodes of the current node
     const getUpstreamNodes = useCallback(
-        (currentNode?: WorkflowNode) => {
+        (currentNode?: WorkflowNode, nodes?: WorkflowNode[], edges?: WorkflowEdge[]) => {
+            nodes = nodes || getNodes();
+            edges = edges || getEdges();
             currentNode = currentNode || getSelectedNode();
+
             const getAllIncomers = (
                 node: WorkflowNode,
                 data: Record<ApiKey, WorkflowNode[]> = {},
@@ -222,7 +225,7 @@ const useWorkflow = () => {
 
             return getAllIncomers(currentNode!);
         },
-        [nodes, edges, getSelectedNode],
+        [getNodes, getEdges, getSelectedNode],
     );
 
     const getUpstreamNodeParams = useCallback(
@@ -230,7 +233,7 @@ const useWorkflow = () => {
             currentNode = currentNode || getSelectedNode();
             if (!currentNode) return [];
 
-            const incomeNodes = getUpstreamNodes(currentNode);
+            const incomeNodes = getUpstreamNodes(currentNode, nodes, edges);
             // TODO: get the correct nodes params
             const result: NodeParamType[] = incomeNodes.map(node => ({
                 nodeId: node.id,
@@ -265,19 +268,20 @@ const useWorkflow = () => {
 
             return [result, flattenResult];
         },
-        [getSelectedNode, getUpstreamNodes],
+        [nodes, edges, getSelectedNode, getUpstreamNodes],
     );
 
     // Check if there is a node that is not connected to an entry node
     const checkFreeNodeLimit = useCallback(
-        (nodes?: WorkflowNode[]) => {
+        (nodes?: WorkflowNode[], edges?: WorkflowEdge[]) => {
             nodes = nodes || getNodes();
+            edges = edges || getEdges();
             let result = false;
 
             result = nodes
                 .filter(node => !entryNodeTypes.includes(node.type as WorkflowNodeType))
                 .some(node => {
-                    const upstreamNodes = getUpstreamNodes(node);
+                    const upstreamNodes = getUpstreamNodes(node, nodes, edges);
                     const hasEntryNode = upstreamNodes.some(item =>
                         entryNodeTypes.includes(item.type as WorkflowNodeType),
                     );
@@ -299,8 +303,8 @@ const useWorkflow = () => {
 
     // Update node status
     const updateNodesStatus = useCallback(
-        (data: Record<string, WorkflowNodeStatus> | null, nodes?: WorkflowNode[]) => {
-            nodes = cloneDeep(nodes || getNodes());
+        (data: Record<string, WorkflowNodeStatus> | null) => {
+            const nodes = cloneDeep(getNodes());
 
             if (!data) {
                 nodes.forEach(node => {
