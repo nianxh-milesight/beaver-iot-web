@@ -177,11 +177,9 @@ const useNodeFormItems = (node?: WorkflowNode) => {
                                 break;
                             }
                             case 'serviceEntitySetting': {
-                                // TODO: use the correct component instead
                                 formItem.render = ({ field: { onChange, value } }) => {
                                     return (
-                                        <EntitySelect
-                                            filterModel={{ type: 'SERVICE' }}
+                                        <ServiceParamAssignInput
                                             value={value}
                                             onChange={onChange}
                                         />

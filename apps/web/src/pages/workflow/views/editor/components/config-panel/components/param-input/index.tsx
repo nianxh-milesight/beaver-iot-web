@@ -21,6 +21,7 @@ import { useDynamicList, useControllableValue } from 'ahooks';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { DeleteOutlineIcon, AddIcon } from '@milesight/shared/src/components';
 import './style.less';
+import { isEqual } from 'lodash-es';
 
 export type ParamInputValueType = {
     arg: string;
@@ -58,10 +59,12 @@ const ParamInput: React.FC<ParamInputProps> = ({
 }) => {
     const { getIntlText } = useI18n();
     const [innerValue, setInnerValue] = useControllableValue<ParamInputValueType[]>(props);
-    const { list, remove, getKey, insert, replace } = useDynamicList<ParamInputValueType>(
-        innerValue || [],
-    );
-
+    const { list, remove, getKey, insert, replace, resetList } =
+        useDynamicList<ParamInputValueType>(innerValue || []);
+    useLayoutEffect(() => {
+        if (isEqual(innerValue, list)) return;
+        resetList(innerValue || []);
+    }, [innerValue, resetList]);
     useLayoutEffect(() => {
         setInnerValue?.(list);
     }, [list, setInnerValue]);

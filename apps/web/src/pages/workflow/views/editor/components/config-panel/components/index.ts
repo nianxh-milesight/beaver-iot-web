@@ -9,7 +9,7 @@ export {
 export { default as MarkdownEditor } from './markdown-editor';
 export { default as ParamInput } from './param-input';
 export { default as ParamSelect } from './param-select';
-export { default as ParamInputSelect } from './param-input-select';
+export { default as ParamInputSelect, type ParamInputSelectProps } from './param-input-select';
 export { default as TimerInput } from './timer-input';
 export {
     default as EntityMultipleSelect,
