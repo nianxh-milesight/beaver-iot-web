@@ -1,34 +1,21 @@
-import { useCallback } from 'react';
-import { delay, generateUUID, withPromiseResolvers } from '@milesight/shared/src/utils/tools';
-import type { PaginationModel, LogListPageType } from '../types';
+import { useRequest } from 'ahooks';
+import { getResponseData, workflowAPI } from '@/services/http';
+import type { PaginationModel, WorkflowData } from '../types';
 
-export const useSourceData = () => {
-    // TODO
-    const generateList = useCallback((limit: number): LogListPageType['content'] => {
-        return Array.from({ length: limit }).map(() => ({
-            id: generateUUID(),
-            status: Math.random() > 0.5 ? 'SUCCESS' : 'ERROR',
-            start_time: Date.now(),
-            time_cost: Math.floor(Math.random() * 1000),
-        }));
-    }, []);
-    // TODO
-    const getLogList = useCallback(
+export const useSourceData = ({ data }: { data: WorkflowData }) => {
+    const { runAsync: getLogList } = useRequest(
         async (pageInfo: PaginationModel) => {
+            const { id } = data || {};
             const { page, pageSize } = pageInfo || {};
-            const { promise, resolve } = withPromiseResolvers<LogListPageType>();
 
-            await delay(1000);
-
-            resolve({
-                page_size: pageSize,
+            const resp = await workflowAPI.getLogList({
+                id,
                 page_number: page,
-                content: generateList(pageSize),
-                total: 100,
+                page_size: pageSize,
             });
-            return promise;
+            return getResponseData(resp)!;
         },
-        [generateList],
+        { manual: true },
     );
 
     return {

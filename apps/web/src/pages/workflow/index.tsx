@@ -28,6 +28,7 @@ const Workflow = () => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [selectedIds, setSelectedIds] = useState<readonly ApiKey[]>([]);
     const [logModalVisible, setLogModalVisible] = useState(false);
+    const [workflowItem, setWorkflowItem] = useState<TableRowDataType>();
     const {
         data: workflowList,
         loading,
@@ -138,6 +139,12 @@ const Workflow = () => {
         [navigate],
     );
 
+    /** Wake up log pop-up window */
+    const handleLog = useCallback((record: TableRowDataType) => {
+        setLogModalVisible(true);
+        setWorkflowItem(record);
+    }, []);
+
     const handleTableBtnClick: UseColumnsProps<TableRowDataType>['onButtonClick'] = useCallback(
         (type, record) => {
             // console.log(type, record);
@@ -227,7 +234,11 @@ const Workflow = () => {
                 </div>
             </div>
             {logModalVisible && (
-                <LogModal visible={logModalVisible} onCancel={handleCloseLogModal} />
+                <LogModal
+                    visible={logModalVisible}
+                    onCancel={handleCloseLogModal}
+                    data={workflowItem!}
+                />
             )}
             <ImportModal
                 visible={importModal}

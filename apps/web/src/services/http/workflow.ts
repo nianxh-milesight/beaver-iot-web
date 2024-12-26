@@ -110,9 +110,12 @@ export interface WorkflowAPISchema extends APISchema {
 
     /** Get workflow log list */
     getLogList: {
-        request: void | {
-            status?: WorkflowNodeStatus;
-        };
+        request:
+            | void
+            | ({
+                  id: ApiKey;
+                  status?: WorkflowNodeStatus;
+              } & SearchRequestType);
         response: SearchResponseType<
             {
                 /** ID */

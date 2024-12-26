@@ -2,25 +2,22 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CircularProgress } from '@mui/material';
 import { Modal, type ModalProps } from '@milesight/shared/src/components';
 import { useI18n } from '@milesight/shared/src/hooks';
-import { Empty, Tooltip } from '@/components';
-import { LogItem } from './components';
+import { Empty } from '@/components';
+import { LogItem, LogRightBar } from './components';
 import { useRenderList, useSourceData } from './hooks';
-import ActionLog from '../action-log';
-import type { LogRenderListType } from './types';
+import type { LogRenderListType, WorkflowData } from './types';
 import './style.less';
 
-// TODO mock Data
-import traceData from './trace.json';
-import workflowData from './workflow.json';
-
-export type IProps = ModalProps;
-export default React.memo(({ visible, ...props }: IProps) => {
+export interface IProps extends ModalProps {
+    data: WorkflowData;
+}
+export default React.memo(({ visible, data, ...props }: IProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const { getIntlText } = useI18n();
     const [activeItem, setActiveItem] = useState<LogRenderListType>();
 
-    const { getLogList } = useSourceData();
+    const { getLogList } = useSourceData({ data });
     const { scrollItem, virtualList, getLogListLoading } = useRenderList({
         containerRef,
         listRef,
@@ -88,18 +85,7 @@ export default React.memo(({ visible, ...props }: IProps) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="ms-log-right-bar">
-                            <div className="ms-log-right-bar__title">
-                                <Tooltip title={activeItem?.title || ''} autoEllipsis />
-                            </div>
-                            <div className="ms-log-right-bar__detail">
-                                <ActionLog
-                                    // TODO mock Data
-                                    traceData={traceData.traceInfo as any}
-                                    workflowData={workflowData as any}
-                                />
-                            </div>
-                        </div>
+                        <LogRightBar data={data} activeItem={activeItem} />
                     </>
                 )}
             </div>

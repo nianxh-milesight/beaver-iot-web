@@ -29,3 +29,7 @@ export interface InfiniteScrollType {
     source: LogListPageType;
     hasMore: boolean;
 }
+
+export type WorkflowData = ObjectToCamelCase<
+    WorkflowAPISchema['getList']['response']['content'][number]
+>;
