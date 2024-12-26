@@ -1,3 +1,4 @@
+import React from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { Alert } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
@@ -22,7 +23,8 @@ const getAlphabetIndex = (index: number) => {
     }
     return ALPHABET_LIST[index];
 };
-export default function AccordionUsage({ traceData, workflowData }: ActionLogProps) {
+
+export default React.memo(({ traceData, workflowData }: ActionLogProps) => {
     const { getIntlText } = useI18n();
     const { treeData } = useNestedData({ workflowData, traceData });
 
@@ -99,4 +101,4 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
     };
 
     return <div className="ms-action-log">{renderAccordion(treeData)}</div>;
-}
+});

@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { getIncomers, getOutgoers } from '@xyflow/react';
 import { cloneDeep } from 'lodash-es';
-import { useMemoizedFn } from 'ahooks';
 import { generateUUID, objectToCamelCase } from '@milesight/shared/src/utils/tools';
 import { basicNodeConfigs } from '../../../config';
 import type {
@@ -28,36 +27,39 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
     }, [traceData]);
 
     /** Add required attributes */
-    const wrapperNode = useMemoizedFn((node: WorkflowNode): WorkflowNestNode => {
-        const nestNode = cloneDeep(node) as WorkflowNestNode;
-        const { id, type, data } = nestNode || {};
-        const { nodeName } = data || {};
-        const { status, input, output, timeCost, errorMessage } = objectToCamelCase(
-            traceMap[id] || {},
-        );
+    const wrapperNode = useCallback(
+        (node: WorkflowNode): WorkflowNestNode => {
+            const nestNode = cloneDeep(node) as WorkflowNestNode;
+            const { id, type, data } = nestNode || {};
+            const { nodeName } = data || {};
+            const { status, input, output, timeCost, errorMessage } = objectToCamelCase(
+                traceMap[id] || {},
+            );
 
-        nestNode.attrs = {
-            $$token: generateUUID(),
-            name: nodeName || '',
-            type: type!,
-            status,
-            timeCost: timeCost!,
-            input,
-            output,
-            errorMessage,
-        };
+            nestNode.attrs = {
+                $$token: generateUUID(),
+                name: nodeName || '',
+                type: type!,
+                status,
+                timeCost: timeCost!,
+                input,
+                output,
+                errorMessage,
+            };
 
-        return nestNode;
-    });
+            return nestNode;
+        },
+        [traceMap],
+    );
 
     /** Determine whether it is the root node */
-    const isRootNode = useMemoizedFn((node: WorkflowNestNode) => {
+    const isRootNode = useCallback((node: WorkflowNestNode) => {
         const { type } = node || {};
         return entryNodeConfigs.some(config => config.type === type);
-    });
+    }, []);
 
     /** Wrap workflow data */
-    const wrapperWorkflowData = useMemoizedFn(
+    const wrapperWorkflowData = useCallback(
         (workflowData: WorkflowDataType): WorkflowNestDataType => {
             const { nodes } = workflowData || {};
             const nestNodes = (nodes || []).map(node => wrapperNode(node));
@@ -67,17 +69,17 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
                 nodes: nestNodes,
             };
         },
+        [wrapperNode],
     );
 
     // when `workflowData` or `traceData` change, re-render the tree
     const workflowNestData = useMemo(
         () => wrapperWorkflowData(workflowData),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [workflowData, traceData, wrapperWorkflowData],
+        [workflowData, wrapperWorkflowData],
     );
 
     /** Convert flat data to tree */
-    const dataToTree = useMemoizedFn(
+    const dataToTree = useCallback(
         (cb?: (node: WorkflowNestNode) => void): WorkflowNestNode[] => {
             const { nodes, edges } = workflowNestData || {};
 
@@ -99,6 +101,7 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
 
             return root;
         },
+        [isRootNode, workflowNestData],
     );
 
     // Tree node data
@@ -124,49 +127,58 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
     }, [roots]);
 
     /** Get the depth of a node */
-    const getDepthByNode = useMemoizedFn((node: WorkflowNestNode): number => {
-        const { attrs } = node || {};
-        const { $$token } = attrs || {};
+    const getDepthByNode = useCallback(
+        (node: WorkflowNestNode): number => {
+            const { attrs } = node || {};
+            const { $$token } = attrs || {};
 
-        return treeDepthMap.get($$token) || 0;
-    });
+            return treeDepthMap.get($$token) || 0;
+        },
+        [treeDepthMap],
+    );
 
     // Get the upstream node of a given node
-    const getParentNodeInTree = useMemoizedFn((node: WorkflowNestNode) => {
-        const { attrs } = node;
-        const { $$token } = attrs;
+    const getParentNodeInTree = useCallback(
+        (node: WorkflowNestNode) => {
+            const { attrs } = node;
+            const { $$token } = attrs;
 
-        return treeParentMap.get($$token);
-    });
+            return treeParentMap.get($$token);
+        },
+        [treeParentMap],
+    );
 
     /** Get available upstream nodes */
-    const getOnceIncomeNode = useMemoizedFn((node: WorkflowNestNode): ParallelNodeResult | null => {
-        const { nodes, edges } = workflowNestData || {};
+    const getOnceIncomeNode = useCallback(
+        (node: WorkflowNestNode): ParallelNodeResult | null => {
+            const { nodes, edges } = workflowNestData || {};
 
-        // Get parent nodes
-        const incomers = getIncomers(node, nodes, edges) as WorkflowNestNode[];
-        if (!incomers?.length) return null;
+            // Get parent nodes
+            const incomers = getIncomers(node, nodes, edges) as WorkflowNestNode[];
+            if (!incomers?.length) return null;
 
-        // Check if parent nodes have only one outgoing node
-        const isOnceIncomeNode = incomers.every(incomer => {
-            const outgoers = getOutgoers(incomer, nodes, edges) as WorkflowNestNode[];
-            // Only one outgoing node
-            return outgoers.length === 1;
-        });
-        if (!isOnceIncomeNode) return null;
+            // Check if parent nodes have only one outgoing node
+            const isOnceIncomeNode = incomers.every(incomer => {
+                const outgoers = getOutgoers(incomer, nodes, edges) as WorkflowNestNode[];
+                // Only one outgoing node
+                return outgoers.length === 1;
+            });
+            if (!isOnceIncomeNode) return null;
 
-        const usableIncomes = incomers.sort((a, b) => getDepthByNode(a) - getDepthByNode(b));
-        const [usableIncome] = usableIncomes || [];
+            const usableIncomes = incomers.sort((a, b) => getDepthByNode(a) - getDepthByNode(b));
+            const [usableIncome] = usableIncomes || [];
 
-        return {
-            node,
-            incomers,
-            usableIncome,
-        };
-    });
+            return {
+                node,
+                incomers,
+                usableIncome,
+            };
+        },
+        [getDepthByNode, workflowNestData],
+    );
 
     /** Get nodes that need to be promoted to the same level */
-    const getParallelNodeList = useMemoizedFn((): ParallelNodeResult[] => {
+    const getParallelNodeList = useCallback((): ParallelNodeResult[] => {
         const { nodes } = workflowNestData || {};
         const parallelNodeList: ParallelNodeResult[] = [];
 
@@ -178,35 +190,41 @@ export const useNestedData = ({ traceData, workflowData }: ActionLogProps) => {
         });
 
         return parallelNodeList;
-    });
+    }, [getOnceIncomeNode, workflowNestData]);
 
     /** Cancel references */
-    const cancelQuote = useMemoizedFn((parallelNodeList: ParallelNodeResult[]) => {
-        const { nodes, edges } = workflowNestData || {};
+    const cancelQuote = useCallback(
+        (parallelNodeList: ParallelNodeResult[]) => {
+            const { nodes, edges } = workflowNestData || {};
 
-        (parallelNodeList || []).forEach(({ node }) => {
-            const incomers = getIncomers(node, nodes, edges) as WorkflowNestNode[];
-            // Remove references
-            (incomers || []).forEach(incomer => {
-                incomer.children = (incomer.children || []).filter(v => v.id !== node.id);
+            (parallelNodeList || []).forEach(({ node }) => {
+                const incomers = getIncomers(node, nodes, edges) as WorkflowNestNode[];
+                // Remove references
+                (incomers || []).forEach(incomer => {
+                    incomer.children = (incomer.children || []).filter(v => v.id !== node.id);
+                });
             });
-        });
-    });
+        },
+        [workflowNestData],
+    );
 
     /** Connect new references */
-    const connectQuote = useMemoizedFn((parallelNodeList: ParallelNodeResult[]) => {
-        (parallelNodeList || []).forEach(result => {
-            const { node, usableIncome } = result || {};
-            const parentNode = getParentNodeInTree(usableIncome);
+    const connectQuote = useCallback(
+        (parallelNodeList: ParallelNodeResult[]) => {
+            (parallelNodeList || []).forEach(result => {
+                const { node, usableIncome } = result || {};
+                const parentNode = getParentNodeInTree(usableIncome);
 
-            if (parentNode) {
-                parentNode.children = (parentNode.children || []).concat(node);
-                return;
-            }
+                if (parentNode) {
+                    parentNode.children = (parentNode.children || []).concat(node);
+                    return;
+                }
 
-            roots.push(node);
-        });
-    });
+                roots.push(node);
+            });
+        },
+        [getParentNodeInTree, roots],
+    );
 
     /** Generate tree data */
     const treeData = useMemo(() => {
