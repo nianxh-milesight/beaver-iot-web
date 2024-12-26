@@ -37,7 +37,7 @@ export interface EditorProps
      * Callback function triggered when the language changes.
      * @param value - The new language value.
      */
-    onLangChange?: (value: string) => void;
+    onLangChange?: (value: EditorSupportLang) => void;
 
     /** default value */
     defaultValue?: string;
