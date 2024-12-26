@@ -368,7 +368,8 @@ const WorkflowEditor = () => {
 
         console.log(data);
         toast.success(getIntlText('common.message.operation_success'));
-        navigate('/workflow');
+        setIsPreventLeave(false);
+        setTimeout(() => navigate('/workflow'), 0);
     };
 
     return (
