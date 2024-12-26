@@ -13,7 +13,6 @@ import {
     ErrorIcon,
     // FlagIcon,
 } from '@milesight/shared/src/components';
-import type { FlowRunningStatus } from '@/services/http/workflow';
 
 type NodeCategoryConfigItemType = {
     /** Node Category i18n key */
@@ -175,14 +174,16 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
 /**
  * Status Render Map
  */
-export const LogStatusMap: Record<FlowRunningStatus, { className: string; icon: React.ReactNode }> =
-    {
-        Success: {
-            className: 'ms-log-status__success',
-            icon: <CheckCircleIcon />,
-        },
-        Error: {
-            className: 'ms-log-status__error',
-            icon: <ErrorIcon />,
-        },
-    };
+export const LogStatusMap: Record<
+    WorkflowNodeStatus,
+    { className: string; icon: React.ReactNode }
+> = {
+    SUCCESS: {
+        className: 'ms-log-status__success',
+        icon: <CheckCircleIcon />,
+    },
+    ERROR: {
+        className: 'ms-log-status__error',
+        icon: <ErrorIcon />,
+    },
+};

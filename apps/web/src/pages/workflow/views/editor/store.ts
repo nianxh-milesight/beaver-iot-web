@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { type WorkflowAPISchema } from '@/services/http';
+import { type WorkflowAPISchema, type FlowNodeTraceInfo } from '@/services/http';
 import { basicNodeConfigs } from '../../config';
+import type { NodesDataValidResult } from './hooks';
 import type { NodeConfigItem } from './typings';
 
 interface FlowStore {
@@ -33,7 +34,7 @@ interface FlowStore {
      */
     runLogs?: WorkflowAPISchema['getLogList']['response']['content'];
 
-    logDetail?: WorkflowAPISchema['getLogDetail']['response'];
+    logDetail?: PartialOptional<FlowNodeTraceInfo, 'start_time' | 'time_cost'>[];
 
     logDetailLoading?: boolean;
 
@@ -50,6 +51,8 @@ interface FlowStore {
     setLogDetail: (detail?: FlowStore['logDetail']) => void;
 
     setLogDetailLoading: (loading: FlowStore['logDetailLoading']) => void;
+
+    setNodesDataValidResult: (data?: NodesDataValidResult) => void;
 }
 
 const useFlowStore = create(
@@ -61,19 +64,19 @@ const useFlowStore = create(
                 id: '1',
                 start_time: 1733809691235,
                 time_cost: 1000,
-                status: 'Success',
+                status: 'SUCCESS',
             },
             {
                 id: '2',
                 start_time: 1733809691235,
                 time_cost: 1000,
-                status: 'Error',
+                status: 'ERROR',
             },
             {
                 id: '3',
                 start_time: 1733809691235,
                 time_cost: 1000,
-                status: 'Success',
+                status: 'ERROR',
             },
         ],
 
@@ -115,6 +118,25 @@ const useFlowStore = create(
         setRunLogs: runLogs => set({ runLogs }),
         setLogDetail: detail => set({ logDetail: detail }),
         setLogDetailLoading: loading => set({ logDetailLoading: loading }),
+        setNodesDataValidResult(data) {
+            if (!data) {
+                set({ logPanelMode: undefined, logDetail: undefined });
+                return;
+            }
+            console.log(data);
+            const logDetail = Object.entries(data).map(([id, { type, name, label, errMsgs }]) => {
+                const result: NonNullable<FlowStore['logDetail']>[0] = {
+                    node_id: id,
+                    node_label: label!,
+                    status: 'ERROR',
+                    error_message: errMsgs[0],
+                };
+                return result;
+            });
+
+            console.log(logDetail);
+            set({ openLogPanel: true, logPanelMode: 'feVerify', logDetail });
+        },
     })),
 );
 

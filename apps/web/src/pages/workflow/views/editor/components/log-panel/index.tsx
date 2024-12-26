@@ -5,7 +5,9 @@ import cls from 'classnames';
 import { useRequest } from 'ahooks';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon } from '@milesight/shared/src/components';
+import { ActionLog } from '@/pages/workflow/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
+import useWorkflow from '../../hooks/useWorkflow';
 import useFlowStore from '../../store';
 import './style.less';
 
@@ -14,6 +16,8 @@ import './style.less';
  */
 const LogPanel = () => {
     const { getIntlText } = useI18n();
+    const nodes = useNodes<WorkflowNode>();
+    const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const {
         openLogPanel,
         logPanelMode,
@@ -35,8 +39,7 @@ const LogPanel = () => {
             'setLogDetailLoading',
         ]),
     );
-    const nodes = useNodes<WorkflowNode>();
-    const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { updateNodesStatus } = useWorkflow();
     const title = useMemo(() => {
         switch (logPanelMode) {
             case 'testRun':
@@ -55,6 +58,7 @@ const LogPanel = () => {
     const handleClose = () => {
         // TODO: remove node `$status` prop and close the panel
         setOpenLogPanel(false);
+        updateNodesStatus(null);
     };
 
     // ---------- Run Test ----------
@@ -92,6 +96,7 @@ const LogPanel = () => {
         runFlowTest();
     }, [logPanelMode, showTestInput, runFlowTest]);
 
+    console.log({ logDetail });
     return (
         <Panel
             position="top-right"
@@ -136,7 +141,9 @@ const LogPanel = () => {
                         </div>
                     )}
                     <div className="log-detail-area">
-                        <span>Render LogDetail...</span>
+                        {!!logDetail?.length && (
+                            <ActionLog traceData={logDetail!} workflowData={toObject()} />
+                        )}
                     </div>
                 </div>
             </div>

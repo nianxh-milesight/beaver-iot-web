@@ -20,7 +20,13 @@ import { CodeEditor, useConfirm } from '@/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { MIN_ZOOM, MAX_ZOOM, FROZEN_NODE_PROPERTY_KEYS } from './constants';
 import useFlowStore from './store';
-import { useNodeTypes, useInteractions, useWorkflow } from './hooks';
+import {
+    useNodeTypes,
+    useInteractions,
+    useWorkflow,
+    useValidate,
+    NODE_VALIDATE_TOAST_KEY,
+} from './hooks';
 import {
     Topbar,
     Controls,
@@ -56,11 +62,13 @@ const WorkflowEditor = () => {
         checkNestedParallelLimit,
         checkNodeNumberLimit,
         checkFreeNodeLimit,
+        updateNodesStatus,
     } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
         useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
+    const { checkNodesData } = useValidate();
     const checkWorkflowValid = useCallback(() => {
         const { nodes, edges } = toObject();
         if (!checkNodeNumberLimit(nodes)) return false;
@@ -130,7 +138,9 @@ const WorkflowEditor = () => {
     );
 
     // ---------- Fetch Nodes Config ----------
-    const { setNodeConfigs } = useFlowStore(useStoreShallow(['setNodeConfigs']));
+    const { setNodeConfigs, setNodesDataValidResult } = useFlowStore(
+        useStoreShallow(['setNodeConfigs', 'setNodesDataValidResult']),
+    );
     const { loading: nodeConfigLoading } = useRequest(
         async () => {
             const [error, resp] = await awaitWrap(workflowAPI.getFlowNodes());
@@ -243,12 +253,35 @@ const WorkflowEditor = () => {
     const [saveLoading, setSaveLoading] = useState(false);
     const handleSave = async () => {
         if (!checkWorkflowValid()) return;
+        const dataCheckResult = checkNodesData();
+
+        console.log({ dataCheckResult });
+        if (dataCheckResult !== true) {
+            if (designMode === 'canvas') {
+                const statusData = Object.entries(dataCheckResult).reduce(
+                    (acc, [id, item]) => {
+                        acc[id] = item.status;
+                        return acc;
+                    },
+                    {} as NonNullable<Parameters<typeof updateNodesStatus>[0]>,
+                );
+                // TODO: show validate panel
+                setNodesDataValidResult(dataCheckResult);
+                updateNodesStatus(statusData, nodes);
+            } else {
+                const errItem = Object.values(dataCheckResult).find(item => item.errMsgs.length);
+
+                toast.error({ key: NODE_VALIDATE_TOAST_KEY, content: errItem?.errMsgs[0] });
+            }
+            return;
+        }
+
         if (!basicData) {
             // TODO: data validate
             return;
         }
 
-        const { nodes, edges, viewport } = toObject();
+        // const { nodes, edges, viewport } = toObject();
         const hasTriggerNode = nodes.find(node => node.type === 'trigger');
 
         // If has a trigger node and it is the first time to create, show tip
@@ -270,14 +303,14 @@ const WorkflowEditor = () => {
         // TODO: referenced warning confirm ?
 
         // TODO: check the nodes data is valid
-        console.log('workflow data', { nodes, edges, viewport });
+        console.log('workflow data', { nodes, edges });
         setSaveLoading(true);
         const [error, resp] = await awaitWrap(
             workflowAPI.saveFlowDesign({
                 name: basicData.name!,
                 remark: basicData.remark!,
                 enabled: basicData.enabled!,
-                design_data: JSON.stringify({ nodes, edges, viewport }),
+                design_data: JSON.stringify({ nodes, edges }),
             }),
         );
 
@@ -288,7 +321,7 @@ const WorkflowEditor = () => {
 
         console.log(data);
         toast.success(getIntlText('common.message.operation_success'));
-        // navigate('/workflow');
+        navigate('/workflow');
     };
 
     return (
