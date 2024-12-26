@@ -20,8 +20,10 @@ import {
 } from './validator';
 import type { Validate, TValidator } from './typings';
 
+export * from './asserts';
 // 导出所有的单条 validator
 export * from './validator';
+export { getErrorMessage, EErrorMessages };
 
 export type { Validate, TValidator };
 export type TChecker = () => Record<string, ReturnType<TValidator>>;

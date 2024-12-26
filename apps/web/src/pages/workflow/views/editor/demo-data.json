@@ -34,7 +34,7 @@
                 "y": 0
             },
             "type": "code",
-            "componentName": "simpleTimer"
+            "componentName": "code"
         },
         {
             "id": "4",
@@ -93,7 +93,7 @@
                 "y": 200
             },
             "type": "webhook",
-            "componentName": "simpleTimer"
+            "componentName": "webhook"
         }
     ],
     "edges": [

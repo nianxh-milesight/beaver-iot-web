@@ -89,9 +89,8 @@ declare type BaseNodeDataType<T extends Record<string, any> = Record<string, any
 declare type TriggerNodeDataType = BaseNodeDataType<{
     /** 输入参数 */
     entityConfigs: {
-        name: string;
-        type: EntityValueDataType;
-        value: any;
+        arg: string;
+        type: string;
     }[];
 }>;
 
@@ -120,48 +119,13 @@ declare type TimerNodeDataType = BaseNodeDataType<{
         }[];
         expirationEpochSecond?: number;
     };
-
-    /**
-     * 执行类型
-     * @param ONCE 单次执行
-     * @param CYCLE 周期执行
-     */
-    type: 'ONCE' | 'CYCLE';
-    /** 执行时间 */
-    executionTime?: number;
-    /** 过期时间，默认 2035/01/01 00:00 */
-    expireTime?: number;
-    /** 周期配置 */
-    settings?: {
-        /** 执行周期 */
-        period?: TimePeriodType;
-        /**
-         * 执行时间，该数据为零点到所选时间点的毫秒数，默认 32400000(09:00)
-         */
-        time?: number;
-    }[];
 }>;
 
 /**
  * 事件监听节点参数类型
  */
 declare type ListenerNodeDataType = BaseNodeDataType<{
-    /**
-     * 监听类型
-     * @param change 实体数据变更
-     * @param call 服务调用
-     * @param report 事件上报
-     */
-    type: 'change' | 'call' | 'report';
-    /** 监听目标 */
-    target: ApiKey;
-    /** 输出参数 */
-    // outputs?: {
-    //     key: ApiKey;
-    //     name: string;
-    //     type: EntityType;
-    //     value: any;
-    // }[];
+    entities: ApiKey[];
 }>;
 
 declare type WorkflowLogicOperator = 'AND' | 'OR';
@@ -232,9 +196,9 @@ declare type CodeNodeDataType = BaseNodeDataType<{
     /** 代码内容 */
     expression: string;
     /** 输入参数 */
-    inputArguments: Record<ApiKey, string>;
+    inputArguments: { key: string; value: string }[];
     /** 输出参数 */
-    outputArguments: {
+    Payload: {
         name: ApiKey;
         type: EntityValueDataType;
     }[];
@@ -244,20 +208,12 @@ declare type CodeNodeDataType = BaseNodeDataType<{
  * 服务节点参数类型
  */
 declare type ServiceNodeDataType = BaseNodeDataType<{
-    /** 服务实体 Key */
+    /** Service Entity Key */
     serviceEntity: ApiKey;
     /**
-     * 输入参数
-     *
-     * TODO: 该参数后端设计与需求输入限制表不符，待确认
+     * Input variables of service entity
      */
     serviceParams: Record<ApiKey, string>;
-    // inputs: {
-    //     name: ApiKey;
-    //     type: EntityValueDataType;
-    //     value: any;
-    //     source: ApiKey;
-    // }[];
 }>;
 
 /**
@@ -271,61 +227,41 @@ declare type AssignerNodeDataType = BaseNodeDataType<{
  * 实体选择节点参数类型
  */
 declare type SelectNodeDataType = BaseNodeDataType<{
-    settings: {
-        /**
-         * 监听类型
-         * @param change 实体数据变更
-         * @param call 服务调用
-         * @param report 事件上报
-         */
-        type: 'change' | 'call' | 'report';
-        /** 监听目标 */
-        target: ApiKey;
-    }[];
+    entities: ApiKey[];
 }>;
 
 /**
  * 邮件节点参数类型
  */
 declare type EmailNodeDataType = BaseNodeDataType & {
-    /** 邮箱类型 */
-    type: 'gmail';
-    /** 邮箱 API Key */
-    apiKey: ApiKey;
-    /** 邮箱 */
-    email: string | string[];
-    /** 邮件内容 */
+    emailConfig: {
+        provider: 'SMTP' | 'google';
+        smtpConfig: {
+            host: string;
+            port: number;
+            encryption: 'STARTTLS' | 'NONE';
+            username: string;
+            password: string;
+        };
+    };
+    subject: string;
+    recipients: string[];
     content: string;
-    /** 输出参数 */
-    // outputs: {
-    //     name: ApiKey;
-    //     type: EntityValueDataType;
-    //     value: any;
-    // }[];
 };
 
 /**
  * Webhook 节点参数类型
  */
 declare type WebhookNodeDataType = BaseNodeDataType & {
-    /** 推送数据（来源于上个节点） */
-    data: ApiKey[];
-    /** 自定义数据 */
-    customData: {
+    /** Custom Data */
+    inputArguments?: {
         key: ApiKey;
-        type: EntityValueDataType;
-        value: any;
+        value: string;
     }[];
     /** Webhook URL */
-    url: string;
-    /** Webhook 密钥 */
-    secret: string;
-    /** 输出参数 */
-    outputs: {
-        name: ApiKey;
-        type: EntityValueDataType;
-        value: any;
-    }[];
+    webhookUrl: string;
+    /** Webhook Secret */
+    secretKey?: string;
 };
 
 /**

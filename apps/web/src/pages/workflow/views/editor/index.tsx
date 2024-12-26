@@ -207,8 +207,12 @@ const WorkflowEditor = () => {
                     result.data = omitBy(node.data, (_, key) => checkPrivateProperty(key));
                     return result;
                 });
+                const newEdges = edges.map(edge => {
+                    edge.data = omitBy(edge.data, (_, key) => checkPrivateProperty(key));
+                    return edge;
+                });
 
-                setEditorFlowData(JSON.stringify({ nodes: newNodes, edges }, null, 2));
+                setEditorFlowData(JSON.stringify({ nodes: newNodes, edges: newEdges }, null, 2));
             } else if (mode === 'canvas') {
                 let data: Pick<WorkflowSchema, 'nodes' | 'edges'>;
 

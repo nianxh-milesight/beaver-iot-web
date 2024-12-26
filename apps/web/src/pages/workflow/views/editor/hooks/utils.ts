@@ -44,7 +44,7 @@ export const getParallelInfo = (
 
         startNode = nodes.find(node => node.id === (parentNode.data as any).start_node_id);
     } else {
-        startNode = nodes.find(node => entryNodeTypes.includes(node.type!));
+        startNode = nodes.find(node => entryNodeTypes.includes(node.type as WorkflowNodeType));
     }
     if (!startNode) throw new Error('Start node not found');
 
