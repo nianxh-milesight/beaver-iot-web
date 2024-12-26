@@ -354,6 +354,8 @@ const WorkflowEditor = () => {
         setSaveLoading(true);
         const [error, resp] = await awaitWrap(
             workflowAPI.saveFlowDesign({
+                id: wid || undefined,
+                version,
                 name: basicData.name!,
                 remark: basicData.remark!,
                 enabled: basicData.enabled!,
