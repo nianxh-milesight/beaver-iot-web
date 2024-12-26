@@ -1,7 +1,7 @@
 import { memo, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useRequest } from 'ahooks';
-import { omitBy } from 'lodash-es';
+import { omitBy, merge, isEmpty } from 'lodash-es';
 import {
     ReactFlow,
     Background,
@@ -26,6 +26,7 @@ import {
     useWorkflow,
     useValidate,
     NODE_VALIDATE_TOAST_KEY,
+    EDGE_VALIDATE_TOAST_KEY,
 } from './hooks';
 import {
     Topbar,
@@ -68,7 +69,8 @@ const WorkflowEditor = () => {
         useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
-    const { checkNodesData } = useValidate();
+    const { checkNodesId, checkNodesType, checkNodesData, checkEdgesId, checkEdgesType } =
+        useValidate();
     const checkWorkflowValid = useCallback(() => {
         const { nodes, edges } = toObject();
         if (!checkNodeNumberLimit(nodes)) return false;
@@ -226,26 +228,42 @@ const WorkflowEditor = () => {
             } else if (mode === 'canvas') {
                 let data: Pick<WorkflowSchema, 'nodes' | 'edges'>;
 
-                // TODO: json validate, data validate
                 try {
                     data = JSON.parse(editorFlowData || '{}');
                 } catch (e) {
+                    console.warn(e);
                     toast.error({ content: getIntlText('common.message.json_format_error') });
                     return;
                 }
                 const { nodes, edges } = data;
 
+                if (
+                    checkNodesId(nodes, { validateFirst: true }) ||
+                    checkNodesType(nodes, { validateFirst: true }) ||
+                    checkEdgesId(edges, nodes, { validateFirst: true }) ||
+                    checkEdgesType(edges, nodes, { validateFirst: true })
+                ) {
+                    return;
+                }
+
                 setNodes(nodes);
                 setEdges(edges);
             }
-            const data = toObject();
-
-            // TODO: check the nodes json data is valid
-            console.log('workflow data', data);
 
             setDesignMode(mode);
         },
-        [editorFlowData, toObject, setEdges, setNodes, checkWorkflowValid, getIntlText],
+        [
+            editorFlowData,
+            checkWorkflowValid,
+            toObject,
+            checkNodesId,
+            checkNodesType,
+            checkEdgesId,
+            checkEdgesType,
+            setNodes,
+            setEdges,
+            getIntlText,
+        ],
     );
 
     // ---------- Save Workflow ----------
@@ -253,35 +271,65 @@ const WorkflowEditor = () => {
     const [saveLoading, setSaveLoading] = useState(false);
     const handleSave = async () => {
         if (!checkWorkflowValid()) return;
-        const dataCheckResult = checkNodesData();
+        const flowData = toObject();
+        const isAdvanceMode = designMode === 'advanced';
 
-        console.log({ dataCheckResult });
-        if (dataCheckResult !== true) {
-            if (designMode === 'canvas') {
-                const statusData = Object.entries(dataCheckResult).reduce(
-                    (acc, [id, item]) => {
-                        acc[id] = item.status;
-                        return acc;
-                    },
-                    {} as NonNullable<Parameters<typeof updateNodesStatus>[0]>,
-                );
-                // TODO: show validate panel
-                setNodesDataValidResult(dataCheckResult);
-                updateNodesStatus(statusData, nodes);
-            } else {
-                const errItem = Object.values(dataCheckResult).find(item => item.errMsgs.length);
+        if (isAdvanceMode) {
+            let jsonData: Pick<WorkflowSchema, 'nodes' | 'edges'>;
 
-                toast.error({ key: NODE_VALIDATE_TOAST_KEY, content: errItem?.errMsgs[0] });
+            try {
+                jsonData = JSON.parse(editorFlowData || '{}');
+            } catch (e) {
+                console.warn(e);
+                toast.error({ content: getIntlText('common.message.json_format_error') });
+                return;
             }
+
+            flowData.nodes = jsonData.nodes;
+            flowData.edges = jsonData.edges;
+        }
+
+        const { nodes, edges, viewport } = flowData;
+
+        const edgesCheckResult = merge(
+            checkEdgesId(edges, nodes, { validateFirst: isAdvanceMode }),
+            checkEdgesType(edges, nodes, { validateFirst: isAdvanceMode }),
+        );
+        console.log({ edgesCheckResult });
+        if (!isEmpty(edgesCheckResult)) {
+            if (isAdvanceMode) return;
+            const errItem = Object.values(edgesCheckResult).find(item => item.errMsgs.length);
+            toast.error({ key: EDGE_VALIDATE_TOAST_KEY, content: errItem?.errMsgs[0] });
             return;
         }
+
+        const nodesCheckResult = merge(
+            checkNodesId(nodes, { validateFirst: isAdvanceMode }),
+            checkNodesType(nodes, { validateFirst: isAdvanceMode }),
+            checkNodesData(nodes, { validateFirst: isAdvanceMode }),
+        );
+        console.log({ nodesCheckResult });
+        if (!isEmpty(nodesCheckResult)) {
+            const statusData = Object.entries(nodesCheckResult).reduce(
+                (acc, [id, item]) => {
+                    acc[id] = item.status;
+                    return acc;
+                },
+                {} as NonNullable<Parameters<typeof updateNodesStatus>[0]>,
+            );
+
+            setNodesDataValidResult(nodesCheckResult);
+            updateNodesStatus(statusData, nodes);
+            return;
+        }
+        updateNodesStatus(null);
+        setNodesDataValidResult(null);
 
         if (!basicData) {
             // TODO: data validate
             return;
         }
 
-        // const { nodes, edges, viewport } = toObject();
         const hasTriggerNode = nodes.find(node => node.type === 'trigger');
 
         // If has a trigger node and it is the first time to create, show tip
@@ -302,8 +350,6 @@ const WorkflowEditor = () => {
 
         // TODO: referenced warning confirm ?
 
-        // TODO: check the nodes data is valid
-        console.log('workflow data', { nodes, edges });
         setSaveLoading(true);
         const [error, resp] = await awaitWrap(
             workflowAPI.saveFlowDesign({

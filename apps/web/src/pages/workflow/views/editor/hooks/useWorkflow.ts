@@ -44,7 +44,7 @@ const entryNodeTypes = Object.values(basicNodeConfigs)
     .map(item => item.type);
 
 const useWorkflow = () => {
-    const { getNodes, getEdges, setNodes } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { getNodes, getEdges, setNodes, fitView } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const nodes = useNodes<WorkflowNode>();
     const edges = useEdges<WorkflowEdge>();
     const { getIntlText } = useI18n();
@@ -317,11 +317,12 @@ const useWorkflow = () => {
                         $status: status,
                     };
                 });
+                fitView({ duration: 300 });
             }
 
             setNodes(nodes);
         },
-        [getNodes, setNodes],
+        [getNodes, setNodes, fitView],
     );
 
     return {

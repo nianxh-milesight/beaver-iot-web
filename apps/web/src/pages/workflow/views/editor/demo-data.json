@@ -98,46 +98,46 @@
     ],
     "edges": [
         {
-            "id": "1-2",
+            "id": "1_2",
             "source": "1",
             "target": "2",
             "type": "addable"
         },
         {
-            "id": "2-3",
+            "id": "2_3",
             "source": "2",
             "target": "3",
             "type": "addable",
             "sourceHandle": "$temp:if"
         },
         {
-            "id": "2-4",
+            "id": "2_4",
             "source": "2",
             "target": "4",
             "type": "addable",
             "sourceHandle": "$temp:else"
         },
         {
-            "id": "2-5",
+            "id": "2_5",
             "source": "2",
             "target": "5",
             "type": "addable",
             "sourceHandle": "$temp:else"
         },
         {
-            "id": "3-6",
+            "id": "3_6",
             "source": "3",
             "target": "6",
             "type": "addable"
         },
         {
-            "id": "4-7",
+            "id": "4_7",
             "source": "4",
             "target": "7",
             "type": "addable"
         },
         {
-            "id": "5-8",
+            "id": "5_8",
             "source": "5",
             "target": "8",
             "type": "addable"

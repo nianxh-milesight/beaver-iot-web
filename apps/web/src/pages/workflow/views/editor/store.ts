@@ -52,7 +52,7 @@ interface FlowStore {
 
     setLogDetailLoading: (loading: FlowStore['logDetailLoading']) => void;
 
-    setNodesDataValidResult: (data?: NodesDataValidResult) => void;
+    setNodesDataValidResult: (data: NodesDataValidResult | null) => void;
 }
 
 const useFlowStore = create(
@@ -120,7 +120,7 @@ const useFlowStore = create(
         setLogDetailLoading: loading => set({ logDetailLoading: loading }),
         setNodesDataValidResult(data) {
             if (!data) {
-                set({ logPanelMode: undefined, logDetail: undefined });
+                set({ openLogPanel: false, logPanelMode: undefined, logDetail: undefined });
                 return;
             }
             console.log(data);

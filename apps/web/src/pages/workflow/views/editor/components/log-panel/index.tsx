@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Stack, IconButton, Button, TextField, CircularProgress } from '@mui/material';
-import { Panel, useNodes, useReactFlow } from '@xyflow/react';
+import { Panel, useReactFlow } from '@xyflow/react';
 import cls from 'classnames';
 import { useRequest } from 'ahooks';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
@@ -16,8 +16,7 @@ import './style.less';
  */
 const LogPanel = () => {
     const { getIntlText } = useI18n();
-    const nodes = useNodes<WorkflowNode>();
-    const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { getNodes, toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const {
         openLogPanel,
         logPanelMode,
@@ -40,6 +39,10 @@ const LogPanel = () => {
         ]),
     );
     const { updateNodesStatus } = useWorkflow();
+    const flowData = useMemo(() => {
+        if (!openLogPanel) return;
+        return toObject();
+    }, [openLogPanel, toObject]);
     const title = useMemo(() => {
         switch (logPanelMode) {
             case 'testRun':
@@ -64,11 +67,12 @@ const LogPanel = () => {
     // ---------- Run Test ----------
     const [entryInput, setEntryInput] = useState('');
     const showTestInput = useMemo(() => {
-        if (logPanelMode !== 'testRun') return false;
+        if (!flowData || logPanelMode !== 'testRun') return false;
+        const nodes = getNodes();
         const hasTriggerNode = nodes.find(node => node.type === 'trigger');
 
         return !!hasTriggerNode;
-    }, [nodes, logPanelMode]);
+    }, [flowData, logPanelMode, getNodes]);
     const { run: runFlowTest } = useRequest(
         async () => {
             if (logPanelMode !== 'testRun') return;
@@ -96,7 +100,6 @@ const LogPanel = () => {
         runFlowTest();
     }, [logPanelMode, showTestInput, runFlowTest]);
 
-    console.log({ logDetail });
     return (
         <Panel
             position="top-right"
@@ -141,8 +144,8 @@ const LogPanel = () => {
                         </div>
                     )}
                     <div className="log-detail-area">
-                        {!!logDetail?.length && (
-                            <ActionLog traceData={logDetail!} workflowData={toObject()} />
+                        {!!logDetail?.length && flowData && (
+                            <ActionLog traceData={logDetail!} workflowData={flowData} />
                         )}
                     </div>
                 </div>
