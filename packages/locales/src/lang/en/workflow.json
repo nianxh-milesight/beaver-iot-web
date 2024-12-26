@@ -106,5 +106,7 @@
     "workflow.valid.invalid_node_type": "The {1} Node type is invalid.",
     "workflow.valid.invalid_edge_type": "The Edge (connecting node {1} and {2}) Type is invalid.",
     "workflow.valid.node_id_duplicated": "{1} and {2} Node ID is duplicated.",
-    "workflow.valid.edge_id_duplicated": "The Edge (connecting node {1} and {2}) ID is duplicated."
+    "workflow.valid.edge_id_duplicated": "The Edge (connecting node {1} and {2}) ID is duplicated.",
+    "workflow.node.service_helptext": "Please select the service you want to call first.",
+    "workflow.node.input_variables": "Input Variables"
 }
