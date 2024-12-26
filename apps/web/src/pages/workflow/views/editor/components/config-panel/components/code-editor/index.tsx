@@ -25,8 +25,8 @@ const CodeEditor: React.FC<IProps> = ({ value, onChange }) => {
             const { language = DEFAULT_LANGUAGE, expression = '' } = data;
 
             const result = {
-                language: language || value?.language,
-                expression: expression || value?.expression,
+                language: language ?? value?.language,
+                expression: expression ?? value?.expression,
             };
             onChange?.(result);
         },

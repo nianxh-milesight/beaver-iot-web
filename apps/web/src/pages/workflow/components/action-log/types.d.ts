@@ -28,7 +28,7 @@ export interface AccordionLog
     /**
      * error message
      */
-    errorMsg?: string;
+    errorMessage?: string;
     /**
      * Children
      */

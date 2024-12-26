@@ -6,13 +6,16 @@
         .text-size(@font-size-sm);
     }
 
-    &__input {
-        margin-bottom: @margin-sm;
+    &__input,
+    &__output {
+        margin-top: @margin-sm;
+
+        &:first-child {
+            margin-top: 0;
+        }
     }
 
     &__alert {
-        margin-bottom: @margin-sm;
-
         .MuiPaper-root {
             padding: 0 @padding-md;
 

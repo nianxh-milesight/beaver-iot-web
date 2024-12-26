@@ -13,7 +13,13 @@ export default React.memo(({ data }: IProps) => {
     const { getIntlText } = useI18n();
 
     /** Get the header render config */
-    const { icon, iconBgColor, name, status, timeCost } = useMemo(() => {
+    const {
+        icon,
+        iconBgColor,
+        name,
+        status = 'Success',
+        timeCost,
+    } = useMemo(() => {
         const { type, config, status, name, timeCost } = data || {};
         const { icon, iconBgColor, labelIntlKey } = config || {};
         const result = basicNodeConfigs[type];

@@ -41,7 +41,7 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
 
         return treeData.map(data => {
             const { children, attrs, ...item } = data || {};
-            const { input, output, errorMsg } = attrs || {};
+            const { input, output, errorMessage } = attrs || {};
 
             // If there are child nodes, increment the index
             if ((children?.length || 0) > 1) {
@@ -63,26 +63,28 @@ export default function AccordionUsage({ traceData, workflowData }: ActionLogPro
             return (
                 <Fragment key={item.id}>
                     <AccordionCard header={<AccordionHeader data={attrs} />}>
-                        {errorMsg && (
+                        {errorMessage && (
                             <div className="ms-action-log__alert">
                                 <Alert severity="error" icon={false}>
-                                    <Tooltip autoEllipsis title={errorMsg} />
+                                    <Tooltip autoEllipsis title={errorMessage} />
                                 </Alert>
                             </div>
                         )}
                         {input && (
                             <div className="ms-action-log__input">
                                 <ActionCodeEditor
-                                    value={JSON.stringify(input, null, 2)}
+                                    value={input}
                                     title={getIntlText('common.label.input')}
                                 />
                             </div>
                         )}
                         {output && (
-                            <ActionCodeEditor
-                                value={JSON.stringify(output, null, 2)}
-                                title={getIntlText('common.label.output')}
-                            />
+                            <div className="ms-action-log__output">
+                                <ActionCodeEditor
+                                    value={output}
+                                    title={getIntlText('common.label.output')}
+                                />
+                            </div>
                         )}
                     </AccordionCard>
                     {!!children?.length && (
