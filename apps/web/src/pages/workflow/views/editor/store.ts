@@ -45,6 +45,7 @@ interface FlowStore {
     setOpenLogPanel: (open: FlowStore['openLogPanel']) => void;
 
     setTestLogs: (testLogs: FlowStore['testLogs']) => void;
+    addTestLog: (log?: NonNullable<FlowStore['testLogs']>[0]) => void;
 
     setRunLogs: (runLogs: FlowStore['runLogs']) => void;
 
@@ -59,26 +60,7 @@ const useFlowStore = create(
     immer<FlowStore>(set => ({
         nodeConfigs: basicNodeConfigs,
 
-        testLogs: [
-            {
-                id: '1',
-                start_time: 1733809691235,
-                time_cost: 1000,
-                status: 'SUCCESS',
-            },
-            {
-                id: '2',
-                start_time: 1733809691235,
-                time_cost: 1000,
-                status: 'ERROR',
-            },
-            {
-                id: '3',
-                start_time: 1733809691235,
-                time_cost: 1000,
-                status: 'ERROR',
-            },
-        ],
+        testLogs: [],
 
         setNodeConfigs: nodeConfigs => {
             const configs = Object.entries(nodeConfigs).reduce((acc, [cat, configs]) => {
@@ -115,6 +97,12 @@ const useFlowStore = create(
         setLogPanelMode: logPanelMode => set({ logPanelMode }),
         setOpenLogPanel: open => set({ openLogPanel: open }),
         setTestLogs: testLogs => set({ testLogs }),
+        addTestLog: log => {
+            set(state => {
+                if (!log) return;
+                state.testLogs?.unshift(log);
+            });
+        },
         setRunLogs: runLogs => set({ runLogs }),
         setLogDetail: detail => set({ logDetail: detail }),
         setLogDetailLoading: loading => set({ logDetailLoading: loading }),

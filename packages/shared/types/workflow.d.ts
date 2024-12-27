@@ -68,6 +68,11 @@ declare type WorkflowNodeCategoryType = 'entry' | 'control' | 'action' | 'extern
 declare type WorkflowNodeStatus = 'ERROR' | 'SUCCESS';
 
 /**
+ * Node Param Value Type
+ */
+declare type WorkflowParamValueType = 'INT' | 'FLOAT' | 'BOOLEAN' | 'STRING';
+
+/**
  * Node Base Data Model（Properties that begin with `$` are private to the frontend）
  */
 declare type BaseNodeDataType<T extends Record<string, any> = Record<string, any>> = {
@@ -90,7 +95,7 @@ declare type TriggerNodeDataType = BaseNodeDataType<{
     /** Entity Definition */
     entityConfigs: {
         name: string;
-        type: string;
+        type: WorkflowParamValueType;
     }[];
 }>;
 
@@ -283,7 +288,7 @@ declare type WorkflowNode<T extends WorkflowNodeType | undefined = undefined> = 
                     ? ReactFlowNode<Partial<EmailNodeDataType>, 'email'>
                     : T extends 'webhook'
                       ? ReactFlowNode<Partial<WebhookNodeDataType>, 'webhook'>
-                      : ReactFlowNode<Partial<BaseNodeDataType>>;
+                      : ReactFlowNode<Partial<BaseNodeDataType>, WorkflowNodeType>;
 
 /**
  * Workflow Edge Model

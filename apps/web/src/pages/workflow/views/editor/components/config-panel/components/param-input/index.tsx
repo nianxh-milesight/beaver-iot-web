@@ -42,9 +42,9 @@ export interface ParamInputProps {
 
 const DEFAULT_EMPTY_VALUE: ParamInputValueType = {
     name: '',
-    type: '',
+    type: '' as WorkflowParamValueType,
 };
-const typeOptions = ['INT', 'FLOAT', 'BOOLEAN', 'STRING'];
+const typeOptions: WorkflowParamValueType[] = ['INT', 'FLOAT', 'BOOLEAN', 'STRING'];
 
 const ParamInput: React.FC<ParamInputProps> = ({
     required,

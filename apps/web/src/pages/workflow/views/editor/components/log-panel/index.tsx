@@ -1,10 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Stack, IconButton, Button, TextField, CircularProgress } from '@mui/material';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Stack, IconButton, Button, CircularProgress } from '@mui/material';
 import { Panel, useReactFlow } from '@xyflow/react';
 import cls from 'classnames';
 import { useRequest } from 'ahooks';
+import { genRandomString } from '@milesight/shared/src/utils/tools';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
-import { CloseIcon, PlayArrowIcon } from '@milesight/shared/src/components';
+import { CloseIcon, PlayArrowIcon, toast } from '@milesight/shared/src/components';
+import { CodeEditor } from '@/components';
 import { ActionLog } from '@/pages/workflow/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import useWorkflow from '../../hooks/useWorkflow';
@@ -22,7 +24,7 @@ const LogPanel = () => {
         logPanelMode,
         logDetail,
         logDetailLoading,
-        testLogs,
+        addTestLog,
         setOpenLogPanel,
         setLogDetail,
         setLogDetailLoading,
@@ -32,7 +34,7 @@ const LogPanel = () => {
             'logPanelMode',
             'logDetail',
             'logDetailLoading',
-            'testLogs',
+            'addTestLog',
             'setOpenLogPanel',
             'setLogDetail',
             'setLogDetailLoading',
@@ -57,53 +59,142 @@ const LogPanel = () => {
                 return '';
         }
     }, [logPanelMode, getIntlText]);
+    const isTestRunMode = logPanelMode === 'testRun';
 
-    const handleClose = () => {
-        // TODO: remove node `$status` prop and close the panel
+    const handleClose = useCallback(() => {
         setOpenLogPanel(false);
+        setEntryInput('');
+        setLogDetail(undefined);
+        setLogDetailLoading(false);
         updateNodesStatus(null);
-    };
+    }, [setLogDetail, setLogDetailLoading, setOpenLogPanel, updateNodesStatus]);
 
     // ---------- Run Test ----------
     const [entryInput, setEntryInput] = useState('');
-    const showTestInput = useMemo(() => {
-        if (!flowData || logPanelMode !== 'testRun') return false;
+    const hasInput = useMemo(() => {
+        if (!openLogPanel || !flowData || !isTestRunMode) return false;
         const nodes = getNodes();
-        const hasTriggerNode = nodes.find(node => node.type === 'trigger');
 
-        return !!hasTriggerNode;
-    }, [flowData, logPanelMode, getNodes]);
+        return !!nodes.find(({ type }) => type === 'trigger' || type === 'listener');
+    }, [openLogPanel, flowData, isTestRunMode, getNodes]);
+
+    const genDemoData = useCallback(() => {
+        if (!openLogPanel || !isTestRunMode) return;
+        const nodes = getNodes();
+        const entryNode = nodes.find(({ type }) => type === 'trigger' || type === 'listener');
+        const { parameters } = entryNode?.data || {};
+        const result: Record<string, any> = {};
+
+        switch (entryNode?.type) {
+            case 'trigger': {
+                const configs = parameters?.entityConfigs as NonNullable<
+                    TriggerNodeDataType['parameters']
+                >['entityConfigs'];
+
+                if (!configs?.length) return result;
+                configs.forEach(({ name, type }) => {
+                    if (!name) return;
+                    let value: any = genRandomString(8, { lowerCase: true });
+
+                    switch (type) {
+                        case 'BOOLEAN': {
+                            value = Math.random() > 0.5;
+                            break;
+                        }
+                        case 'INT':
+                        case 'FLOAT': {
+                            value = Math.floor(Math.random() * 100);
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                    result[name] = value;
+                });
+                break;
+            }
+            case 'listener': {
+                const inputArgs = parameters?.entities;
+
+                if (!inputArgs) return result;
+                inputArgs.forEach((key: string) => {
+                    result[key] = genRandomString(8, { lowerCase: true });
+                });
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        return result;
+    }, [openLogPanel, isTestRunMode, getNodes]);
+
     const { run: runFlowTest } = useRequest(
-        async () => {
-            if (logPanelMode !== 'testRun') return;
+        async (value?: string) => {
+            if (!openLogPanel || !isTestRunMode) return;
             setLogDetailLoading(true);
-            const dsl = toObject();
-            // TODO: insert entryInput value into dsl
-            const [error, resp] = await awaitWrap(workflowAPI.runFlow({ dsl }));
+
+            let input: Record<string, any>;
+            try {
+                input = !value ? undefined : JSON.parse(value || '{}');
+            } catch (e) {
+                toast.error({ content: getIntlText('common.message.json_format_error') });
+                return;
+            }
+            const designData = toObject();
+            const [error, resp] = await awaitWrap(
+                workflowAPI.testFlow({ input, design_data: JSON.stringify(designData) }),
+            );
             setLogDetailLoading(false);
 
             if (error || !isRequestSuccess(resp)) return;
             const data = getResponseData(resp);
+            const nodeStatus =
+                data?.trace_infos.reduce(
+                    (result: Record<string, WorkflowNodeStatus>, { node_id: nodeId, status }) => {
+                        result[nodeId] = status;
+                        return result;
+                    },
+                    {},
+                ) || null;
 
+            addTestLog({ id: genRandomString(8, { lowerCase: true }), ...data! });
             setLogDetail(data?.trace_infos);
+            updateNodesStatus(nodeStatus);
         },
         {
             manual: true,
             debounceWait: 300,
-            refreshDeps: [logPanelMode, entryInput, toObject],
+            refreshDeps: [openLogPanel, isTestRunMode, entryInput, toObject],
         },
     );
 
     // Auto run flow test when there is not trigger node in workflow
     useEffect(() => {
-        if (logPanelMode !== 'testRun' || showTestInput) return;
+        if (!openLogPanel || !isTestRunMode) return;
+        if (hasInput) {
+            setEntryInput(JSON.stringify(genDemoData(), null, 2));
+            return;
+        }
+
         runFlowTest();
-    }, [logPanelMode, showTestInput, runFlowTest]);
+    }, [openLogPanel, isTestRunMode, hasInput, genDemoData, runFlowTest]);
+
+    // Clear Data when panel mode change
+    useEffect(() => {
+        if (!logPanelMode) return;
+        handleClose();
+    }, [logPanelMode, handleClose]);
 
     return (
         <Panel
             position="top-right"
-            className={cls('ms-workflow-panel-log-root', { hidden: !openLogPanel })}
+            className={cls('ms-workflow-panel-log-root', {
+                hidden: !openLogPanel,
+                loading: logDetailLoading,
+            })}
         >
             <div className="ms-workflow-panel-log">
                 <div className="ms-workflow-panel-config-header">
@@ -117,14 +208,13 @@ const LogPanel = () => {
                     </Stack>
                 </div>
                 <div className="ms-workflow-panel-config-body">
-                    {showTestInput && (
+                    {hasInput && (
                         <div className="input-area">
-                            {/* TODO: Replace TextField with JSON Editor */}
-                            <TextField
-                                multiline
-                                fullWidth
-                                rows={8}
-                                onChange={e => setEntryInput(e.target.value)}
+                            <CodeEditor
+                                editorLang="json"
+                                title={getIntlText('common.label.input')}
+                                value={entryInput}
+                                onChange={setEntryInput}
                             />
                             <Button
                                 fullWidth
@@ -137,18 +227,19 @@ const LogPanel = () => {
                                     )
                                 }
                                 disabled={logDetailLoading}
-                                onClick={runFlowTest}
+                                onClick={() => runFlowTest(entryInput)}
                             >
                                 {getIntlText('common.label.run')}
                             </Button>
                         </div>
                     )}
-                    <div className="log-detail-area">
-                        {!!logDetail?.length && flowData && (
+                    {!!logDetail?.length && flowData && (
+                        <div className="log-detail-area">
                             <ActionLog traceData={logDetail!} workflowData={flowData} />
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
+                {logDetailLoading && <CircularProgress />}
             </div>
         </Panel>
     );
