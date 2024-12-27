@@ -17,7 +17,7 @@ type InputParamListType = {
     value: ParamInputSelectProps['value'];
 };
 type ServiceParamsValueType = {
-    [key: string]: string;
+    [key: string]: string | undefined;
 };
 type ServiceParamAssignInputValueType = {
     serviceEntity?: ApiKey;
@@ -51,7 +51,7 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
     const [innerValue, setInnerValue] =
         useControllableValue<ServiceParamAssignInputValueType>(props);
     const { list, replace, resetList } = useDynamicList<InputParamListType>([]);
-    const { run: handlerChange, cancel: cancelHandlerChange } = useDebounceFn(
+    const { run: handlerChange } = useDebounceFn(
         async (serviceEntity?: ApiKey) => {
             setInnerValue(pre => ({ ...pre, serviceEntity }));
             if (serviceEntity) {
@@ -64,26 +64,13 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
                     if (!error) {
                         resetList(
                             res.map((item: EntityItem) => {
-                                const reg = /#{([^}]+)}/g;
-                                const valueItem =
+                                const valueItem: ParamInputSelectProps['value'] =
                                     innerValue?.serviceParams?.[item.entity_key as string];
-                                let paramValue: ParamInputSelectProps['value'] = {
-                                    value: valueItem,
-                                };
-                                if (valueItem) {
-                                    const match = reg.exec(valueItem);
-                                    if (match) {
-                                        const ref = match[1];
-                                        if (ref) {
-                                            paramValue = { ref };
-                                        }
-                                    }
-                                }
                                 return {
                                     key: item.entity_key,
                                     name: item.entity_name,
                                     type: item.entity_value_type,
-                                    value: valueItem ? paramValue : undefined,
+                                    value: valueItem || undefined,
                                 };
                             }),
                         );
@@ -125,10 +112,10 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
     }, [list]);
     const transformParams = useCallback(
         (paramList: InputParamListType[]): ServiceParamsValueType => {
+            console.log('💯 ~ paramList:', paramList);
             const res: ServiceParamsValueType = {};
             paramList.forEach(item => {
-                const { value = '', ref } = item.value || {};
-                res[item.key] = ref ? `#{${ref}}` : value;
+                res[item.key] = item.value;
             });
             return res;
         },

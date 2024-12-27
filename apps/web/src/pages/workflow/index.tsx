@@ -170,12 +170,7 @@ const Workflow = () => {
     );
     const handleExportWorkFlow = useCallback(
         async (record: TableRowDataType) => {
-            const [error, resp] = await awaitWrap(
-                workflowAPI.getFlowDesign({
-                    id: record.id,
-                    version: record?.version ?? '',
-                }),
-            );
+            const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: record.id }));
 
             if (error || !isRequestSuccess(resp)) return;
             exportJsonFile(getResponseData(resp) as WorkflowAPISchema['getFlowDesign']['response']);
@@ -187,7 +182,7 @@ const Workflow = () => {
             // console.log(type, record);
             switch (type) {
                 case 'edit': {
-                    navigate(`/workflow/editor?wid=${record.id}&version=${record?.version ?? ''}`);
+                    navigate(`/workflow/editor?wid=${record.id}`);
                     break;
                 }
                 case 'detail': {
