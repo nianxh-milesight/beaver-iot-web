@@ -29,6 +29,10 @@ export interface WorkflowAPISchema extends APISchema {
         request: {
             name?: string;
             status?: FlowStatus;
+            /** data per page */
+            page_size?: number | null;
+            /** pagination page numbers */
+            page_number?: number | null;
         };
         response: SearchResponseType<
             {

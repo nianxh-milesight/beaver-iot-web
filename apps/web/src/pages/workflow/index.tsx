@@ -42,12 +42,12 @@ const Workflow = () => {
         mutate: updateWorkworkflowList,
     } = useRequest(
         async () => {
-            // const { page, pageSize } = paginationModel;
+            const { page, pageSize } = paginationModel;
             const [error, resp] = await awaitWrap(
                 workflowAPI.getList({
                     name: keyword || '',
-                    // page_size: pageSize,
-                    // page_number: page + 1,
+                    page_size: pageSize,
+                    page_number: page + 1,
                 }),
             );
             const data = getResponseData(resp);
@@ -173,7 +173,7 @@ const Workflow = () => {
             const [error, resp] = await awaitWrap(
                 workflowAPI.getFlowDesign({
                     id: record.id,
-                    version: record.version,
+                    version: record?.version ?? '',
                 }),
             );
 
@@ -187,7 +187,7 @@ const Workflow = () => {
             // console.log(type, record);
             switch (type) {
                 case 'edit': {
-                    navigate(`/workflow/editor?wid=${record.id}&version=${record.version}`);
+                    navigate(`/workflow/editor?wid=${record.id}&version=${record?.version ?? ''}`);
                     break;
                 }
                 case 'detail': {
