@@ -224,7 +224,7 @@ export interface WorkflowAPISchema extends APISchema {
     /** Test single node */
     testSingleNode: {
         request: {
-            input: Record<string, any>;
+            input?: Record<string, any>;
             /** Node Config (JSON string) */
             node_config: string;
         };

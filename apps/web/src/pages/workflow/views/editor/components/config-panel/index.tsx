@@ -101,6 +101,11 @@ const ConfigPanel = () => {
 
     // ---------- Show Test Drawer ----------
     const [drawerOpen, setDrawerOpen] = useState(false);
+    useEffect(() => setDrawerOpen(false), [selectedNode]);
+    useEffect(() => {
+        if (drawerOpen) return;
+        setDrawerOpen(false);
+    }, [drawerOpen]);
 
     return (
         <Panel
@@ -207,7 +212,11 @@ const ConfigPanel = () => {
                         )}
                     </div>
                 </div>
-                <TestDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+                <TestDrawer
+                    open={drawerOpen}
+                    node={selectedNode}
+                    onClose={() => setDrawerOpen(false)}
+                />
             </div>
         </Panel>
     );

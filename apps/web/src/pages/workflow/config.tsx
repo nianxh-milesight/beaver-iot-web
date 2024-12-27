@@ -74,6 +74,10 @@ export type NodeConfigItemType = {
      * Independent testing enabled
      */
     testable?: boolean;
+    /**
+     * The keys that can be used in test input
+     */
+    testInputKeys?: string[];
 };
 
 /**
@@ -129,6 +133,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <SettingsEthernetIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
+        testInputKeys: ['inputArguments'],
     },
     assigner: {
         type: 'assigner',
@@ -137,6 +142,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <EntityIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
+        testInputKeys: ['exchangePayload'],
     },
     service: {
         type: 'service',
@@ -145,6 +151,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <RoomServiceIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
+        testInputKeys: ['serviceInvocationSetting.serviceParams'],
     },
     select: {
         type: 'select',
@@ -153,6 +160,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <FactCheckIcon />,
         iconBgColor: '#26A69A',
         category: 'action',
+        testInputKeys: ['entities'],
     },
     email: {
         type: 'email',
@@ -169,6 +177,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <WebhookIcon />,
         iconBgColor: '#7E57C2',
         category: 'external',
+        testInputKeys: ['inputArguments'],
     },
 };
 

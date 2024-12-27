@@ -170,5 +170,7 @@
     "common.message.json_format_error": "JSON 格式错误",
     "common.label.tip": "Tip",
     "common.label.export": "Export",
-    "common.label.creator": "Creator"
+    "common.label.creator": "Creator",
+    "common.label.error": "Error",
+    "common.label.success": "Success"
 }
