@@ -112,7 +112,6 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
     }, [list]);
     const transformParams = useCallback(
         (paramList: InputParamListType[]): ServiceParamsValueType => {
-            console.log('💯 ~ paramList:', paramList);
             const res: ServiceParamsValueType = {};
             paramList.forEach(item => {
                 res[item.key] = item.value;

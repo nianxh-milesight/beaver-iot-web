@@ -50,8 +50,6 @@ export interface WorkflowAPISchema extends APISchema {
                 updated_at: number;
                 /** User Nickname */
                 user_nickname: string;
-                /** workflow version */
-                version: string;
             }[]
         >;
     };
