@@ -45,7 +45,6 @@ const useFormItems = ({ mode = 'login' }: UseFormItemsProps) => {
         const items: ControllerProps<FormDataProps>[] = [
             {
                 name: 'email',
-                defaultValue: 'xiejc@milesight.com',
                 rules: {
                     validate: {
                         checkRequired: checkRequired(),
@@ -107,7 +106,6 @@ const useFormItems = ({ mode = 'login' }: UseFormItemsProps) => {
             },
             {
                 name: 'password',
-                defaultValue: 'Milesight@2024',
                 rules: {
                     validate: {
                         checkRequired: checkRequired(),
