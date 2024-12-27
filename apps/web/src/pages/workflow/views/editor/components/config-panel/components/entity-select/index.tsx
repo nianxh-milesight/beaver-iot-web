@@ -29,7 +29,7 @@ export type EntitySelectOptionType = {
         EntityAPISchema['getList']['response']['content'][number],
         'entity_value_attribute'
     > & {
-        entity_value_attribute: EntityValueAttributeType;
+        entity_value_attribute: string;
     };
 };
 
@@ -140,22 +140,12 @@ const EntitySelect: React.FC<EntitySelectProps> = ({
     const options = useMemo(() => {
         const list = searchedEntityList || filteredEntityList || [];
         const result: EntitySelectOptionType[] = list.map(item => {
-            const entityValueAttribute = (() => {
-                try {
-                    return JSON.parse(item.entity_value_attribute);
-                } catch (e) {
-                    return item.entity_value_attribute;
-                }
-            })();
             return {
                 label: item.entity_name,
                 value: item.entity_key,
                 valueType: item.entity_value_type,
                 description: [item.device_name, item.integration_name].filter(Boolean).join(', '),
-                rawData: {
-                    ...item,
-                    entity_value_attribute: entityValueAttribute as EntityValueAttributeType,
-                },
+                rawData: item,
             };
         });
 

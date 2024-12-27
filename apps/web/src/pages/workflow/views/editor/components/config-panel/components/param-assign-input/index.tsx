@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useCallback, useLayoutEffect } from 'react';
 import { Button, IconButton, TextField } from '@mui/material';
 import { isEqual } from 'lodash-es';
 import { useDynamicList, useControllableValue } from 'ahooks';
@@ -8,12 +8,10 @@ import ParamInputSelect from '../param-input-select';
 import './style.less';
 
 export type ParamAssignInputValueType =
-    | undefined
-    | {
-          key?: string;
-          ref?: string;
-          value?: string;
-      };
+    | NonNullable<CodeNodeDataType['parameters']>['inputArguments']
+    | undefined;
+
+export type ParamAssignInputInnerValueType = [string, string] | undefined;
 
 export interface ParamAssignInputProps {
     label?: string[];
@@ -21,12 +19,21 @@ export interface ParamAssignInputProps {
     multiple?: boolean;
     error?: boolean;
     helperText?: React.ReactNode;
-    value?: ParamAssignInputValueType[];
-    defaultValue?: ParamAssignInputValueType[];
-    onChange?: (value: ParamAssignInputValueType[]) => void;
+    value?: ParamAssignInputValueType;
+    defaultValue?: ParamAssignInputValueType;
+    onChange?: (value: ParamAssignInputValueType) => void;
 }
 
 const MAX_VALUE_LENGTH = 10;
+
+const arrayToObject = (arr: ParamAssignInputInnerValueType[]) => {
+    const result: ParamAssignInputValueType = {};
+    arr?.forEach(item => {
+        if (!item) return;
+        result[item[0]] = item[1];
+    });
+    return result;
+};
 
 /**
  * Param Assignment Input Component
@@ -40,18 +47,18 @@ const ParamAssignInput: React.FC<ParamAssignInputProps> = ({
     ...props
 }) => {
     const { getIntlText } = useI18n();
-    const [data, setData] = useControllableValue<ParamAssignInputValueType[]>(props);
+    const [data, setData] = useControllableValue<ParamAssignInputValueType>(props);
     const { list, remove, getKey, insert, replace, resetList } =
-        useDynamicList<ParamAssignInputValueType>(data);
+        useDynamicList<ParamAssignInputInnerValueType>(Object.entries(data || {}));
 
     useLayoutEffect(() => {
-        if (isEqual(data, list)) return;
-        resetList(data || []);
+        if (isEqual(data, arrayToObject(list))) return;
+        resetList(Object.entries(data || {}));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, resetList]);
 
     useLayoutEffect(() => {
-        setData?.(list);
+        setData?.(arrayToObject(list));
     }, [list, setData]);
 
     return (
@@ -62,15 +69,15 @@ const ParamAssignInput: React.FC<ParamAssignInputProps> = ({
                         autoComplete="off"
                         label={label?.[0] || getIntlText('common.label.name')}
                         required={required}
-                        value={item?.key || ''}
-                        onChange={e => replace(index, { ...item, key: e.target.value })}
+                        value={item?.[0] || ''}
+                        onChange={e => replace(index, [e.target.value, item?.[1] || ''])}
                     />
                     <ParamInputSelect
                         label={label?.[1]}
                         required={required}
-                        value={{ ref: item?.ref, value: item?.value }}
+                        value={item?.[1]}
                         onChange={data => {
-                            replace(index, { key: item?.key, ...data });
+                            replace(index, [item?.[0] || '', data || '']);
                         }}
                     />
                     <IconButton onClick={() => remove(index)}>
@@ -87,7 +94,7 @@ const ParamAssignInput: React.FC<ParamAssignInputProps> = ({
                     disabled={list.length >= MAX_VALUE_LENGTH}
                     onClick={() => {
                         if (list.length >= MAX_VALUE_LENGTH) return;
-                        insert(list.length, {});
+                        insert(list.length, ['', '']);
                     }}
                 >
                     {getIntlText('common.label.add')}

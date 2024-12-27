@@ -1,18 +1,14 @@
-import { useMemo, useLayoutEffect, useState, useRef } from 'react';
+import { useMemo, useLayoutEffect, useState, useRef, useCallback } from 'react';
 import { useControllableValue, useSize } from 'ahooks';
 import { TextField, Menu, MenuItem, IconButton, Chip, ListSubheader } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { SettingsOutlinedIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
 import useWorkflow from '@/pages/workflow/views/editor/hooks/useWorkflow';
+import { isRefParamKey } from '@/pages/workflow/views/editor/helper';
 import './style.less';
 
-type ParamInputSelectValueType =
-    | undefined
-    | {
-          ref?: string;
-          value?: string;
-      };
+type ParamInputSelectValueType = string | undefined;
 
 type OptionItemType = {
     nodeId: ApiKey;
@@ -95,7 +91,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                         }
                         onClick={() => {
                             setAnchorEl(null);
-                            setData({ ref: output.key });
+                            setData(output.key);
                         }}
                     >
                         <div className="ms-param-input-select-item">
@@ -111,30 +107,45 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
         return [result, renderedOptions];
     }, [selectValue, getUpstreamNodeParams, setData]);
 
+    const handleInputChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
+        e => {
+            const { value } = e.target;
+
+            // input value
+            if (!isRefParamKey(value)) {
+                setData(value);
+                return;
+            }
+
+            // Reference to an entity
+            setInputValue('');
+            const option = options?.find(item => item.valueKey === value);
+
+            if (!option) return;
+            setData(value);
+            setSelectValue(option);
+        },
+        [options, setData],
+    );
+
     useLayoutEffect(() => {
         // Direct input value
-        if (data?.value) {
-            setInputValue(data.value);
+        if (!isRefParamKey(data)) {
+            setInputValue(data || '');
             setSelectValue(undefined);
             return;
         }
 
         // Reference to an entity
-        if (data?.ref) {
-            setInputValue('');
-            const option = options?.find(item => item.valueKey === data.ref);
-
-            setSelectValue(val => {
-                if (val && val.valueKey === data.ref) {
-                    return val;
-                }
-                return option;
-            });
-            return;
-        }
-
         setInputValue('');
-        setSelectValue(undefined);
+        const option = options?.find(item => item.valueKey === data);
+
+        setSelectValue(val => {
+            if (val && val.valueKey === data) {
+                return val;
+            }
+            return option;
+        });
     }, [data, options]);
 
     return (
@@ -161,9 +172,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                     },
                 }}
                 value={inputValue}
-                onChange={e => {
-                    setData({ value: e.target.value });
-                }}
+                onChange={handleInputChange}
             />
             {!!selectValue && (
                 <Chip
@@ -174,7 +183,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                             <span className="type">{selectValue.valueType}</span>
                         </>
                     }
-                    onDelete={() => setData({ ref: undefined })}
+                    onDelete={() => setData(undefined)}
                 />
             )}
             <Menu

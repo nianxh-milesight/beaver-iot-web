@@ -17,6 +17,7 @@ import {
     NODE_MIN_NUMBER_LIMIT,
     ENTRY_NODE_NUMBER_LIMIT,
 } from '../constants';
+import { genRefParamKey } from '../helper';
 import { getParallelInfo } from './utils';
 
 export type NodeParamType = {
@@ -243,12 +244,12 @@ const useWorkflow = () => {
                     {
                         name: 'output112123123123123123123123131231231',
                         type: 'string',
-                        key: `${node.type}.${node.id}.1132e3123132`,
+                        key: genRefParamKey(node.type as WorkflowNodeType, node.id, '1132e3123132'),
                     },
                     {
                         name: 'output22',
                         type: 'number',
-                        key: `${node.type}.${node.id}.11eyu3123132`,
+                        key: genRefParamKey(node.type as WorkflowNodeType, node.id, '11eyu3123132'),
                     },
                 ],
             }));
@@ -298,7 +299,7 @@ const useWorkflow = () => {
 
             return result;
         },
-        [getNodes, getUpstreamNodes, getIntlText],
+        [getNodes, getEdges, getUpstreamNodes, getIntlText],
     );
 
     // Update node status

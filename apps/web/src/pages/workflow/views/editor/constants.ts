@@ -59,6 +59,11 @@ export const NODE_SPACING_Y = 48;
 export const PARAM_REFERENCE_PREFIX = '@';
 
 /**
+ * Global parameter reference pattern
+ */
+export const PARAM_REFERENCE_PATTERN = /^#\{([^{}]+)\}$/;
+
+/**
  * Global parameter reference key divider
  */
 export const PARAM_REFERENCE_DIVIDER = '.';

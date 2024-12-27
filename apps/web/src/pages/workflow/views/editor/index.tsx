@@ -135,8 +135,8 @@ const WorkflowEditor = () => {
     );
 
     // ---------- Fetch Nodes Config ----------
-    const { setNodeConfigs, setNodesDataValidResult } = useFlowStore(
-        useStoreShallow(['setNodeConfigs', 'setNodesDataValidResult']),
+    const { setOpenLogPanel, setNodeConfigs, setNodesDataValidResult } = useFlowStore(
+        useStoreShallow(['setOpenLogPanel', 'setNodeConfigs', 'setNodesDataValidResult']),
     );
     const { loading: nodeConfigLoading } = useRequest(
         async () => {
@@ -241,6 +241,7 @@ const WorkflowEditor = () => {
 
                 setNodes(nodes);
                 setEdges(edges);
+                setOpenLogPanel(false);
             }
 
             setDesignMode(mode);

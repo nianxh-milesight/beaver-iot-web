@@ -46,6 +46,7 @@
 .@{prefix}-workflow-com-log-list {
     position: relative;
     height: 248px;
+    padding-top: @padding-xs;
     overflow: auto;
 
     .@{prefix}-empty {
@@ -76,8 +77,9 @@
             opacity: .8;
         }
 
-        &:first-child {
-            margin-top: @margin-xs;
+        &__left {
+            display: flex;
+            align-items: center;
         }
 
         &__title {

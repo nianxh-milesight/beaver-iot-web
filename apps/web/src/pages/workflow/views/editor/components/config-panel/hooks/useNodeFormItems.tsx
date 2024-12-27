@@ -53,7 +53,7 @@ const useNodeFormItems = (node?: WorkflowNode) => {
     const formConfigs = useMemo(() => {
         if (!Object.keys(nodeConfigs).length) return {};
 
-        // console.log({ nodeConfigs });
+        console.log({ nodeConfigs });
         const result: Partial<Record<WorkflowNodeType, NodeFormGroupType[]>> = {};
         Object.entries(nodeConfigs).forEach(([nodeType, nodeConfig]) => {
             const { properties = {}, outputProperties = {} } = nodeConfig.schema || {};

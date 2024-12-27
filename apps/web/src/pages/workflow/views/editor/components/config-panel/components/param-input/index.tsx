@@ -3,7 +3,6 @@
  *
  * Note: use in TriggerNode, CodeNode
  */
-
 import { useLayoutEffect, useMemo } from 'react';
 import {
     Select,
@@ -23,10 +22,10 @@ import { DeleteOutlineIcon, AddIcon } from '@milesight/shared/src/components';
 import './style.less';
 import { isEqual } from 'lodash-es';
 
-export type ParamInputValueType = {
-    arg: string;
-    type: string;
-    isCheck?: boolean;
+export type ParamInputValueType = NonNullable<
+    TriggerNodeDataType['parameters']
+>['entityConfigs'][0] & {
+    context?: boolean;
 };
 
 export interface ParamInputProps {
@@ -42,7 +41,7 @@ export interface ParamInputProps {
 }
 
 const DEFAULT_EMPTY_VALUE: ParamInputValueType = {
-    arg: '',
+    name: '',
     type: '',
 };
 const typeOptions = ['INT', 'FLOAT', 'BOOLEAN', 'STRING'];
@@ -69,7 +68,7 @@ const ParamInput: React.FC<ParamInputProps> = ({
         setInnerValue?.(list);
     }, [list, setInnerValue]);
 
-    const handlerChange = (
+    const handleChange = (
         index: number,
         rowItem: ParamInputValueType,
         key: string,
@@ -91,9 +90,9 @@ const ParamInput: React.FC<ParamInputProps> = ({
                     <FormControl required={required} disabled={disabled}>
                         <TextField
                             label={nameInputProps?.label || getIntlText('common.label.name')}
-                            value={item.arg}
+                            value={item.name}
                             onChange={e =>
-                                handlerChange(index, item, 'arg', e.target.value as string)
+                                handleChange(index, item, 'name', e.target.value as string)
                             }
                         />
                     </FormControl>
@@ -107,7 +106,7 @@ const ParamInput: React.FC<ParamInputProps> = ({
                             label={typeSelectProps?.label || getIntlText('common.label.type')}
                             value={item.type}
                             onChange={e =>
-                                handlerChange(index, item, 'type', e.target.value as string)
+                                handleChange(index, item, 'type', e.target.value as string)
                             }
                         >
                             {typeOptions.map(item => (
@@ -124,12 +123,12 @@ const ParamInput: React.FC<ParamInputProps> = ({
                             disabled={disabled}
                         >
                             <Switch
-                                checked={!!item?.isCheck}
+                                checked={!!item?.context}
                                 onChange={e =>
-                                    handlerChange(
+                                    handleChange(
                                         index,
                                         item,
-                                        'isCheck',
+                                        'context',
                                         e.target.checked as boolean,
                                     )
                                 }

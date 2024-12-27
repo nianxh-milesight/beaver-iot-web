@@ -6,6 +6,7 @@ import { Menu, MenuItem } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { CheckCircleIcon, ErrorIcon, LoopIcon } from '@milesight/shared/src/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
+import useFlowStore from '../../store';
 import Handle from '../handle';
 import './style.less';
 
@@ -137,7 +138,8 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     /**
      * Menu Item click callback
      */
-    const { updateNode, deleteElements } = useReactFlow();
+    const { updateNode, deleteElements } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const nodeConfigs = useFlowStore(state => state.nodeConfigs);
     const handleMenuItemClick = useCallback(
         async (
             e: React.MouseEvent<HTMLLIElement, MouseEvent>,
@@ -155,8 +157,11 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
 
             switch (type) {
                 case 'change': {
+                    if (!targetNodeType) return;
+                    const nodeConfig = nodeConfigs[targetNodeType];
                     updateNode(nodeId, {
                         type: targetNodeType,
+                        componentName: nodeConfig.componentName,
                         data: {},
                     });
                     break;

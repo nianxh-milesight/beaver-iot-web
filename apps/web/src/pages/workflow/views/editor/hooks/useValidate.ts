@@ -463,10 +463,14 @@ const useValidate = () => {
                 const { nodeName, nodeRemark, parameters } = data || {};
                 let tempResult = result[id];
 
-                if (options?.validateFirst && tempResult?.errMsgs.length) {
-                    toast.error({ key: 'node-validate', content: tempResult.errMsgs[0] });
-                    return result;
-                }
+                // if (
+                //     options?.validateFirst &&
+                //     Object.values(result).some(item => item.errMsgs.length)
+                // ) {
+                //     const errItem = Object.values(result).find(item => item.errMsgs.length);
+                //     toast.error({ key: 'node-validate', content: errItem?.errMsgs[0] });
+                //     return result;
+                // }
 
                 if (!tempResult) {
                     tempResult = {
@@ -503,21 +507,25 @@ const useValidate = () => {
                             1: nodeName || `${getIntlText(config.labelIntlKey)} (ID: ${id})`,
                         }),
                     );
-                    continue;
+                } else {
+                    // Node parameters data check
+                    Object.entries(parameters).forEach(([key, value]) => {
+                        const validKey = `${type}.${key}`;
+                        const validators = dataValidators[validKey] || dataValidators[key] || {};
+
+                        Object.values(validators).forEach(validator => {
+                            const result = validator(value, key);
+                            if (result && result !== true) {
+                                tempResult.errMsgs.push(result);
+                            }
+                        });
+                    });
                 }
 
-                // Node parameters data check
-                Object.entries(parameters).forEach(([key, value]) => {
-                    const validKey = `${type}.${key}`;
-                    const validators = dataValidators[validKey] || dataValidators[key] || {};
-
-                    Object.values(validators).forEach(validator => {
-                        const result = validator(value, key);
-                        if (result && result !== true) {
-                            tempResult.errMsgs.push(result);
-                        }
-                    });
-                });
+                if (options?.validateFirst && tempResult.errMsgs.length) {
+                    toast.error({ key: 'node-validate', content: tempResult.errMsgs[0] });
+                    return result;
+                }
             }
 
             Object.entries(result).forEach(([id, data]) => {

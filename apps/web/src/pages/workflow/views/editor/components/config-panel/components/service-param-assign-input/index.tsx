@@ -1,10 +1,10 @@
 import { useCallback, useLayoutEffect, useMemo } from 'react';
-import { useEntityApi } from '@/plugin/hooks';
-import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
+import { isEqual } from 'lodash-es';
 import { useControllableValue, useDebounceFn, useDynamicList } from 'ahooks';
 import { Divider, IconButton, Tooltip } from '@mui/material';
+import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { HelpIcon } from '@milesight/shared/src/components';
-import { isEqual } from 'lodash-es';
+import { useEntityApi } from '@/plugin/hooks';
 import useConfigPanelStore from '../../store';
 import ParamInputSelect, { ParamInputSelectProps } from '../param-input-select';
 import EntitySelect from '../entity-select';

@@ -4,7 +4,7 @@ import {
     checkRangeLength,
     type Validate,
 } from '@milesight/shared/src/utils/validators';
-import { PARAM_REFERENCE_PREFIX, PARAM_REFERENCE_DIVIDER } from './constants';
+import { PARAM_REFERENCE_PATTERN, PARAM_REFERENCE_DIVIDER } from './constants';
 
 /**
  * Node Data Validators Config
@@ -23,23 +23,23 @@ export const validatorsConfig: Record<string, Record<string, Validate>> = {
  * Generate Reference Param Key
  */
 export const genRefParamKey = (nodeType: WorkflowNodeType, nodeId: ApiKey, valueKey: ApiKey) => {
-    return `${PARAM_REFERENCE_PREFIX}${[nodeType, nodeId, valueKey].join(PARAM_REFERENCE_DIVIDER)}`;
+    return `#{${[nodeType, nodeId, valueKey].join(PARAM_REFERENCE_DIVIDER)}}`;
 };
 
 /**
  * Check if the value is a reference param key
  */
-export const isRefParamKey = (key: string) => {
-    return key.startsWith(PARAM_REFERENCE_PREFIX);
+export const isRefParamKey = (key?: string) => {
+    return key && PARAM_REFERENCE_PATTERN.test(key);
 };
 
 /**
  * Parse the reference param key
  */
-export const parseRefParamKey = (key: string) => {
-    if (!isRefParamKey(key)) return {};
-    const [nodeType, nodeId, valueKey] = key.slice(1).split(PARAM_REFERENCE_DIVIDER);
-    return { nodeType, nodeId, valueKey };
+export const parseRefParamKey = (key?: string) => {
+    if (!key || !isRefParamKey(key)) return;
+    const matches = key.match(PARAM_REFERENCE_PATTERN);
+    return matches?.[1];
 };
 
 /**

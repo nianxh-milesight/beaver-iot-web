@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ButtonGroup, Button, Popover, Tabs, Tab, CircularProgress } from '@mui/material';
 import { useRequest } from 'ahooks';
 import { useNodes } from '@xyflow/react';
@@ -31,6 +32,8 @@ const DEFAULT_TAB_KEY: LogType = 'test';
 const TestButton: React.FC<Props> = ({ disabled }) => {
     const { getIntlText } = useI18n();
     const nodes = useNodes<WorkflowNode>();
+    const [searchParams] = useSearchParams();
+    const wid = searchParams.get('wid');
     const {
         runLogs,
         testLogs,
@@ -53,36 +56,24 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
         ]),
     );
 
+    // ---------- Fetch Run Log List ----------
     const { loading, run: getRunLogList } = useRequest(
         async () => {
-            // const [error, resp] = await awaitWrap(workflowAPI.getLogList());
-            // if (error || !isRequestSuccess(resp)) {
-            //     return;
-            // }
-            // const data = getResponseData(resp);
+            if (!wid) return;
+            const [error, resp] = await awaitWrap(
+                workflowAPI.getLogList({ id: wid, page_size: 999, page_number: 1 }),
+            );
 
-            // TODO: get log list
-            const log = {
-                id: '1',
-                start_time: Date.now(),
-                time_cost: 500,
-                status: 'Success',
-            };
-            const data = new Array(100).fill(0).map((_, index) => ({
-                ...log,
-                id: index + 1,
-                status: Math.floor(Math.random() * 10) % 2 === 0 ? 'Success' : 'Error',
-            }));
+            // console.log({ error, resp });
+            if (error || !isRequestSuccess(resp)) return;
+            const data = getResponseData(resp);
 
-            await new Promise(resolve => {
-                setTimeout(resolve, 1000);
-            });
-
-            setRunLogs(data as LogListProps['data']);
+            setRunLogs(data?.content);
         },
         {
             manual: true,
             debounceWait: 300,
+            refreshDeps: [wid],
         },
     );
 
@@ -125,15 +116,15 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
             if (error || !isRequestSuccess(resp)) return;
             const data = getResponseData(resp);
 
-            setLogDetail(data);
+            setLogDetail(data?.trace_info);
         },
         [setLogDetail, setLogDetailLoading, setLogPanelMode, setOpenLogPanel],
     );
 
     // ---------- Tab ----------
     const [tabKey, setTabKey] = useState<LogType>(DEFAULT_TAB_KEY);
-    const tabs = useMemo<LogTabItem[]>(() => {
-        return [
+    const tabs = useMemo(() => {
+        const result: LogTabItem[] = [
             {
                 key: 'test',
                 label: getIntlText('workflow.editor.logs_popover_title_test'),
@@ -145,7 +136,10 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
                     />
                 ),
             },
-            {
+        ];
+
+        if (wid) {
+            result.push({
                 key: 'run',
                 label: getIntlText('workflow.editor.logs_popover_title_run'),
                 component: (
@@ -156,9 +150,11 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
                         onSelect={record => handleLogItemClick('run', record)}
                     />
                 ),
-            },
-        ];
-    }, [runLogs, testLogs, loading, getIntlText, handleLogItemClick]);
+            });
+        }
+
+        return result;
+    }, [wid, runLogs, testLogs, loading, getIntlText, handleLogItemClick]);
 
     return (
         <>
