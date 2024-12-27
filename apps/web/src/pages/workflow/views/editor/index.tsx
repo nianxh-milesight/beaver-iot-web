@@ -157,6 +157,10 @@ const WorkflowEditor = () => {
         if (wid) return { id: wid };
     });
     const [flowDataLoading, setFlowDataLoading] = useState<boolean>();
+    const handleFlowDataChange = useCallback<NonNullable<TopbarProps['onDataChange']>>(data => {
+        setBasicData(data);
+        setIsPreventLeave(true);
+    }, []);
 
     useRequest(
         async () => {
@@ -190,10 +194,6 @@ const WorkflowEditor = () => {
             refreshDeps: [wid, version],
         },
     );
-    const handleFlowDataChange = useCallback<NonNullable<TopbarProps['onDataChange']>>(data => {
-        setBasicData(data);
-        setIsPreventLeave(true);
-    }, []);
 
     // ---------- Design Mode Change ----------
     const [designMode, setDesignMode] = useState<DesignMode>('canvas');
@@ -256,6 +256,7 @@ const WorkflowEditor = () => {
             checkEdgesType,
             setNodes,
             setEdges,
+            setOpenLogPanel,
             getIntlText,
         ],
     );
@@ -355,11 +356,8 @@ const WorkflowEditor = () => {
         setSaveLoading(true);
         const [error, resp] = await awaitWrap(
             workflowAPI.saveFlowDesign({
-                id: wid || undefined,
-                version,
-                name: basicData.name!,
-                remark: basicData.remark!,
-                enabled: basicData.enabled!,
+                ...basicData,
+                name: basicData.name,
                 design_data: JSON.stringify({ nodes, edges, viewport }),
             }),
         );

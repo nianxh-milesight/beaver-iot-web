@@ -190,7 +190,7 @@ export interface WorkflowAPISchema extends APISchema {
             /** Flow Remark */
             remark?: string;
             /** Enabled */
-            enabled: boolean;
+            enabled?: boolean;
             /** Flow Design Data (JSON string) */
             design_data: string;
         };
