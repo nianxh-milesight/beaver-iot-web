@@ -39,7 +39,7 @@ const Workflow = () => {
         data: workflowList,
         loading,
         run: getWorkflowList,
-        mutate: updateWorkworkflowList,
+        mutate: updateWorkflowList,
     } = useRequest(
         async () => {
             const { page, pageSize } = paginationModel;
@@ -134,7 +134,7 @@ const Workflow = () => {
         (isOpen: boolean, contains?: WorkflowSchema) => {
             if (contains) {
                 // TODO: wid should be deleted
-                navigate('/workflow/editor?wid=12121', {
+                navigate('/workflow/editor', {
                     state: {
                         workflowSchema: contains,
                     },
@@ -229,7 +229,7 @@ const Workflow = () => {
                     status: enabled ? 'disable' : 'enable',
                 }),
             );
-            updateWorkworkflowList({
+            updateWorkflowList({
                 ...workflowList,
                 content: workflowList?.content.map(item =>
                     item.id === row.id

@@ -1,5 +1,5 @@
-import { memo, useState, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { memo, useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { omitBy, merge, isEmpty, cloneDeep } from 'lodash-es';
 import {
@@ -194,6 +194,18 @@ const WorkflowEditor = () => {
             refreshDeps: [wid, version],
         },
     );
+
+    // ---------- Handle Import Data ----------
+    const { state } = useLocation();
+    const importedData = state?.workflowSchema as WorkflowSchema | undefined;
+
+    useEffect(() => {
+        if (wid || !importedData) return;
+        const { nodes, edges, viewport } = importedData;
+
+        setNodes(nodes);
+        setEdges(edges);
+    }, [wid, importedData, setNodes, setEdges]);
 
     // ---------- Design Mode Change ----------
     const [designMode, setDesignMode] = useState<DesignMode>('canvas');

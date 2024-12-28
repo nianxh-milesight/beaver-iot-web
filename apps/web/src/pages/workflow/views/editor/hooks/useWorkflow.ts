@@ -7,26 +7,28 @@ import {
     getOutgoers,
     type IsValidConnection,
 } from '@xyflow/react';
-import { uniqBy, omit, cloneDeep } from 'lodash-es';
+import { uniqBy, omit, cloneDeep, pick, isEmpty, isObject } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
+import useFlowStore from '../store';
 import {
     PARALLEL_LIMIT,
     PARALLEL_DEPTH_LIMIT,
     NODE_MIN_NUMBER_LIMIT,
     ENTRY_NODE_NUMBER_LIMIT,
 } from '../constants';
-import { genRefParamKey } from '../helper';
+import { genRefParamKey, isRefParamKey } from '../helper';
 import { getParallelInfo } from './utils';
 
 export type NodeParamType = {
     nodeId: ApiKey;
     nodeName?: string;
     nodeType?: WorkflowNodeType;
+    nodeLabel?: string;
     outputs: {
         name: string;
-        type: string;
+        type?: string;
         key: string;
     }[];
 };
@@ -36,7 +38,7 @@ export type FlattenNodeParamType = {
     nodeName?: string;
     nodeType?: WorkflowNodeType;
     valueName: string;
-    valueType: string;
+    valueType?: string;
     valueKey: string;
 };
 
@@ -49,6 +51,7 @@ const useWorkflow = () => {
     const nodes = useNodes<WorkflowNode>();
     const edges = useEdges<WorkflowEdge>();
     const { getIntlText } = useI18n();
+    const nodeConfigs = useFlowStore(state => state.nodeConfigs);
 
     const selectedNode = useMemo(() => {
         const selectedNodes = nodes.filter(item => item.selected);
@@ -235,24 +238,74 @@ const useWorkflow = () => {
             if (!currentNode) return [];
 
             const incomeNodes = getUpstreamNodes(currentNode, nodes, edges);
-            // TODO: get the correct nodes params
-            const result: NodeParamType[] = incomeNodes.map(node => ({
-                nodeId: node.id,
-                nodeName: node.data?.nodeName,
-                nodeType: node.type as WorkflowNodeType,
-                outputs: [
-                    {
-                        name: 'output112123123123123123123123131231231',
-                        type: 'string',
-                        key: genRefParamKey(node.type as WorkflowNodeType, node.id, '1132e3123132'),
-                    },
-                    {
-                        name: 'output22',
-                        type: 'number',
-                        key: genRefParamKey(node.type as WorkflowNodeType, node.id, '11eyu3123132'),
-                    },
-                ],
-            }));
+            const result = incomeNodes
+                .map(({ id, type, data }) => {
+                    const { nodeName, parameters } = data || {};
+                    const config = nodeConfigs[type!];
+                    const outputKeys = config?.outputKeys;
+                    const paramData: NodeParamType = {
+                        nodeId: id,
+                        nodeName,
+                        nodeType: type,
+                        nodeLabel: config?.labelIntlKey ? getIntlText(config.labelIntlKey) : '',
+                        outputs: [],
+                    };
+
+                    if (isEmpty(parameters) || !outputKeys?.length) return;
+                    const outputArgs = pick(parameters, outputKeys);
+
+                    Object.entries(outputArgs).forEach(([param, data]) => {
+                        switch (param) {
+                            case 'entityConfigs':
+                            case 'Payload': {
+                                if (!Array.isArray(data)) return;
+                                data.forEach((item: Record<string, any>) => {
+                                    paramData.outputs.push({
+                                        name: item?.name,
+                                        type: item?.type,
+                                        key: genRefParamKey(id, item.name),
+                                    });
+                                });
+                                break;
+                            }
+                            case 'entities': {
+                                if (!Array.isArray(data)) return;
+                                data.forEach(item => {
+                                    // TODO: get the entity value type
+                                    paramData.outputs.push({
+                                        name: item,
+                                        // type: ??,
+                                        key: genRefParamKey(id, item),
+                                    });
+                                });
+                                break;
+                            }
+                            case 'inputArguments':
+                            case 'exchangePayload':
+                            case 'serviceInvocationSetting': {
+                                if (param === 'serviceInvocationSetting') {
+                                    data = data.serviceParams;
+                                }
+                                if (!isObject(data)) return;
+                                Object.entries(data).forEach(([key, value]) => {
+                                    if (isRefParamKey(value)) return;
+                                    // TODO: get the entity value type
+                                    paramData.outputs.push({
+                                        name: key,
+                                        // type: ??,
+                                        key: genRefParamKey(id, key),
+                                    });
+                                });
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                    });
+                    return paramData;
+                })
+                .filter(item => !!item);
             const flattenResult = result.reduce((acc, item) => {
                 acc.push(
                     ...item.outputs.map(output => ({
@@ -269,7 +322,7 @@ const useWorkflow = () => {
 
             return [result, flattenResult];
         },
-        [nodes, edges, getSelectedNode, getUpstreamNodes],
+        [nodes, edges, nodeConfigs, getSelectedNode, getUpstreamNodes, getIntlText],
     );
 
     // Check if there is a node that is not connected to an entry node

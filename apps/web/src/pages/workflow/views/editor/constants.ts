@@ -98,10 +98,10 @@ export const conditionOperatorMap: Partial<
     END_WITH: {
         labelIntlKey: 'workflow.label.condition_operator_end_with',
     },
-    IS: {
+    EQ: {
         labelIntlKey: 'workflow.label.condition_operator_is',
     },
-    IS_NOT: {
+    NE: {
         labelIntlKey: 'workflow.label.condition_operator_is_not',
     },
     IS_EMPTY: {

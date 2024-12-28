@@ -1,23 +1,17 @@
-import { useMemo, useLayoutEffect, useState, useRef, useCallback } from 'react';
+import { useLayoutEffect, useState, useRef, useCallback } from 'react';
 import { useControllableValue, useSize } from 'ahooks';
-import { TextField, Menu, MenuItem, IconButton, Chip, ListSubheader } from '@mui/material';
+import { TextField, IconButton, Chip, Popover } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { SettingsOutlinedIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
-import useWorkflow from '@/pages/workflow/views/editor/hooks/useWorkflow';
+import useWorkflow, {
+    type FlattenNodeParamType,
+} from '@/pages/workflow/views/editor/hooks/useWorkflow';
 import { isRefParamKey } from '@/pages/workflow/views/editor/helper';
+import UpstreamNodeList from '../upstream-node-list';
 import './style.less';
 
 type ParamInputSelectValueType = string | undefined;
-
-type OptionItemType = {
-    nodeId: ApiKey;
-    nodeName?: string;
-    nodeType?: WorkflowNodeType;
-    valueName?: string;
-    valueType?: string;
-    valueKey?: string;
-};
 
 export interface ParamInputSelectProps {
     label?: string;
@@ -49,63 +43,13 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
 }) => {
     const { getIntlText } = useI18n();
     const { getUpstreamNodeParams } = useWorkflow();
+    const [, options] = getUpstreamNodeParams();
     const containerRef = useRef<HTMLDivElement>(null);
     const [data, setData] = useControllableValue<ParamInputSelectValueType>(props);
     const [inputValue, setInputValue] = useState<string>('');
-    const [selectValue, setSelectValue] = useState<OptionItemType>();
+    const [selectValue, setSelectValue] = useState<FlattenNodeParamType>();
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const { width: containerWidth } = useSize(containerRef) || {};
-
-    const [options, renderedOptions] = useMemo(() => {
-        const [nodeParams] = getUpstreamNodeParams();
-        const result = nodeParams?.reduce((acc, param) => {
-            param.outputs?.forEach(output => {
-                acc.push({
-                    nodeId: param.nodeId,
-                    nodeName: param.nodeName,
-                    nodeType: param.nodeType,
-                    valueName: output.name,
-                    valueType: output.type,
-                    valueKey: output.key,
-                });
-            });
-            return acc;
-        }, [] as OptionItemType[]);
-
-        // TODO: render Empty component when the options is empty
-        const renderedOptions = nodeParams?.reduce((acc, node) => {
-            acc.push(
-                <ListSubheader key={node.nodeId} className="ms-param-input-select-option-groupname">
-                    {node.nodeType}
-                </ListSubheader>,
-            );
-
-            node.outputs.forEach(output => {
-                acc.push(
-                    <MenuItem
-                        className="ms-param-input-select-option"
-                        key={output.key}
-                        selected={
-                            node.nodeId === selectValue?.nodeId &&
-                            output.key === selectValue?.valueKey
-                        }
-                        onClick={() => {
-                            setAnchorEl(null);
-                            setData(output.key);
-                        }}
-                    >
-                        <div className="ms-param-input-select-item">
-                            <Tooltip autoEllipsis className="name" title={output.name} />
-                            <span className="type">{output.type}</span>
-                        </div>
-                    </MenuItem>,
-                );
-            });
-            return acc;
-        }, [] as React.ReactNode[]);
-
-        return [result, renderedOptions];
-    }, [selectValue, getUpstreamNodeParams, setData]);
 
     const handleInputChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
         e => {
@@ -114,6 +58,7 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
             // input value
             if (!isRefParamKey(value)) {
                 setData(value);
+                setInputValue(value);
                 return;
             }
 
@@ -186,10 +131,11 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                     onDelete={() => setData(undefined)}
                 />
             )}
-            <Menu
+            <Popover
                 className="ms-param-input-select-menu"
                 open={!!anchorEl}
                 anchorEl={anchorEl}
+                onClose={() => setAnchorEl(null)}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right',
@@ -198,7 +144,6 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                     vertical: 'top',
                     horizontal: 'right',
                 }}
-                onClose={() => setAnchorEl(null)}
                 sx={{
                     '& .MuiList-root': {
                         width: containerWidth,
@@ -207,8 +152,13 @@ const ParamInputSelect: React.FC<ParamInputSelectProps> = ({
                     },
                 }}
             >
-                {renderedOptions}
-            </Menu>
+                <UpstreamNodeList
+                    onChange={node => {
+                        setAnchorEl(null);
+                        setData(node.valueKey);
+                    }}
+                />
+            </Popover>
         </div>
     );
 };

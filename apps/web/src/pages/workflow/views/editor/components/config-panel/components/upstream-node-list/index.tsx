@@ -30,7 +30,7 @@ const UpstreamNodeList: React.FC<UpstreamNodeListProps> = props => {
         return upstreamNodes?.reduce((acc, node) => {
             acc.push(
                 <ListSubheader key={node.nodeId} className="ms-upstream-node-list-option-groupname">
-                    {node.nodeType}
+                    {`${node.nodeLabel} (${node.nodeName || node.nodeId})`}
                 </ListSubheader>,
             );
 

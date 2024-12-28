@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import cls from 'classnames';
-import { get } from 'lodash-es';
+import { pick, isEmpty } from 'lodash-es';
 import { useRequest } from 'ahooks';
 import {
     Backdrop,
@@ -60,35 +60,40 @@ const TestDrawer: React.FC<TestDrawerProps> = ({ node, open, onClose }) => {
         const node = getNode(nodeId);
         const { parameters } = node?.data || {};
         const result: Record<string, any> = {};
-        const inputArgs = get(parameters, nodeConfig.testInputKeys || []);
+        const inputArgs = pick(parameters, nodeConfig.testInputKeys || []);
 
-        if (!inputArgs) return result;
+        if (isEmpty(inputArgs)) return result;
 
-        // TODO: Generate different type data based on reference key type ?
-        switch (nodeConfig.type) {
-            case 'code':
-            case 'service':
-            case 'assigner':
-            case 'webhook': {
-                Object.entries(inputArgs).forEach(([key, value]) => {
-                    if (!key) return;
-                    result[key] =
-                        value && !isRefParamKey(value as string)
-                            ? value
-                            : genRandomString(8, { lowerCase: true });
-                });
-                break;
+        // Use different traversal methods for different param
+        Object.entries(inputArgs).forEach(([param, data]) => {
+            // TODO: Generate different type data based on reference key type ?
+            switch (param) {
+                case 'entities': {
+                    data.forEach((key: string) => {
+                        result[key] = genRandomString(8, { lowerCase: true });
+                    });
+                    break;
+                }
+                case 'inputArguments':
+                case 'serviceInvocationSetting':
+                case 'exchangePayload': {
+                    if (param === 'serviceInvocationSetting') {
+                        data = data.serviceParams;
+                    }
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (!key) return;
+                        result[key] =
+                            value && !isRefParamKey(value as string)
+                                ? value
+                                : genRandomString(8, { lowerCase: true });
+                    });
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
-            case 'select': {
-                inputArgs.forEach((key: string) => {
-                    result[key] = genRandomString(8, { lowerCase: true });
-                });
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+        });
 
         return result;
     }, [open, nodeId, nodeConfig, getNode]);

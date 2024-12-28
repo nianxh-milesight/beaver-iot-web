@@ -135,13 +135,24 @@ declare type ListenerNodeDataType = BaseNodeDataType<{
 
 declare type WorkflowLogicOperator = 'AND' | 'OR';
 
+/**
+ * Filter Operator used in the Condition Expression
+ * @param CONTAINS contains
+ * @param NOT_CONTAINS not contains
+ * @param START_WITH start witch
+ * @param END_WITH end witch
+ * @param EQ equal
+ * @param NE not equal
+ * @param IS_EMPTY is empty
+ * @param IS_NOT_EMPTY is not empty
+ */
 declare type WorkflowFilterOperator =
     | 'CONTAINS'
     | 'NOT_CONTAINS'
     | 'START_WITH'
     | 'END_WITH'
-    | 'IS'
-    | 'IS_NOT'
+    | 'EQ'
+    | 'NE'
     | 'IS_EMPTY'
     | 'IS_NOT_EMPTY';
 

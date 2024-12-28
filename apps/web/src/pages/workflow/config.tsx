@@ -71,13 +71,17 @@ export type NodeConfigItemType = {
      */
     category: WorkflowNodeCategoryType;
     /**
-     * Independent testing enabled
+     * Enable independent testing
      */
     testable?: boolean;
     /**
      * The keys that can be used in test input
      */
     testInputKeys?: string[];
+    /**
+     * The keys that can be referenced in downstream node
+     */
+    outputKeys?: string[];
 };
 
 /**
@@ -92,6 +96,8 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <InputIcon />,
         iconBgColor: '#3491FA',
         category: 'entry',
+        testInputKeys: ['entityConfigs'],
+        outputKeys: ['entityConfigs'],
     },
     timer: {
         type: 'timer',
@@ -110,6 +116,8 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         icon: <HearingIcon />,
         iconBgColor: '#3491FA',
         category: 'entry',
+        testInputKeys: ['entities'],
+        outputKeys: ['entities'],
     },
     ifelse: {
         type: 'ifelse',
@@ -134,6 +142,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         iconBgColor: '#26A69A',
         category: 'action',
         testInputKeys: ['inputArguments'],
+        outputKeys: ['Payload'],
     },
     assigner: {
         type: 'assigner',
@@ -143,6 +152,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         iconBgColor: '#26A69A',
         category: 'action',
         testInputKeys: ['exchangePayload'],
+        outputKeys: ['exchangePayload'],
     },
     service: {
         type: 'service',
@@ -152,6 +162,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         iconBgColor: '#26A69A',
         category: 'action',
         testInputKeys: ['serviceInvocationSetting.serviceParams'],
+        outputKeys: ['serviceInvocationSetting.serviceParams'],
     },
     select: {
         type: 'select',
@@ -161,6 +172,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         iconBgColor: '#26A69A',
         category: 'action',
         testInputKeys: ['entities'],
+        outputKeys: ['entities'],
     },
     email: {
         type: 'email',
@@ -178,6 +190,7 @@ export const basicNodeConfigs: Record<WorkflowNodeType, NodeConfigItemType> = {
         iconBgColor: '#7E57C2',
         category: 'external',
         testInputKeys: ['inputArguments'],
+        outputKeys: ['inputArguments'],
     },
 };
 

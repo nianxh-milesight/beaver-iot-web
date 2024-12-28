@@ -22,8 +22,8 @@ export const validatorsConfig: Record<string, Record<string, Validate>> = {
 /**
  * Generate Reference Param Key
  */
-export const genRefParamKey = (nodeType: WorkflowNodeType, nodeId: ApiKey, valueKey: ApiKey) => {
-    return `#{${[nodeType, nodeId, valueKey].join(PARAM_REFERENCE_DIVIDER)}}`;
+export const genRefParamKey = (nodeId: ApiKey, valueKey: ApiKey) => {
+    return `#{properties.${nodeId}['${valueKey}']}`;
 };
 
 /**
@@ -38,8 +38,14 @@ export const isRefParamKey = (key?: string) => {
  */
 export const parseRefParamKey = (key?: string) => {
     if (!key || !isRefParamKey(key)) return;
-    const matches = key.match(PARAM_REFERENCE_PATTERN);
-    return matches?.[1];
+    const matches = key.match(/^#\{properties\.([^'[\]]+)\['([^']+)'\]\}$/);
+
+    if (!matches) return;
+    const [, nodeId, valueKey] = matches;
+    return {
+        nodeId,
+        valueKey,
+    };
 };
 
 /**
