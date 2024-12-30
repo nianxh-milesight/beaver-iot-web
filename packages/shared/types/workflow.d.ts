@@ -94,6 +94,7 @@ declare type BaseNodeDataType<T extends Record<string, any> = Record<string, any
 declare type TriggerNodeDataType = BaseNodeDataType<{
     /** Entity Definition */
     entityConfigs: {
+        identify: string;
         name: string;
         type: EntityValueDataType;
     }[];

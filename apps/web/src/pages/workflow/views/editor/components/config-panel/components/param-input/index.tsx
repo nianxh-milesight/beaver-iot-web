@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { useDynamicList, useControllableValue } from 'ahooks';
 import { useI18n } from '@milesight/shared/src/hooks';
+import { genRandomString } from '@milesight/shared/src/utils/tools';
 import { DeleteOutlineIcon, AddIcon } from '@milesight/shared/src/components';
 import './style.less';
 import { isEqual } from 'lodash-es';
@@ -41,6 +42,7 @@ export interface ParamInputProps {
 }
 
 const DEFAULT_EMPTY_VALUE: ParamInputValueType = {
+    identify: '',
     name: '',
     type: '' as EntityValueDataType,
 };
@@ -97,7 +99,10 @@ const ParamInput: React.FC<ParamInputProps> = ({
     }, [list]);
     const handlerAdd = () => {
         if (disabledAdd) return;
-        insert(list.length, DEFAULT_EMPTY_VALUE);
+        insert(list.length, {
+            ...DEFAULT_EMPTY_VALUE,
+            identify: `param_${genRandomString(8, { lowerCase: true })}`,
+        });
     };
     return (
         <div className="ms-param-input">

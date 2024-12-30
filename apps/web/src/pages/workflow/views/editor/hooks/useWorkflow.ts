@@ -226,18 +226,24 @@ const useWorkflow = () => {
 
                     Object.entries(outputArgs).forEach(([param, data]) => {
                         switch (param) {
+                            // Data Type: { identify?: string; name: string; type: string }[]
                             case 'entityConfigs':
                             case 'Payload': {
                                 if (!Array.isArray(data)) return;
+                                // TODO: The key may use `identity` to replace `name` ?
                                 data.forEach((item: Record<string, any>) => {
                                     paramData.outputs.push({
                                         name: item?.name,
                                         type: item?.type,
-                                        key: genRefParamKey(id, item.name),
+                                        key:
+                                            param === 'entityConfigs'
+                                                ? genRefParamKey(id, item.name)
+                                                : genRefParamKey(id, item.identify),
                                     });
                                 });
                                 break;
                             }
+                            // Data Type: string[]
                             case 'entities': {
                                 if (!Array.isArray(data)) return;
                                 data.forEach(item => {
@@ -250,6 +256,7 @@ const useWorkflow = () => {
                                 });
                                 break;
                             }
+                            // Data Type: Record<string, string>
                             case 'inputArguments':
                             case 'exchangePayload':
                             case 'serviceInvocationSetting': {
