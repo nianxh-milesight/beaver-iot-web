@@ -141,7 +141,7 @@ const WorkflowEditor = () => {
     const [flowDataLoading, setFlowDataLoading] = useState<boolean>();
     const handleFlowDataChange = useCallback<NonNullable<TopbarProps['onDataChange']>>(data => {
         setBasicData(data);
-        setIsPreventLeave(true);
+        // setIsPreventLeave(true);
     }, []);
 
     useRequest(
@@ -359,9 +359,15 @@ const WorkflowEditor = () => {
         // console.log({ error, resp });
         setSaveLoading(false);
         if (error || !isRequestSuccess(resp)) return;
-        const data = getResponseData(resp);
+        const respData = getResponseData(resp);
 
         // console.log(data);
+        setBasicData(data => {
+            const result = data || {};
+            result.version = respData?.version ? respData.version : result.version;
+
+            return result;
+        });
         toast.success(getIntlText('common.message.operation_success'));
         setIsPreventLeave(false);
         setTimeout(() => navigate('/workflow'), 0);
