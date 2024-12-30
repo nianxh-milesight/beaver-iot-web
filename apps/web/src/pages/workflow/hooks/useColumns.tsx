@@ -155,7 +155,6 @@ const useColumns = <T extends TableRowDataType>({ onButtonClick }: UseColumnsPro
                             >
                                 <MenuItem onClick={() => onButtonClick('export', row)}>
                                     <IconButton
-                                        disabled={row.enabled}
                                         sx={{
                                             width: 30,
                                             height: 30,
@@ -167,10 +166,12 @@ const useColumns = <T extends TableRowDataType>({ onButtonClick }: UseColumnsPro
                                         </span>
                                     </IconButton>
                                 </MenuItem>
-                                <MenuItem onClick={() => onButtonClick('delete', row)}>
+                                <MenuItem
+                                    disabled={row.enabled}
+                                    onClick={() => onButtonClick('delete', row)}
+                                >
                                     <IconButton
                                         color="error"
-                                        disabled={row.enabled}
                                         sx={{
                                             width: 30,
                                             height: 30,
