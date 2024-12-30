@@ -186,8 +186,8 @@ const Workflow = () => {
                     break;
                 }
                 case 'log': {
-                    // TODO: Popup Log Modal
-                    console.log('popup log modal', record);
+                    setWorkflowItem(record);
+                    setLogModalVisible(true);
                     break;
                 }
                 case 'delete': {
