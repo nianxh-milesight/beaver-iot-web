@@ -1,5 +1,5 @@
-import { useMemo, useRef } from 'react';
-import { useI18n, useTime, useVirtualList } from '@milesight/shared/src/hooks';
+import { useRef } from 'react';
+import { useTime, useVirtualList } from '@milesight/shared/src/hooks';
 import { ErrorIcon, CheckCircleIcon } from '@milesight/shared/src/components';
 import { type WorkflowAPISchema } from '@/services/http';
 import { Empty } from '@/components';
@@ -8,28 +8,17 @@ import './style.less';
 export type LogType = 'test' | 'run';
 
 export interface LogListProps {
-    type: LogType;
+    // type: LogType;
 
-    data?: WorkflowAPISchema['getLogList']['response']['content'];
+    data: WorkflowAPISchema['getLogList']['response']['content'];
 
     loading?: boolean;
 
     onSelect?: (record: NonNullable<LogListProps['data']>[number]) => void;
 }
 
-const LogList: React.FC<LogListProps> = ({ type, data = [], loading, onSelect }) => {
-    const { getIntlText } = useI18n();
+const LogList: React.FC<LogListProps> = ({ data, loading, onSelect }) => {
     const { getTimeFormat } = useTime();
-    // const titlePrefix = useMemo(() => {
-    //     switch (type) {
-    //         case 'test':
-    //             return getIntlText('workflow.editor.log_title_test');
-    //         case 'run':
-    //             return getIntlText('workflow.editor.log_title_run');
-    //         default:
-    //             return '';
-    //     }
-    // }, [type, getIntlText]);
 
     // ---------- Virtual List ----------
     const containerRef = useRef<HTMLDivElement>(null);
@@ -40,8 +29,6 @@ const LogList: React.FC<LogListProps> = ({ type, data = [], loading, onSelect })
         itemHeight: 38,
         overscan: 10,
     });
-
-    // TODO: Infinite Scroll Loading ?
 
     return (
         <div className="ms-workflow-com-log-list" ref={containerRef}>

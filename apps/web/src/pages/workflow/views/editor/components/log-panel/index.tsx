@@ -7,7 +7,7 @@ import { merge, isEmpty } from 'lodash-es';
 import { genRandomString } from '@milesight/shared/src/utils/tools';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon, toast } from '@milesight/shared/src/components';
-import { CodeEditor } from '@/components';
+import { CodeEditor, Empty } from '@/components';
 import { ActionLog } from '@/pages/workflow/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import useWorkflow from '../../hooks/useWorkflow';
@@ -32,6 +32,7 @@ const LogPanel: React.FC<LogPanelProps> = ({ designMode }) => {
         logDetail,
         logDetailLoading,
         addTestLog,
+        setTestLogs,
         setOpenLogPanel,
         setLogDetail,
         setLogDetailLoading,
@@ -43,6 +44,7 @@ const LogPanel: React.FC<LogPanelProps> = ({ designMode }) => {
             'logDetail',
             'logDetailLoading',
             'addTestLog',
+            'setTestLogs',
             'setOpenLogPanel',
             'setLogDetail',
             'setLogDetailLoading',
@@ -253,7 +255,7 @@ const LogPanel: React.FC<LogPanelProps> = ({ designMode }) => {
                         </IconButton>
                     </Stack>
                 </div>
-                <div className="ms-workflow-panel-config-body">
+                <div className="ms-workflow-panel-log-body">
                     {hasInput && (
                         <div className="input-area">
                             <CodeEditor
@@ -279,10 +281,16 @@ const LogPanel: React.FC<LogPanelProps> = ({ designMode }) => {
                             </Button>
                         </div>
                     )}
-                    {!!logDetail?.length && flowData && (
+                    {!!logDetail?.length && flowData ? (
                         <div className="log-detail-area">
                             <ActionLog traceData={logDetail!} workflowData={flowData} />
                         </div>
+                    ) : (
+                        !hasInput && (
+                            <div className="empty-area">
+                                <Empty size="small" />
+                            </div>
+                        )
                     )}
                 </div>
                 {logDetailLoading && <CircularProgress />}

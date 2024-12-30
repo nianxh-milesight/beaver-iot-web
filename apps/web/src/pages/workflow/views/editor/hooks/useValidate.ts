@@ -74,6 +74,8 @@ const useValidate = () => {
                 return true;
             };
         };
+
+        // Note: The `checkRequired` name is fixed and cannot be modified
         const result: Record<string, Record<string, NodeDataValidator>> = {
             nodeName: {
                 checkRequired,
@@ -192,7 +194,7 @@ const useValidate = () => {
                     const message = getIntlText(ErrorIntlKey.required, { 1: fieldName });
                     const { when } = value || {};
 
-                    if (!when.length) return message;
+                    if (!when?.length) return message;
                     const hasEmptyCondition = when.some(({ expressionType, conditions }) => {
                         switch (expressionType) {
                             case 'mvel': {
@@ -220,6 +222,7 @@ const useValidate = () => {
                 },
             },
             'code.expression': {
+                checkRequired,
                 checkMaxLength(value: string, fieldName) {
                     const maxLength = 2000;
                     if (value && value.length > maxLength) {
@@ -684,6 +687,19 @@ const useValidate = () => {
                         }),
                     );
                 } else {
+                    const nodeCheckers = Object.keys(dataValidators).filter(key =>
+                        key.startsWith(`${type}.`),
+                    );
+                    nodeCheckers?.forEach(checker => {
+                        const key = checker.replace(`${type}.`, '');
+                        const checkRequired = dataValidators[key]?.checkRequired;
+
+                        if (parameters[key] || !checkRequired) return;
+                        const result = checkRequired(parameters[key], key);
+                        if (result && result !== true) {
+                            tempResult.errMsgs.push(result);
+                        }
+                    });
                     // Node parameters data check
                     Object.entries(parameters).forEach(([key, value]) => {
                         const validKey = `${type}.${key}`;

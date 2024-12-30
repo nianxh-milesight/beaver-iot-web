@@ -135,8 +135,7 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
                 label: getIntlText('workflow.editor.logs_popover_title_test'),
                 component: (
                     <LogList
-                        type="test"
-                        data={testLogs}
+                        data={testLogs || []}
                         onSelect={record => handleLogItemClick('test', record)}
                     />
                 ),
@@ -149,8 +148,7 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
                 label: getIntlText('workflow.editor.logs_popover_title_run'),
                 component: (
                     <LogList
-                        type="run"
-                        data={runLogs}
+                        data={runLogs || []}
                         loading={loading}
                         onSelect={record => handleLogItemClick('run', record)}
                     />

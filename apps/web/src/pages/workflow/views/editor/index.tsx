@@ -110,9 +110,16 @@ const WorkflowEditor = () => {
     );
 
     // ---------- Fetch Nodes Config ----------
-    const { setOpenLogPanel, setNodeConfigs, setNodesDataValidResult } = useFlowStore(
-        useStoreShallow(['setOpenLogPanel', 'setNodeConfigs', 'setNodesDataValidResult']),
-    );
+    const { setOpenLogPanel, setNodeConfigs, setTestLogs, setLogDetail, setNodesDataValidResult } =
+        useFlowStore(
+            useStoreShallow([
+                'setOpenLogPanel',
+                'setNodeConfigs',
+                'setTestLogs',
+                'setLogDetail',
+                'setNodesDataValidResult',
+            ]),
+        );
     const { loading: nodeConfigLoading } = useRequest(
         async () => {
             const [error, resp] = await awaitWrap(workflowAPI.getFlowNodes());
@@ -359,6 +366,15 @@ const WorkflowEditor = () => {
         setIsPreventLeave(false);
         setTimeout(() => navigate('/workflow'), 0);
     };
+
+    useEffect(() => {
+        return () => {
+            setOpenLogPanel(false);
+            setIsPreventLeave(false);
+            setTestLogs(undefined);
+            setLogDetail(undefined);
+        };
+    }, []);
 
     return (
         <div className="ms-main">

@@ -1,6 +1,7 @@
 import { useState, useMemo, useLayoutEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Menu, MenuItem, type MenuProps } from '@mui/material';
+import { useDebounceFn } from 'ahooks';
 import { useI18n } from '@milesight/shared/src/hooks';
 import {
     nodeCategoryConfigs,
@@ -73,24 +74,24 @@ const NodeMenu = ({
     // ---------- Menu Item Click ----------
     const { screenToFlowPosition } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const { addNode } = useInteractions();
-    const handleClick = (
-        e: React.MouseEvent<HTMLLIElement, MouseEvent>,
-        type: WorkflowNodeType,
-    ) => {
-        e.stopPropagation();
+    const { run: handleClick } = useDebounceFn(
+        (e: React.MouseEvent<HTMLLIElement, MouseEvent>, type: WorkflowNodeType) => {
+            let position: { x: number; y: number } | undefined;
+            if (!prevNodeId && !nextNodeId) {
+                position = screenToFlowPosition({ x: e.clientX - 20, y: e.clientY - 20 });
+            }
 
-        let position: { x: number; y: number } | undefined;
-        if (!prevNodeId && !nextNodeId) {
-            position = screenToFlowPosition({ x: e.clientX - 20, y: e.clientY - 20 });
-        }
-
-        addNode(
-            { nodeType: type, position },
-            { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle },
-        );
-        onItemClick?.(type);
-        handleInnerClose({}, 'backdropClick');
-    };
+            addNode(
+                { nodeType: type, position },
+                { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle },
+            );
+            onItemClick?.(type);
+            handleInnerClose({}, 'backdropClick');
+        },
+        {
+            wait: 300,
+        },
+    );
 
     return (
         <Menu
@@ -120,7 +121,13 @@ const NodeMenu = ({
 
                 children.push(
                     ...menus.map(menu => (
-                        <MenuItem key={menu.type} onClick={e => handleClick(e, menu.type)}>
+                        <MenuItem
+                            key={menu.type}
+                            onClick={e => {
+                                e.stopPropagation();
+                                handleClick(e, menu.type);
+                            }}
+                        >
                             <span className="icon" style={{ backgroundColor: menu.iconBgColor }}>
                                 {menu.icon}
                             </span>
