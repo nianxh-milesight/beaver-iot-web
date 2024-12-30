@@ -42,10 +42,26 @@ export interface ParamInputProps {
 
 const DEFAULT_EMPTY_VALUE: ParamInputValueType = {
     name: '',
-    type: '' as WorkflowParamValueType,
+    type: '' as EntityValueDataType,
 };
-const typeOptions: WorkflowParamValueType[] = ['INT', 'FLOAT', 'BOOLEAN', 'STRING'];
-
+const typeOptions = [
+    {
+        label: 'INT',
+        value: 'LONG',
+    },
+    {
+        label: 'FLOAT',
+        value: 'DOUBLE',
+    },
+    {
+        label: 'BOOLEAN',
+        value: 'BOOLEAN',
+    },
+    {
+        label: 'STRING',
+        value: 'STRING',
+    },
+];
 const ParamInput: React.FC<ParamInputProps> = ({
     required,
     disabled,
@@ -110,8 +126,8 @@ const ParamInput: React.FC<ParamInputProps> = ({
                             }
                         >
                             {typeOptions.map(item => (
-                                <MenuItem key={item} value={item}>
-                                    {item}
+                                <MenuItem key={item.value} value={item.value}>
+                                    {item.label}
                                 </MenuItem>
                             ))}
                         </Select>
