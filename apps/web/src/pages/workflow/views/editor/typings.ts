@@ -1,5 +1,10 @@
 import { type NodeConfigItemType } from '../../config';
 
+/**
+ * Workflow Design Mode
+ */
+export type DesignMode = 'canvas' | 'advanced';
+
 export type NodeFormItemValueType =
     | 'string'
     | 'int'

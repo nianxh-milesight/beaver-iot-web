@@ -1,4 +1,4 @@
-export { default as Topbar, type DesignMode, type TopbarProps } from './topbar';
+export { default as Topbar, type TopbarProps } from './topbar';
 export { default as Controls, type ControlsProps } from './controls';
 export { default as ConfigPanel } from './config-panel';
 

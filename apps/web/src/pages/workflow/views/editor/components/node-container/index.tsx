@@ -175,7 +175,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                 }
             }
         },
-        [nodeId, updateNode, deleteElements],
+        [nodeId, nodeConfigs, updateNode, deleteElements],
     );
 
     const menuItems = useMemo(() => {

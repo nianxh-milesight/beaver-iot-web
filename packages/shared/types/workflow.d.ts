@@ -223,12 +223,12 @@ declare type CodeNodeDataType = BaseNodeDataType<{
  * Service Node Parameters
  */
 declare type ServiceNodeDataType = BaseNodeDataType<{
-    /** Service Entity Key */
-    serviceEntity: ApiKey;
-    /**
-     * Input variables of service entity
-     */
-    serviceParams: Record<ApiKey, string>;
+    serviceInvocationSetting: {
+        /** Service Entity Key */
+        serviceEntity: string;
+        /** Input variables of service entity */
+        serviceParams?: Record<string, string>;
+    };
 }>;
 
 /**

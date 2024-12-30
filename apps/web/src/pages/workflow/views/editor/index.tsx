@@ -15,19 +15,12 @@ import {
 } from '@xyflow/react';
 import { checkPrivateProperty } from '@milesight/shared/src/utils/tools';
 import { useI18n, useStoreShallow, usePreventLeave } from '@milesight/shared/src/hooks';
-import { CheckIcon, InfoIcon, LoadingButton, toast } from '@milesight/shared/src/components';
+import { InfoIcon, LoadingButton, toast } from '@milesight/shared/src/components';
 import { CodeEditor, useConfirm } from '@/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import { MIN_ZOOM, MAX_ZOOM, FROZEN_NODE_PROPERTY_KEYS } from './constants';
 import useFlowStore from './store';
-import {
-    useNodeTypes,
-    useInteractions,
-    useWorkflow,
-    useValidate,
-    NODE_VALIDATE_TOAST_KEY,
-    EDGE_VALIDATE_TOAST_KEY,
-} from './hooks';
+import { useNodeTypes, useInteractions, useWorkflow, useValidate } from './hooks';
 import {
     Topbar,
     Controls,
@@ -38,9 +31,9 @@ import {
     EntryPanel,
     LogPanel,
     TestButton,
-    type DesignMode,
     type TopbarProps,
 } from './components';
+import { type DesignMode } from './typings';
 
 import '@xyflow/react/dist/style.css';
 import './style.less';
@@ -56,31 +49,13 @@ const WorkflowEditor = () => {
     const { getIntlText } = useI18n();
     const nodeTypes = useNodeTypes();
     const { toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
-    const {
-        isValidConnection,
-        checkParallelLimit,
-        checkNestedParallelLimit,
-        checkNodeNumberLimit,
-        checkFreeNodeLimit,
-        updateNodesStatus,
-    } = useWorkflow();
+    const { isValidConnection, checkWorkflowValid, updateNodesStatus } = useWorkflow();
     const { handleConnect, handleBeforeDelete, handleEdgeMouseEnter, handleEdgeMouseLeave } =
         useInteractions();
     const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>([]);
     const { checkNodesId, checkNodesType, checkNodesData, checkEdgesId, checkEdgesType } =
         useValidate();
-    const checkWorkflowValid = useCallback(
-        (nodes: WorkflowNode[], edges: WorkflowEdge[]) => {
-            if (!checkNodeNumberLimit(nodes)) return false;
-            if (checkFreeNodeLimit(nodes, edges)) return false;
-            if (!checkNestedParallelLimit(nodes, edges)) return false;
-            if (nodes.some(node => !checkParallelLimit(node.id, undefined, edges))) return false;
-
-            return true;
-        },
-        [checkNodeNumberLimit, checkFreeNodeLimit, checkNestedParallelLimit, checkParallelLimit],
-    );
     const confirm = useConfirm();
 
     // ---------- Prevent Leave ----------
@@ -174,7 +149,7 @@ const WorkflowEditor = () => {
             const { design_data: designData, ...basicData } = data || {};
             let flowData: Pick<WorkflowSchema, 'nodes' | 'edges'>;
 
-            console.log(data);
+            // console.log(data);
             try {
                 flowData = JSON.parse(designData || '{}');
             } catch (e) {
@@ -297,27 +272,22 @@ const WorkflowEditor = () => {
 
         const { nodes, edges, viewport } = flowData;
 
-        console.log({ nodes, edges });
+        // console.log({ nodes, edges });
         if (!checkWorkflowValid(nodes, edges)) return;
 
         const edgesCheckResult = merge(
-            checkEdgesId(edges, nodes, { validateFirst: isAdvanceMode }),
-            checkEdgesType(edges, nodes, { validateFirst: isAdvanceMode }),
+            checkEdgesId(edges, nodes, { validateFirst: true }),
+            checkEdgesType(edges, nodes, { validateFirst: true }),
         );
-        console.log({ edgesCheckResult });
-        if (!isEmpty(edgesCheckResult)) {
-            if (isAdvanceMode) return;
-            const errItem = Object.values(edgesCheckResult).find(item => item.errMsgs.length);
-            toast.error({ key: EDGE_VALIDATE_TOAST_KEY, content: errItem?.errMsgs[0] });
-            return;
-        }
+        // console.log({ edgesCheckResult });
+        if (!isEmpty(edgesCheckResult)) return;
 
         const nodesCheckResult = merge(
             checkNodesId(nodes, { validateFirst: isAdvanceMode }),
             checkNodesType(nodes, { validateFirst: isAdvanceMode }),
             checkNodesData(nodes, { validateFirst: isAdvanceMode }),
         );
-        console.log({ nodesCheckResult });
+        // console.log({ nodesCheckResult });
         if (!isEmpty(nodesCheckResult)) {
             if (isAdvanceMode) return;
             const statusData = Object.entries(nodesCheckResult).reduce(
@@ -355,11 +325,16 @@ const WorkflowEditor = () => {
             if (!proceed) return;
         }
 
-        // remove private property
         nodes.forEach(node => {
+            // remove interactive property
+            delete node.selected;
+            delete node.dragging;
+
+            // remove private property
             node.data = omitBy(node.data, (_, key) => checkPrivateProperty(key));
         });
         edges.forEach(edge => {
+            delete edge.selected;
             edge.data = omitBy(edge.data, (_, key) => checkPrivateProperty(key));
         });
 
@@ -374,12 +349,12 @@ const WorkflowEditor = () => {
             }),
         );
 
-        console.log({ error, resp });
+        // console.log({ error, resp });
         setSaveLoading(false);
         if (error || !isRequestSuccess(resp)) return;
         const data = getResponseData(resp);
 
-        console.log(data);
+        // console.log(data);
         toast.success(getIntlText('common.message.operation_success'));
         setIsPreventLeave(false);
         setTimeout(() => navigate('/workflow'), 0);
@@ -446,7 +421,7 @@ const WorkflowEditor = () => {
                             horizontal={helperLineHorizontal}
                             vertical={helperLineVertical}
                         />
-                        <LogPanel />
+                        <LogPanel designMode={designMode} />
                         <ConfigPanel />
                         <EntryPanel isEditing={!!wid} loading={flowDataLoading} />
                     </ReactFlow>

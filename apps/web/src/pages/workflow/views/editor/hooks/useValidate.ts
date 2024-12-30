@@ -1,18 +1,18 @@
 import { useMemo, useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { uniqBy } from 'lodash-es';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { toast } from '@milesight/shared/src/components';
 import {
     isEmpty,
     isRangeValue,
-    isMinLength,
     isMaxLength,
     isURL,
     isMatches,
+    isEmail,
 } from '@milesight/shared/src/utils/validators';
 import { EDGE_TYPE_ADDABLE } from '../constants';
 import useFlowStore from '../store';
+import { isRefParamKey } from '../helper';
 
 type NodeDataValidator<T = any> = (value?: T, fieldName?: string) => string | boolean | undefined;
 
@@ -39,6 +39,8 @@ enum ErrorIntlKey {
     rangeLength = 'workflow.valid.range_length',
     minLength = 'workflow.valid.min_length',
     maxLength = 'workflow.valid.max_length',
+    url = 'workflow.valid.invalid_url',
+    email = 'workflow.valid.invalid_email',
 }
 
 export const NODE_VALIDATE_TOAST_KEY = 'node-validate';
@@ -113,6 +115,20 @@ const useValidate = () => {
                     value: NonNullable<CodeNodeDataType['parameters']>['inputArguments'],
                     fieldName,
                 ) {
+                    if (value && Object.keys(value).length) {
+                        const maxLength = 50;
+                        const hasOverLength = Object.keys(value).some(key => {
+                            if (key && !isMaxLength(key, maxLength)) return true;
+                            return false;
+                        });
+
+                        if (!hasOverLength) return true;
+                        return getIntlText(ErrorIntlKey.maxLength, {
+                            1: fieldName,
+                            2: maxLength,
+                        });
+                    }
+
                     return true;
                 },
             },
@@ -173,33 +189,178 @@ const useValidate = () => {
                     value: NonNullable<IfElseNodeDataType['parameters']>['choice'],
                     fieldName,
                 ) {
+                    const message = getIntlText(ErrorIntlKey.required, { 1: fieldName });
+                    const { when } = value || {};
+
+                    if (!when.length) return message;
+                    const hasEmptyCondition = when.some(({ expressionType, conditions }) => {
+                        switch (expressionType) {
+                            case 'mvel': {
+                                const { expressionValue, expressionDescription } = conditions[0];
+                                return !expressionValue || !expressionDescription;
+                            }
+                            case 'condition': {
+                                const hasEmpty = conditions.some(({ expressionValue }) => {
+                                    if (typeof expressionValue === 'string') return true;
+                                    const { key, operator, value } = expressionValue || {};
+
+                                    return !key || !operator || !value;
+                                });
+
+                                return hasEmpty;
+                            }
+                            default: {
+                                return true;
+                            }
+                        }
+                    });
+
+                    if (hasEmptyCondition) return message;
                     return true;
                 },
             },
             'code.expression': {
-                // checkRequired() {},
+                checkMaxLength(value: string, fieldName) {
+                    const maxLength = 2000;
+                    if (value && value.length > maxLength) {
+                        return getIntlText(ErrorIntlKey.maxLength, {
+                            1: fieldName,
+                            2: maxLength,
+                        });
+                    }
+                    return true;
+                },
             },
             'code.Payload': {
                 checkMaxLength(
                     value: NonNullable<CodeNodeDataType['parameters']>['Payload'],
                     fieldName,
                 ) {
+                    if (value.length) {
+                        const maxLength = 50;
+                        const hasOverLength = value.some(item => {
+                            if (item.name && !isMaxLength(`${item.name}`, maxLength)) return true;
+                            return false;
+                        });
+
+                        if (!hasOverLength) return true;
+                        return getIntlText(ErrorIntlKey.maxLength, {
+                            1: fieldName,
+                            2: maxLength,
+                        });
+                    }
+
                     return true;
                 },
             },
-            'service.serviceInvocationSetting': {},
-            'assigner.exchangePayload': {},
+            'service.serviceInvocationSetting': {
+                checkRequired(
+                    value: NonNullable<
+                        ServiceNodeDataType['parameters']
+                    >['serviceInvocationSetting'],
+                    fieldName,
+                ) {
+                    if (value?.serviceEntity) return true;
+                    return getIntlText(ErrorIntlKey.required, { 1: fieldName });
+                },
+                checkMaxLength(
+                    value: NonNullable<
+                        ServiceNodeDataType['parameters']
+                    >['serviceInvocationSetting'],
+                    fieldName,
+                ) {
+                    if (value?.serviceParams && Object.keys(value.serviceParams).length) {
+                        const maxLength = 1000;
+                        const hasOverLength = Object.values(value.serviceParams).some(val => {
+                            if (val && !isRefParamKey(val) && !isMaxLength(val, maxLength)) {
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        if (!hasOverLength) return true;
+                        return getIntlText(ErrorIntlKey.maxLength, {
+                            1: fieldName,
+                            2: maxLength,
+                        });
+                    }
+                    return true;
+                },
+            },
+            'assigner.exchangePayload': {
+                checkRequired(
+                    value: NonNullable<AssignerNodeDataType['parameters']>['exchangePayload'],
+                    fieldName,
+                ) {
+                    if (
+                        !value ||
+                        !Object.keys(value).filter(Boolean).length ||
+                        !Object.values(value).filter(Boolean).length
+                    ) {
+                        return getIntlText(ErrorIntlKey.required, { 1: fieldName });
+                    }
+
+                    return true;
+                },
+                checkMaxLength(
+                    value: NonNullable<AssignerNodeDataType['parameters']>['exchangePayload'],
+                    fieldName,
+                ) {
+                    if (value && Object.values(value).filter(Boolean).length) {
+                        const maxLength = 1000;
+                        const hasOverLength = Object.values(value).some(val => {
+                            if (val && !isRefParamKey(val) && !isMaxLength(val, maxLength)) {
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        if (!hasOverLength) return true;
+                        return getIntlText(ErrorIntlKey.maxLength, {
+                            1: fieldName,
+                            2: maxLength,
+                        });
+                    }
+                    return true;
+                },
+            },
             'email.emailConfig': {
                 checkRequired(
                     value: NonNullable<EmailNodeDataType['parameters']>['emailConfig'],
                     fieldName,
                 ) {
+                    const { provider, smtpConfig } = value || {};
+                    if (
+                        !provider ||
+                        !smtpConfig ||
+                        !Object.values(smtpConfig).filter(Boolean).length
+                    ) {
+                        return getIntlText(ErrorIntlKey.required, { 1: fieldName });
+                    }
                     return true;
                 },
                 checkMaxLength(
                     value: NonNullable<EmailNodeDataType['parameters']>['emailConfig'],
                     fieldName,
                 ) {
+                    const { smtpConfig } = value || {};
+
+                    if (smtpConfig && Object.values(smtpConfig).filter(Boolean).length) {
+                        const maxLength = 50;
+                        const hasOverLength = Object.entries(smtpConfig).some(([key, val]) => {
+                            if (key !== 'encryption' && val && !isMaxLength(`${val}`, maxLength)) {
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        if (!hasOverLength) return true;
+                        return getIntlText(ErrorIntlKey.maxLength, {
+                            1: fieldName,
+                            2: maxLength,
+                        });
+                    }
+
                     return true;
                 },
             },
@@ -208,15 +369,39 @@ const useValidate = () => {
                 checkMaxLength: genMaxLengthValidator(500),
             },
             'email.recipients': {
-                checkRequired,
+                checkRequired(
+                    value: NonNullable<EmailNodeDataType['parameters']>['recipients'],
+                    fieldName,
+                ) {
+                    if (!value || !value.filter(Boolean).length) {
+                        return getIntlText(ErrorIntlKey.required, { 1: fieldName });
+                    }
+                    return true;
+                },
+                checkEmail(
+                    value: NonNullable<EmailNodeDataType['parameters']>['recipients'],
+                    fieldName,
+                ) {
+                    if (value && value.filter(Boolean).length) {
+                        const hasInvalidEmail = value.some(val => !isEmail(val));
+
+                        if (!hasInvalidEmail) return true;
+                        return getIntlText(ErrorIntlKey.email, { 1: fieldName });
+                    }
+                    return true;
+                },
             },
             'email.content': {
                 checkRequired,
-                checkMaxLength: genMaxLengthValidator(5000),
+                checkMaxLength: genMaxLengthValidator(10000),
             },
             'webhook.webhookUrl': {
                 checkRequired,
                 checkUrl(value: string, fieldName) {
+                    if (value && !isURL(value)) {
+                        return getIntlText(ErrorIntlKey.url, { 1: fieldName });
+                    }
+
                     return true;
                 },
             },
@@ -462,15 +647,6 @@ const useValidate = () => {
                 const config = nodeConfigs[nodeType];
                 const { nodeName, nodeRemark, parameters } = data || {};
                 let tempResult = result[id];
-
-                // if (
-                //     options?.validateFirst &&
-                //     Object.values(result).some(item => item.errMsgs.length)
-                // ) {
-                //     const errItem = Object.values(result).find(item => item.errMsgs.length);
-                //     toast.error({ key: 'node-validate', content: errItem?.errMsgs[0] });
-                //     return result;
-                // }
 
                 if (!tempResult) {
                     tempResult = {

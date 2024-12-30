@@ -7,12 +7,8 @@ import { ArrowBackIcon, EditIcon } from '@milesight/shared/src/components';
 import { WorkflowAPISchema } from '@/services/http';
 import { Tooltip } from '@/components';
 import { EditModal, type EditModalProps } from '@/pages/workflow/components';
+import { type DesignMode } from '../../typings';
 import './style.less';
-
-/**
- * Workflow Design Mode
- */
-export type DesignMode = 'canvas' | 'advanced';
 
 export interface TopbarProps {
     /* Is Data Loading */

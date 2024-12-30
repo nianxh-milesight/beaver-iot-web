@@ -355,6 +355,19 @@ const useWorkflow = () => {
         [getNodes, getEdges, getUpstreamNodes, getIntlText],
     );
 
+    // Check if the workflow nodes&edges is valid
+    const checkWorkflowValid = useCallback(
+        (nodes: WorkflowNode[], edges: WorkflowEdge[]) => {
+            if (!checkNodeNumberLimit(nodes)) return false;
+            if (checkFreeNodeLimit(nodes, edges)) return false;
+            if (!checkNestedParallelLimit(nodes, edges)) return false;
+            if (nodes.some(node => !checkParallelLimit(node.id, undefined, edges))) return false;
+
+            return true;
+        },
+        [checkNodeNumberLimit, checkFreeNodeLimit, checkNestedParallelLimit, checkParallelLimit],
+    );
+
     // Update node status
     const updateNodesStatus = useCallback(
         (data: Record<string, WorkflowNodeStatus> | null) => {
@@ -391,6 +404,7 @@ const useWorkflow = () => {
         checkNestedParallelLimit,
         checkNodeNumberLimit,
         checkFreeNodeLimit,
+        checkWorkflowValid,
         getSelectedNode,
         getUpstreamNodes,
         getUpstreamNodeParams,

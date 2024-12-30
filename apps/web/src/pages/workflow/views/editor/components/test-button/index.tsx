@@ -9,6 +9,7 @@ import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/ser
 import { TabPanel } from '@/components';
 import LogList, { type LogType, type LogListProps } from './log-list';
 import useFlowStore from '../../store';
+import useWorkflow from '../../hooks/useWorkflow';
 import './style.less';
 
 export type TestButtonType = 'test' | 'history';
@@ -55,6 +56,7 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
             'setLogDetailLoading',
         ]),
     );
+    const { updateNodesStatus } = useWorkflow();
 
     // ---------- Fetch Run Log List ----------
     const { loading, run: getRunLogList } = useRequest(
@@ -83,6 +85,8 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
         if (type === 'test') {
             setOpenLogPanel(true);
             setLogPanelMode('testRun');
+            setLogDetail(undefined);
+            updateNodesStatus(null);
             return;
         }
 
@@ -94,6 +98,7 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
         async (type: LogType, record: Parameters<NonNullable<LogListProps['onSelect']>>[0]) => {
             setAnchorEl(null);
             setOpenLogPanel(true);
+            updateNodesStatus(null);
             switch (type) {
                 case 'test': {
                     setLogPanelMode('testLog');
@@ -118,7 +123,7 @@ const TestButton: React.FC<Props> = ({ disabled }) => {
 
             setLogDetail(data?.trace_info);
         },
-        [setLogDetail, setLogDetailLoading, setLogPanelMode, setOpenLogPanel],
+        [setLogDetail, setLogDetailLoading, setLogPanelMode, setOpenLogPanel, updateNodesStatus],
     );
 
     // ---------- Tab ----------

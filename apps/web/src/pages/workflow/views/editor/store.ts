@@ -111,7 +111,7 @@ const useFlowStore = create(
                 set({ openLogPanel: false, logPanelMode: undefined, logDetail: undefined });
                 return;
             }
-            console.log(data);
+            // console.log(data);
             const logDetail = Object.entries(data).map(([id, { type, name, label, errMsgs }]) => {
                 const result: NonNullable<FlowStore['logDetail']>[0] = {
                     node_id: id,
@@ -122,7 +122,7 @@ const useFlowStore = create(
                 return result;
             });
 
-            console.log(logDetail);
+            // console.log(logDetail);
             set({ openLogPanel: true, logPanelMode: 'feVerify', logDetail });
         },
     })),

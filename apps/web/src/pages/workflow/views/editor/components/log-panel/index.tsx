@@ -1,8 +1,9 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Stack, IconButton, Button, CircularProgress } from '@mui/material';
 import { Panel, useReactFlow } from '@xyflow/react';
 import cls from 'classnames';
 import { useRequest } from 'ahooks';
+import { merge, isEmpty } from 'lodash-es';
 import { genRandomString } from '@milesight/shared/src/utils/tools';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon, toast } from '@milesight/shared/src/components';
@@ -10,15 +11,21 @@ import { CodeEditor } from '@/components';
 import { ActionLog } from '@/pages/workflow/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import useWorkflow from '../../hooks/useWorkflow';
+import useValidate from '../../hooks/useValidate';
 import useFlowStore from '../../store';
+import { type DesignMode } from '../../typings';
 import './style.less';
+
+export interface LogPanelProps {
+    designMode?: DesignMode;
+}
 
 /**
  * Log Detail Panel
  */
-const LogPanel = () => {
+const LogPanel: React.FC<LogPanelProps> = ({ designMode }) => {
     const { getIntlText } = useI18n();
-    const { getNodes, toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
+    const { getNodes, getEdges, toObject } = useReactFlow<WorkflowNode, WorkflowEdge>();
     const {
         openLogPanel,
         logPanelMode,
@@ -28,6 +35,7 @@ const LogPanel = () => {
         setOpenLogPanel,
         setLogDetail,
         setLogDetailLoading,
+        setNodesDataValidResult,
     } = useFlowStore(
         useStoreShallow([
             'openLogPanel',
@@ -38,9 +46,10 @@ const LogPanel = () => {
             'setOpenLogPanel',
             'setLogDetail',
             'setLogDetailLoading',
+            'setNodesDataValidResult',
         ]),
     );
-    const { updateNodesStatus } = useWorkflow();
+    const { updateNodesStatus, checkWorkflowValid } = useWorkflow();
     const flowData = useMemo(() => {
         if (!openLogPanel) return;
         return toObject();
@@ -60,6 +69,7 @@ const LogPanel = () => {
         }
     }, [logPanelMode, getIntlText]);
     const isTestRunMode = logPanelMode === 'testRun';
+    const isAdvanceMode = designMode === 'advanced';
 
     const handleClose = useCallback(() => {
         setOpenLogPanel(false);
@@ -70,6 +80,8 @@ const LogPanel = () => {
     }, [setLogDetail, setLogDetailLoading, setOpenLogPanel, updateNodesStatus]);
 
     // ---------- Run Test ----------
+    const { checkNodesId, checkNodesType, checkNodesData, checkEdgesId, checkEdgesType } =
+        useValidate();
     const [entryInput, setEntryInput] = useState('');
     const hasInput = useMemo(() => {
         if (!openLogPanel || !flowData || !isTestRunMode) return false;
@@ -134,6 +146,40 @@ const LogPanel = () => {
     const { run: runFlowTest } = useRequest(
         async (value?: string) => {
             if (!openLogPanel || !isTestRunMode) return;
+
+            // workflow verification
+            const nodes = getNodes();
+            const edges = getEdges();
+            if (!checkWorkflowValid(nodes, edges)) return;
+
+            const edgesCheckResult = merge(
+                checkEdgesId(edges, nodes, { validateFirst: true }),
+                checkEdgesType(edges, nodes, { validateFirst: true }),
+            );
+            // console.log({ edgesCheckResult });
+            if (!isEmpty(edgesCheckResult)) return;
+
+            const nodesCheckResult = merge(
+                checkNodesId(nodes, { validateFirst: isAdvanceMode }),
+                checkNodesType(nodes, { validateFirst: isAdvanceMode }),
+                checkNodesData(nodes, { validateFirst: isAdvanceMode }),
+            );
+            // console.log({ nodesCheckResult });
+            if (!isEmpty(nodesCheckResult)) {
+                if (isAdvanceMode) return;
+                const statusData = Object.entries(nodesCheckResult).reduce(
+                    (acc, [id, item]) => {
+                        acc[id] = item.status;
+                        return acc;
+                    },
+                    {} as NonNullable<Parameters<typeof updateNodesStatus>[0]>,
+                );
+
+                setNodesDataValidResult(nodesCheckResult);
+                updateNodesStatus(statusData);
+                return;
+            }
+
             setLogDetailLoading(true);
 
             let input: Record<string, any>;
@@ -179,14 +225,14 @@ const LogPanel = () => {
             return;
         }
 
+        setEntryInput('');
         runFlowTest();
     }, [openLogPanel, isTestRunMode, hasInput, genDemoData, runFlowTest]);
 
-    // Clear Data when panel mode change
+    // Clear Loading Status when panel mode change
     useEffect(() => {
-        if (!logPanelMode) return;
-        handleClose();
-    }, [logPanelMode, handleClose]);
+        setLogDetailLoading(false);
+    }, [logPanelMode, setLogDetailLoading]);
 
     return (
         <Panel
@@ -245,4 +291,4 @@ const LogPanel = () => {
     );
 };
 
-export default LogPanel;
+export default React.memo(LogPanel);

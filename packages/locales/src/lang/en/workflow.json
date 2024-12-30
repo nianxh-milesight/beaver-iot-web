@@ -109,5 +109,7 @@
     "workflow.valid.edge_id_duplicated": "The Edge (connecting node {1} and {2}) ID is duplicated.",
     "workflow.node.service_helptext": "Please select the service you want to call first.",
     "workflow.node.input_variables": "Input Variables",
-    "workflow.editor.config_panel_test_title": "Test {1}"
+    "workflow.editor.config_panel_test_title": "Test {1}",
+    "workflow.valid.invalid_url": "The {1} field value is not a valid URL.",
+    "workflow.valid.invalid_email": "The {1} field value is not a valid email."
 }
