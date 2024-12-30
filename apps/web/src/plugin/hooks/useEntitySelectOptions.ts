@@ -48,7 +48,7 @@ export function useEntitySelectOptions(
             const [error, resp] = await awaitWrap(
                 entityAPI.getList({
                     keyword,
-                    entity_type: entityType,
+                    entity_type: entityType ? [entityType] : undefined,
                     entity_value_type: entityValueTypes,
                     entity_access_mod: entityAccessMods,
                     exclude_children: entityExcludeChildren,
