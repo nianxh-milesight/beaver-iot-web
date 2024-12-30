@@ -7,11 +7,12 @@ import {
     EditIcon,
     MoreVertIcon,
     IosShareIcon,
+    EventNoteIcon,
 } from '@milesight/shared/src/components';
 import { Tooltip, type ColumnType } from '@/components';
 import { workflowAPI, type WorkflowAPISchema } from '@/services/http';
 
-type OperationType = 'detail' | 'delete' | 'edit' | 'enable' | 'export';
+type OperationType = 'log' | 'delete' | 'edit' | 'enable' | 'export';
 
 export type TableRowDataType = ObjectToCamelCase<
     WorkflowAPISchema['getList']['response']['content'][0]
@@ -123,12 +124,12 @@ const useColumns = <T extends TableRowDataType>({ onButtonClick }: UseColumnsPro
                                     <EditIcon sx={{ width: 20, height: 20 }} />
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title={getIntlText('common.label.detail')}>
+                            <Tooltip title={getIntlText('common.label.log')}>
                                 <IconButton
                                     sx={{ width: 30, height: 30 }}
-                                    onClick={() => onButtonClick('detail', row)}
+                                    onClick={() => onButtonClick('log', row)}
                                 >
-                                    <ListAltIcon sx={{ width: 20, height: 20 }} />
+                                    <EventNoteIcon sx={{ width: 20, height: 20 }} />
                                 </IconButton>
                             </Tooltip>
                             <IconButton

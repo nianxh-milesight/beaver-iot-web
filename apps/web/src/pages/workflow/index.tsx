@@ -185,9 +185,9 @@ const Workflow = () => {
                     navigate(`/workflow/editor?wid=${record.id}`);
                     break;
                 }
-                case 'detail': {
-                    // TODO: workflow id 传参
-                    navigate('/workflow/editor');
+                case 'log': {
+                    // TODO: Popup Log Modal
+                    console.log('popup log modal', record);
                     break;
                 }
                 case 'delete': {
@@ -262,7 +262,7 @@ const Workflow = () => {
                         onPaginationModelChange={setPaginationModel}
                         onRowSelectionModelChange={setSelectedIds}
                         onRowDoubleClick={({ row }) => {
-                            navigate(`/device/detail/${row.id}`, { state: row });
+                            navigate(`/workflow/editor?wid=${row.id}`);
                         }}
                         onSearch={setKeyword}
                         onRefreshButtonClick={getWorkflowList}

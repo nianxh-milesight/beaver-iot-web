@@ -99,6 +99,7 @@ export {
     Help as HelpIcon,
     MoreVert as MoreVertIcon,
     IosShare as IosShareIcon,
+    EventNote as EventNoteIcon,
 } from '@mui/icons-material';
 
 export * from './iot-icons';

@@ -172,5 +172,6 @@
     "common.label.export": "Export",
     "common.label.creator": "Creator",
     "common.label.error": "Error",
-    "common.label.success": "Success"
+    "common.label.success": "Success",
+    "common.label.log": "Log"
 }
