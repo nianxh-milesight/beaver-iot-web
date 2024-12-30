@@ -6,6 +6,8 @@ import type { NodesDataValidResult } from './hooks';
 import type { NodeConfigItem } from './typings';
 
 interface FlowStore {
+    selectedNode?: WorkflowNode;
+
     /** Workflow Node Configs */
     nodeConfigs: Record<WorkflowNodeType, NodeConfigItem>;
 
@@ -38,6 +40,8 @@ interface FlowStore {
 
     logDetailLoading?: boolean;
 
+    setSelectedNode: (node?: FlowStore['selectedNode']) => void;
+
     setNodeConfigs: (nodeConfigs: WorkflowAPISchema['getFlowNodes']['response']) => void;
 
     setLogPanelMode: (logPanelMode: FlowStore['logPanelMode']) => void;
@@ -61,6 +65,8 @@ const useFlowStore = create(
         nodeConfigs: basicNodeConfigs,
 
         testLogs: [],
+
+        setSelectedNode: node => set({ selectedNode: node }),
 
         setNodeConfigs: nodeConfigs => {
             const configs = Object.entries(nodeConfigs).reduce((acc, [cat, configs]) => {

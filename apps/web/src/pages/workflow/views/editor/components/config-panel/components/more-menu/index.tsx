@@ -3,15 +3,14 @@ import { IconButton, Popover } from '@mui/material';
 import { useI18n, useCopy } from '@milesight/shared/src/hooks';
 import { MoreHorizIcon, ContentCopyIcon } from '@milesight/shared/src/components';
 import { Tooltip } from '@/components';
-import useWorkflow from '../../../../hooks/useWorkflow';
+import useFlowStore from '../../../../store';
 import './style.less';
 
 const MoreMenu = () => {
     const { getIntlText } = useI18n();
     const { handleCopy } = useCopy();
-    const { getSelectedNode } = useWorkflow();
+    const selectedNode = useFlowStore(state => state.selectedNode);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    const selectedNode = getSelectedNode();
 
     return (
         <div className="ms-config-panel-more-menu">

@@ -5,7 +5,7 @@ import { isEqual } from 'lodash-es';
 import { useDebounceEffect } from 'ahooks';
 import { Stack, IconButton, Divider, Tooltip } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
-import { useI18n } from '@milesight/shared/src/hooks';
+import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon, HelpIcon } from '@milesight/shared/src/components';
 import useFlowStore from '../../store';
 import useWorkflow from '../../hooks/useWorkflow';
@@ -29,9 +29,9 @@ const ConfigPanel = () => {
     const { updateNode, updateNodeData } = useReactFlow();
 
     // ---------- Handle Node-related logic ----------
-    const { getSelectedNode } = useWorkflow();
-    const selectedNode = useMemo(() => getSelectedNode(), [getSelectedNode]);
-    const nodeConfigs = useFlowStore(state => state.nodeConfigs);
+    const { selectedNode, nodeConfigs } = useFlowStore(
+        useStoreShallow(['selectedNode', 'nodeConfigs']),
+    );
     const openPanel = !!selectedNode;
     const nodeConfig = useMemo(() => {
         if (!selectedNode) return;
