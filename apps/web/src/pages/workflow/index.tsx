@@ -78,7 +78,7 @@ const Workflow = () => {
                 description: getIntlText('workflow.message.delete_tip'),
                 onConfirm: async () => {
                     const [error, resp] = await awaitWrap(
-                        workflowAPI.deleteFlow({ id: idsToDelete }),
+                        workflowAPI.deleteFlows({ workflow_id_list: idsToDelete }),
                     );
 
                     // console.log({ error, resp });
@@ -170,7 +170,9 @@ const Workflow = () => {
     );
     const handleExportWorkFlow = useCallback(
         async (record: TableRowDataType) => {
-            const [error, resp] = await awaitWrap(workflowAPI.getFlowDesign({ id: record.id }));
+            const [error, resp] = await awaitWrap(
+                workflowAPI.getFlowDesign({ id: record.id, version: '' }),
+            );
 
             if (error || !isRequestSuccess(resp)) return;
             exportJsonFile(getResponseData(resp) as WorkflowAPISchema['getFlowDesign']['response']);
