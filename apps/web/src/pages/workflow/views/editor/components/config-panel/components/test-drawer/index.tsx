@@ -14,7 +14,13 @@ import {
 import { useReactFlow } from '@xyflow/react';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { genRandomString } from '@milesight/shared/src/utils/tools';
-import { CloseIcon, PlayArrowIcon, CheckCircleIcon, toast } from '@milesight/shared/src/components';
+import {
+    CloseIcon,
+    PlayArrowIcon,
+    CheckCircleIcon,
+    ErrorIcon,
+    toast,
+} from '@milesight/shared/src/components';
 import { CodeEditor, Tooltip } from '@/components';
 import { workflowAPI, awaitWrap, getResponseData, isRequestSuccess } from '@/services/http';
 import useFlowStore from '../../../../store';
@@ -27,9 +33,21 @@ export interface TestDrawerProps {
     onClose: () => void;
 }
 
-const statusDefaultMsgKey: Record<WorkflowNodeStatus, string> = {
-    ERROR: 'common.label.error',
-    SUCCESS: 'common.label.success',
+const statusDefaultMsgKey: Record<
+    WorkflowNodeStatus,
+    {
+        icon: React.ReactNode;
+        intlKey: string;
+    }
+> = {
+    ERROR: {
+        icon: <ErrorIcon />,
+        intlKey: 'common.label.error',
+    },
+    SUCCESS: {
+        icon: <CheckCircleIcon />,
+        intlKey: 'common.label.success',
+    },
 };
 
 const TestDrawer: React.FC<TestDrawerProps> = ({ node, open, onClose }) => {
@@ -190,11 +208,12 @@ const TestDrawer: React.FC<TestDrawerProps> = ({ node, open, onClose }) => {
                                                     ? 'success'
                                                     : 'error'
                                             }
-                                            icon={<CheckCircleIcon />}
+                                            icon={statusDefaultMsgKey[testResult.status]?.icon}
                                         >
                                             {testResult.error_message ||
                                                 getIntlText(
-                                                    statusDefaultMsgKey[testResult.status] || '',
+                                                    statusDefaultMsgKey[testResult.status]
+                                                        ?.intlKey || '',
                                                 )}
                                         </Alert>
                                         {testResult.output && (

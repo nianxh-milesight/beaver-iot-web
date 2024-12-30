@@ -390,7 +390,7 @@ const WorkflowEditor = () => {
                         key="test-button"
                         disabled={
                             designMode === 'advanced' ||
-                            !nodes.length ||
+                            !nodes?.length ||
                             nodeConfigLoading ||
                             saveLoading
                         }
@@ -398,7 +398,7 @@ const WorkflowEditor = () => {
                     <LoadingButton
                         key="save-button"
                         variant="contained"
-                        disabled={!nodes.length}
+                        disabled={!nodes?.length}
                         loading={saveLoading}
                         // startIcon={<CheckIcon />}
                         onClick={handleSave}
