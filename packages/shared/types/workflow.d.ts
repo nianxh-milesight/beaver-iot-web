@@ -95,7 +95,7 @@ declare type TriggerNodeDataType = BaseNodeDataType<{
     /** Entity Definition */
     entityConfigs: {
         name: string;
-        type: WorkflowParamValueType;
+        type: EntityValueDataType;
     }[];
 }>;
 

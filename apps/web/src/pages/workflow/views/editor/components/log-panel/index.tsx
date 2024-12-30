@@ -115,8 +115,8 @@ const LogPanel: React.FC<LogPanelProps> = ({ designMode }) => {
                             value = Math.random() > 0.5;
                             break;
                         }
-                        case 'INT':
-                        case 'FLOAT': {
+                        case 'LONG':
+                        case 'DOUBLE': {
                             value = Math.floor(Math.random() * 100);
                             break;
                         }
