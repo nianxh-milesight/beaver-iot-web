@@ -8,7 +8,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { useI18n, useStoreShallow } from '@milesight/shared/src/hooks';
 import { CloseIcon, PlayArrowIcon, HelpIcon } from '@milesight/shared/src/components';
 import useFlowStore from '../../store';
-import useWorkflow from '../../hooks/useWorkflow';
 import {
     useCommonFormItems,
     useNodeFormItems,

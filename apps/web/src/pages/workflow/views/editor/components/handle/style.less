@@ -1,13 +1,24 @@
 .@{prefix}-workflow {
     & &-handle {
         z-index: 10;
-        width: 2px;
+        width: 16px;
         min-width: auto;
         height: 16px;
         color: var(--primary-color-base);
-        background-color: var(--primary-color-base);
+        background-color: transparent;
         border: none;
         border-radius: 0;
+
+        &::after {
+            position: absolute;
+            top: 1px;
+            bottom: 1px;
+            left: 50%;
+            width: 2px;
+            margin-left: -1px;
+            background-color: var(--primary-color-base);
+            content: '';
+        }
 
         .@{mui-prefix}SvgIcon-root {
             display: none;
@@ -60,10 +71,13 @@
 
     .react-flow__node {
         .@{prefix}-workflow-handle.is-menu-open {
-            width: 16px;
             background-color: var(--component-background);
             border-radius: 16px;
             cursor: pointer;
+
+            &::after {
+                display: none;
+            }
 
             .@{mui-prefix}SvgIcon-root {
                 display: block;
@@ -75,10 +89,13 @@
     .react-flow__node.selected {
         .@{prefix}-workflow-handle.source,
         .@{prefix}-workflow-handle.target.target-enable-add {
-            width: 16px;
             background-color: var(--component-background);
             border-radius: 16px;
             cursor: pointer;
+
+            &::after {
+                display: none;
+            }
 
             .@{mui-prefix}SvgIcon-root {
                 display: block;

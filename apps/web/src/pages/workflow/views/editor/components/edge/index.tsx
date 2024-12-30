@@ -31,10 +31,10 @@ const AddableEdge = ({
     const edges = useEdges<WorkflowEdge>();
     const edge = edges.find(edge => edge.id === id);
     const [edgePath, labelX, labelY] = getBezierPath({
-        sourceX,
+        sourceX: sourceX - 8,
         sourceY,
         sourcePosition,
-        targetX,
+        targetX: targetX + 8,
         targetY,
         targetPosition,
     });
