@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash-es';
 import { useControllableValue, useDebounceFn, useDynamicList } from 'ahooks';
 import { Divider, IconButton, Tooltip } from '@mui/material';
@@ -51,7 +51,9 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
     const [innerValue, setInnerValue] =
         useControllableValue<ServiceParamAssignInputValueType>(props);
     const { list, replace, resetList } = useDynamicList<InputParamListType>([]);
-    const { run: handlerChange } = useDebounceFn(
+    const preValueRef = useRef<ServiceParamAssignInputValueType>();
+
+    const handlerChange = useCallback(
         async (serviceEntity?: ApiKey) => {
             setInnerValue(pre => ({ ...pre, serviceEntity }));
             if (serviceEntity) {
@@ -82,7 +84,7 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
                 resetList([]);
             }
         },
-        { wait: 100 },
+        [innerValue],
     );
     const renderInputParam = useMemo(() => {
         if (list.length) {
@@ -121,12 +123,16 @@ const ServiceParamAssignInput: React.FC<ServiceParamAssignInputProps> = ({
         [],
     );
     useLayoutEffect(() => {
-        const serviceParams = innerValue?.serviceParams ?? {};
-        if (isEqual(serviceParams, transformParams(list))) return;
+        if (isEqual(preValueRef.current, innerValue)) return;
+        preValueRef.current = innerValue;
         handlerChange(innerValue?.serviceEntity);
     }, [innerValue]);
     useLayoutEffect(() => {
-        setInnerValue(pre => ({ ...pre, serviceParams: transformParams(list) }));
+        setInnerValue(pre => {
+            const newValue = { ...pre, serviceParams: transformParams(list) };
+            preValueRef.current = newValue;
+            return newValue;
+        });
     }, [list]);
     return (
         <div className="ms-service-entity-call">
