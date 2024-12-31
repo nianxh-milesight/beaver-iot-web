@@ -5,6 +5,7 @@ import cls from 'classnames';
 import { Menu, MenuItem } from '@mui/material';
 import { useI18n } from '@milesight/shared/src/hooks';
 import { CheckCircleIcon, ErrorIcon, LoopIcon } from '@milesight/shared/src/components';
+import { Tooltip } from '@/components';
 import { basicNodeConfigs } from '@/pages/workflow/config';
 import useFlowStore from '../../store';
 import Handle from '../handle';
@@ -87,7 +88,8 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
     children,
 }) => {
     const { getIntlText } = useI18n();
-    const status = nodeProps?.data?.$status as WorkflowNodeStatus;
+    const status = nodeProps?.data?.$status;
+    const nodeName = nodeProps?.data?.nodeName;
 
     // ---------- ContextMenu ----------
     const [searchParams] = useSearchParams();
@@ -211,7 +213,7 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
             {handles?.map((handle, index) => <Fragment key={index}>{handle}</Fragment>)}
             <div
                 className={cls('ms-workflow-node', `ms-workflow-node-${type}`, {
-                    [status?.toLocaleLowerCase()]: status,
+                    [status?.toLocaleLowerCase() || '']: status,
                 })}
                 onContextMenu={handleContextMenu}
             >
@@ -285,7 +287,11 @@ const NodeContainer: React.FC<NodeContainerProps> = ({
                     >
                         {icon}
                     </span>
-                    <span className="ms-workflow-node-title">{title}</span>
+                    <Tooltip
+                        autoEllipsis
+                        className="ms-workflow-node-title"
+                        title={nodeName || title}
+                    />
                     {!!status && (
                         <span
                             className={cls('ms-workflow-node-status', {

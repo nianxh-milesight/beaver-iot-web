@@ -69,9 +69,11 @@
         }
 
         .@{prefix}-workflow-node-title {
-            .text-size(@font-size-base);
-
+            flex: 1;
+            width: 0;
             font-weight: @font-weight-bold;
+
+            .text-size(@font-size-base);
         }
 
         .@{prefix}-workflow-node-status {

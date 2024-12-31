@@ -166,7 +166,10 @@ const ConditionsInput: React.FC<ConditionsInputProps> = props => {
                         : getIntlText(logicOperatorMap.OR?.labelIntlKey || '');
 
                 return (
-                    <div className="ms-conditions-input-item" key={getBlockKey(blockIndex)}>
+                    <div
+                        className="ms-conditions-input-item"
+                        key={getBlockKey(blockIndex) || blockIndex}
+                    >
                         <div className="ms-conditions-input-item-topbar">
                             <div className="name">
                                 {blockIndex === 0

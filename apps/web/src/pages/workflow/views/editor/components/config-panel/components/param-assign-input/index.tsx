@@ -64,7 +64,7 @@ const ParamAssignInput: React.FC<ParamAssignInputProps> = ({
     return (
         <div className="ms-param-assign-input">
             {list.map((item, index) => (
-                <div className="ms-param-assign-input-item" key={getKey(index)}>
+                <div className="ms-param-assign-input-item" key={getKey(index) || index}>
                     <TextField
                         autoComplete="off"
                         label={label?.[0] || getIntlText('common.label.name')}

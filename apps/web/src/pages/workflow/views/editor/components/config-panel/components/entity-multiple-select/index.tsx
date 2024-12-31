@@ -59,7 +59,7 @@ const EntityMultipleSelect: React.FC<EntityFilterSelectProps> = ({
     return (
         <div className="ms-entity-filter-select">
             {list.map((item, index) => (
-                <div className="ms-entity-filter-select-item" key={getKey(index)}>
+                <div className="ms-entity-filter-select-item" key={getKey(index) || index}>
                     {/* <FormControl required={required} disabled={disabled}>
                         <InputLabel id="entity-filter-select-type-label">
                             {typeSelectProps?.label || getIntlText('common.label.type')}

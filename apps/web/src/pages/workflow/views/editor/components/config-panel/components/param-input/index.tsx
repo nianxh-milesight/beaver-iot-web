@@ -107,7 +107,7 @@ const ParamInput: React.FC<ParamInputProps> = ({
     return (
         <div className="ms-param-input">
             {list.map((item, index) => (
-                <div className="ms-param-input-item" key={getKey(index)}>
+                <div className="ms-param-input-item" key={getKey(index) || index}>
                     <FormControl required={required} disabled={disabled}>
                         <TextField
                             label={nameInputProps?.label || getIntlText('common.label.name')}

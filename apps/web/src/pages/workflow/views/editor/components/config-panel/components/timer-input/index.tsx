@@ -167,7 +167,7 @@ const TimerInput: React.FC<TimerInputProps> = ({ required, ...props }) => {
                             {getIntlText('workflow.editor.form_param_execution_time_queue')}
                         </span>
                         {list.map((item, index) => (
-                            <div className="queue-item" key={getKey(index)}>
+                            <div className="queue-item" key={getKey(index) || index}>
                                 <FormControl fullWidth required={required}>
                                     <InputLabel id="time-input-period-label">
                                         {getIntlText('workflow.editor.form_param_timer_type')}
